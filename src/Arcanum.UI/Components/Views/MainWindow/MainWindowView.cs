@@ -1,10 +1,13 @@
-﻿using Arcanum.UI.AppFeatures;
-using Arcanum.UI.AppFeatures.FeatureInitializers;
+﻿#region
+
+using Arcanum.UI.AppFeatures;
 using CommunityToolkit.Mvvm.ComponentModel;
+
+#endregion
 
 namespace Arcanum.UI.Components.Views.MainWindow;
 
 public class MainWindowView : ObservableObject, IAppFeatureProvider
 {
-   public AppFeature FeatureMetadata { get; } = EditorFeatures.MainWindowFeature;
+   public FeatureId FeatureId => FeatureIds.Editor.MainWindow;
 }

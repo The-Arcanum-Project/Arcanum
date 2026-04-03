@@ -1,10 +1,14 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.IO;
 using System.Windows.Controls;
 using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
+using Arcanum.UI.Documentation.Implementation;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow;
 
@@ -27,7 +31,7 @@ public partial class HelpWindow
       JsonProcessor.Serialize(Path.Combine(IO.GetArcanumDataPath, Config.CONFIG_FILE_NAME), Config.Settings);
    }
 
-   public static void OpenForFeature(IAppFeature feature)
+   public static void OpenForFeature(FeatureDoc feature)
    {
       HelpWindow window = new();
       if (window.DataContext is HelpWindowViewModel vm)

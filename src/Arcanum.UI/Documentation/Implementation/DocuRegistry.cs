@@ -10,12 +10,12 @@ using Common.Logger;
 
 #endregion
 
-namespace Arcanum.UI.Documentation;
+namespace Arcanum.UI.Documentation.Implementation;
 
-public static class DocuPathResolver
+public static class DocuRegistry
 {
    private const string SNIPPET_FOLDER_NAME = "Snippets";
-   private static Dictionary<FeatureId, DocuPage> _cache = new();
+   private static Dictionary<FeatureId, FeatureDoc> _cache = new();
    private static Dictionary<string, string> _snippets = new(StringComparer.OrdinalIgnoreCase);
 
    private static FileSystemWatcher? _watcher;
@@ -23,15 +23,15 @@ public static class DocuPathResolver
    private static DispatcherTimer? _debounceTimer;
 
    private static bool IsUsingExternalSource { get; set; }
-   private static string? ExternalPath { get; set; }
-   private static string? ExternalSnippetsPath { get; set; }
+   public static string? ExternalPath { get; set; }
+   public static string? ExternalSnippetsPath { get; set; }
 
-   public static DocuPage[] GetAllDocuPages => _cache.Values.ToArray();
+   public static FeatureDoc[] GetAllDocuPages => _cache.Values.ToArray();
    public static string[] GetAllSnippetIds => _snippets.Keys.ToArray();
 
    public static event Action? OnDocumentationReloaded;
 
-   public static void LoadDocumentation(bool useExternal, bool forceReload = false, string? externalPath = null)
+   public static void InitializeRegistry(bool useExternal, bool forceReload = false, string? externalPath = null)
    {
       if (!forceReload && _cache.Count > 0)
          return;
@@ -45,8 +45,8 @@ public static class DocuPathResolver
          ArcLog.Write("DPR", LogLevel.DBG, $"Could not find external docs path: {externalPath}");
 
       IsUsingExternalSource = useExternal && !failedExternal;
-      ExternalPath = IsUsingExternalSource ? externalPath : null;
-      ExternalSnippetsPath = IsUsingExternalSource ? Path.Combine(ExternalPath!, SNIPPET_FOLDER_NAME) : null;
+      ExternalPath = IsUsingExternalSource ? externalPath != null ? Path.Combine(externalPath, "Pages") : null : null;
+      ExternalSnippetsPath = IsUsingExternalSource ? Path.Combine(externalPath!, SNIPPET_FOLDER_NAME) : null;
 #else
       IsUsingExternalSource = false;
       ExternalPath = null;
@@ -69,7 +69,7 @@ public static class DocuPathResolver
       }
    }
 
-   private static void LoadFromAssembly(Dictionary<FeatureId, DocuPage>? targetCache = null, Dictionary<string, string>? targetSnippets = null)
+   private static void LoadFromAssembly(Dictionary<FeatureId, FeatureDoc>? targetCache = null, Dictionary<string, string>? targetSnippets = null)
    {
       var activeCache = targetCache ?? _cache;
       var activeSnippets = targetSnippets ?? _snippets;
@@ -106,7 +106,7 @@ public static class DocuPathResolver
    {
       try
       {
-         var newCache = new Dictionary<FeatureId, DocuPage>();
+         var newCache = new Dictionary<FeatureId, FeatureDoc>();
          var newSnippets = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
          if (!IsUsingExternalSource)
@@ -196,7 +196,7 @@ public static class DocuPathResolver
 #endif
    }
 
-   public static DocuPage? GetPage(FeatureId id) => _cache.GetValueOrDefault(id);
+   public static FeatureDoc? GetPage(FeatureId id) => _cache.GetValueOrDefault(id);
 
    public static string ProcessSnippets(string rawMarkdown)
    {

@@ -62,7 +62,6 @@ internal static class Program
       UIHandle.Instance.UIUtils.SetStartupScreen(true);
       LifecycleManager.Instance.DebugInit();
       CommandRegistry.Initialize();
-      FeatureLibrary.Initialize();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
       var clean = false;
 

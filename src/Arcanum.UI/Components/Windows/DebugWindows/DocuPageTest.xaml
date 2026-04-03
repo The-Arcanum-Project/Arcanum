@@ -3,20 +3,28 @@
                          xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
-                         xmlns:md = "clr-namespace:Markdig.Wpf;assembly=Markdig.Wpf"
                          WindowStartupLocation = "CenterScreen"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                          xmlns:converters = "clr-namespace:Arcanum.UI.Components.Converters"
                          xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
-                         mc:Ignorable = "d"
-                         Title = "DocuPageTest" Height = "800" Width = "1200">
+                         xmlns:commands = "clr-namespace:Arcanum.UI.Commands" mc:Ignorable = "d" Title = "DocuPageTest"
+                         Height = "800" Width = "1200">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style TargetType = "styleClasses:BaseButton" x:Key = "ThinBaseButton"
+                   BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
+                <Setter Property = "Padding" Value = "0" />
+                <Setter Property = "MinHeight" Value = "0" />
+                <Setter Property = "Height" Value = "18" />
+                <Setter Property = "FontSize" Value = "9" />
+                <Setter Property = "Margin" Value = "0, 1" />
+            </Style>
             <converters:EnumerableToStringConverter x:Key = "EnumerableToStringConverter" />
         </ResourceDictionary>
     </Window.Resources>
@@ -31,7 +39,7 @@
 
         <!-- Navigation -->
         <ListView x:Name = "DocuPageListView" Grid.Column = "0" Margin = "5"
-                  ItemsSource = "{Binding DocuPages, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}"
+                  ItemsSource = "{Binding DocuPages, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
                   SelectedItem = "{Binding SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
                   SelectionChanged = "DocuPageListView_SelectionChanged">
             <ListView.ItemTemplate>
@@ -52,10 +60,16 @@
         <Border Grid.Column = "3" BorderThickness = "1,0,0,0">
             <ScrollViewer HorizontalScrollBarVisibility = "Disabled" VerticalScrollBarVisibility = "Auto">
                 <StackPanel Margin = "5" HorizontalAlignment = "Stretch">
-                    <TextBlock Text = "Dev Tools" FontWeight = "Bold" Margin = "0,0,0,10"
+                    <TextBlock Text = "Dev Tools" FontWeight = "Bold" Margin = "0,0,0,5"
                                Foreground = "{StaticResource BlueAccentColorBrush}" />
 
-                    <Expander Header = "Page Metadata" IsExpanded = "True" Margin = "0,0,0,10">
+                    <StackPanel Orientation = "Horizontal" Margin = "0, 0, 0, 5">
+                        <styleClasses:BaseButton Content = "New Page" Click = "OnNewPage" Margin = "0,0,5,0" />
+                        <styleClasses:BaseButton Content = "New Snippet" Click = "OnNewSnippet" Margin = "0,0,5,0" />
+                        <styleClasses:BaseButton Content = "Open Folder" Click = "OnOpenFolder" Margin = "0,0,5,0" />
+                    </StackPanel>
+
+                    <Expander Header = "Page Metadata" IsExpanded = "True" Margin = "0,0,0,5">
                         <StackPanel Background = "{StaticResource DefaultBackColorBrush}" Margin = "2">
                             <Grid Margin = "5">
                                 <Grid.ColumnDefinitions>
@@ -139,13 +153,13 @@
                                     <TextBlock Text = "Keywords" Margin = "0,5,0,0" />
                                     <TextBlock
                                         Text = "{Binding SelectedPage.SearchKeywords, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
-                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "WrapWithOverflow"
+                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "NoWrap"
                                         ToolTip = "{Binding SelectedPage.SearchKeywords, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}" />
 
                                     <TextBlock Text = "Links" Margin = "0,5,0,0" />
                                     <TextBlock
                                         Text = "{Binding SelectedPage.Links, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
-                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "WrapWithOverflow"
+                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "NoWrap"
                                         ToolTip = "{Binding SelectedPage.Links, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}" />
 
                                     <Separator Margin = "0,2" />
@@ -153,13 +167,91 @@
                                     <TextBlock Text = "Summary" Margin = "0,5,0,0" />
                                     <TextBlock
                                         Text = "{Binding SelectedPage.Summary, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
-                                        TextWrapping = "WrapWithOverflow"
+                                        TextWrapping = "NoWrap"
                                         ToolTip = "{Binding SelectedPage.Summary, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+
+                                    <Separator Margin = "0,2" />
+                                    <!-- Icon Path & Preview -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width = "Auto" />
+                                            <ColumnDefinition Width = "*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- The Icon Presenter -->
+                                        <ContentControl Width = "16" Height = "16" VerticalAlignment = "Center">
+                                            <ContentControl.Style>
+                                                <Style TargetType = "ContentControl">
+                                                    <Setter Property = "ContentTemplate">
+                                                        <Setter.Value>
+                                                            <DataTemplate>
+                                                                <Path
+                                                                    Data = "{Binding SelectedPage.GetIconGeometry, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                    Stroke = "{StaticResource BlueAccentColorBrush}"
+                                                                    StrokeThickness = "1.5" StrokeLineJoin = "Round"
+                                                                    StrokeStartLineCap = "Round"
+                                                                    StrokeEndLineCap = "Round" Stretch = "Uniform" />
+                                                            </DataTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+
+                                                    <Style.Triggers>
+                                                        <!-- Display as PNG (Bitmap) -->
+                                                        <DataTrigger
+                                                            Binding = "{Binding SelectedPage.IconIsPng, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                            Value = "True">
+                                                            <Setter Property = "ContentTemplate">
+                                                                <Setter.Value>
+                                                                    <DataTemplate>
+                                                                        <Image
+                                                                            Source = "{Binding SelectedPage.GetIconUri, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                            Stretch = "Uniform" />
+                                                                    </DataTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+
+                                                        <!-- Handle Empty/Null -->
+                                                        <DataTrigger
+                                                            Binding = "{Binding SelectedPage.IconPath, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                            Value = "{x:Null}">
+                                                            <Setter Property = "Visibility" Value = "Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ContentControl.Style>
+                                        </ContentControl>
+
+                                        <!-- The Text Path -->
+                                        <TextBlock Grid.Column = "1"
+                                                   Text = "{Binding SelectedPage.IconPath, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                   ToolTip = "{Binding SelectedPage.IconPath, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                   VerticalAlignment = "Center" HorizontalAlignment = "Left"
+                                                   Margin = "0,0,5,0" />
+
+                                    </Grid>
+
+                                    <!-- Assiciated Scopes (string[]) -->
+                                    <TextBlock Text = "Scopes" Margin = "0,5,0,0" />
+                                    <TextBlock
+                                        Text = "{Binding SelectedPage.AssociatedScopes, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}"
+                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "NoWrap"
+                                        ToolTip = "{Binding SelectedPage.AssociatedScopes, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, Converter={StaticResource EnumerableToStringConverter}}" />
+
+                                    <Separator Margin = "0,2" />
+
+                                    <!-- Version String -->
+                                    <TextBlock Text = "Introduced" Margin = "0, 5, 0, 0" />
+                                    <TextBlock
+                                        Text = "{Binding SelectedPage.IntroducedIn, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                        Opacity = "0.7" FontStyle = "Italic" TextWrapping = "NoWrap"
+                                        ToolTip = "{Binding SelectedPage.IntroducedIn, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
                     </Expander>
-                    <Expander Header = "Snippet Picker" IsExpanded = "True" Margin = "0,0,0,10">
+                    <Expander Header = "Snippet Picker" IsExpanded = "True" Margin = "0,0,0,5">
                         <ItemsControl Margin = "4"
                                       ItemsSource = "{Binding AllSnippetIds, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}">
                             <ItemsControl.ItemTemplate>
@@ -172,13 +264,97 @@
                         </ItemsControl>
                     </Expander>
 
-                    <Expander Header = "Visual Debug" IsExpanded = "True">
+                    <Expander Header = "Visual Debug" IsExpanded = "False" Margin = "0,0,0,5">
                         <StackPanel Margin = "4">
                             <styleClasses:BaseButton Content = "Force Reload All" Click = "OnForceReload"
                                                      Margin = "0,1" />
                             <styleClasses:BaseButton Content = "Open in VS Code" Click = "OnOpenInEditor"
                                                      Margin = "0,1" />
                         </StackPanel>
+                    </Expander>
+
+                    <Expander Header = "Available Scopes" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding Source={x:Static commands:CommandScopes.AllScopes}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableScopes_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Status" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllStatus, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableStatus_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Levels" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllFeatureLevel, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableLevels_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Categories" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllFeatureCategory, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableCategory_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Locations" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllFeatureLocation, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableLocations_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Scales" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllFeatureScale, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableScale_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </Expander>
                 </StackPanel>
             </ScrollViewer>

@@ -10,7 +10,7 @@
                          xmlns:views = "clr-namespace:Arcanum.UI.Components.Windows.HelpWindow.Views"
                          xmlns:utils = "clr-namespace:Arcanum.Core.Utils;assembly=Arcanum.Core"
                          xmlns:globalStates = "clr-namespace:Arcanum.Core.GlobalStates;assembly=Arcanum.Core"
-                         mc:Ignorable = "d" Title = "Help / Documentation" Height = "700" Width = "1200"
+                         mc:Ignorable = "d" Title = "Help / Documentation" Height = "900" Width = "1600"
                          WindowStartupLocation = "CenterScreen" Background = "{StaticResource AccentGradientBrush}"
                          commands:CommandBinder.Scope = "{x:Static commands:CommandScopes.DIALOG}"
                          commands:ContextBinder.ObserveContext = "True" Closing = "HelpWindow_OnClosing"
@@ -136,7 +136,7 @@
             </Border>
 
             <!-- PAGE CONTENT: Swaps automatically based on CurrentPage type -->
-            <Border Grid.Row = "1" Padding = "20" Background = "{StaticResource DefaultBackColorBrush}"
+            <Border Grid.Row = "1" Padding = "0" Background = "{StaticResource DefaultBackColorBrush}"
                     CornerRadius = "8" Margin = "4, 0, 4,4" BorderBrush = "{StaticResource DefaultBorderColorBrush}"
                     BorderThickness = "1">
                 <ContentControl Content = "{Binding CurrentPage}" />

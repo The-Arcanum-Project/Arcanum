@@ -1,10 +1,12 @@
-﻿using System.Windows;
+﻿#region
+
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Threading;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow.Views;
 
@@ -20,36 +22,14 @@ public partial class FeatureExplorerView
 
    private void FeatureExplorerView_Loaded(object sender, RoutedEventArgs e)
    {
-      if (DataContext is FeatureExplorerViewModel vm)
-      {
-         vm.RequestSelectionUpdate += OnSelectionUpdateRequested;
-
-         if (vm.SelectedItem != null)
-            OnSelectionUpdateRequested(vm.SelectedItem);
-         else if (vm.FeatureTree.Count > 0)
-            vm.SelectedItem = vm.FeatureTree[0];
-      }
-   }
-
-   private void OnSelectionUpdateRequested(FeatureTreeItem? item)
-   {
-      if (item == null)
-         return;
-
-      Dispatcher.BeginInvoke(DispatcherPriority.Input,
-                             () =>
-                             {
-                                var container = FindTreeViewItem(FeatureTreeView, item);
-                                container?.BringIntoView();
-                                container?.Focus();
-                             });
+      if (DataContext is FeatureExplorerViewModel { Features.Count: > 0 } vm)
+         vm.SelectedItem = vm.Features[0];
    }
 
    private void FeatureExplorerView_Unloaded(object sender, RoutedEventArgs e)
    {
-      // Cleanup to prevent memory leaks
-      if (DataContext is FeatureExplorerViewModel vm)
-         vm.RequestSelectionUpdate -= OnSelectionUpdateRequested;
+      Loaded -= FeatureExplorerView_Loaded;
+      Unloaded -= FeatureExplorerView_Unloaded;
    }
 
    private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -66,28 +46,12 @@ public partial class FeatureExplorerView
       e.Handled = true;
    }
 
-   private void TreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+   private void ListView_OnSelectedItemChanged(object sender, RoutedEventArgs e)
    {
-      if (e.NewValue is FeatureTreeItem item && DataContext is FeatureExplorerViewModel vm)
-         vm.SelectedItem = item;
-   }
+      if (sender is not ListView listView)
+         return;
 
-   private static TreeViewItem? FindTreeViewItem(ItemsControl parent, object dataItem)
-   {
-      if (parent.ItemContainerGenerator.Status != GeneratorStatus.ContainersGenerated)
-         return null!;
-
-      if (parent.ItemContainerGenerator.ContainerFromItem(dataItem) is TreeViewItem container)
-         return container;
-
-      foreach (var childItem in parent.Items)
-         if (parent.ItemContainerGenerator.ContainerFromItem(childItem) is TreeViewItem childContainer)
-         {
-            var found = FindTreeViewItem(childContainer, dataItem);
-            if (found != null!)
-               return found;
-         }
-
-      return null;
+      if (listView.SelectedItem is FeatureItem selectedItem)
+         (DataContext as FeatureExplorerViewModel)?.SelectedItem = selectedItem;
    }
 }

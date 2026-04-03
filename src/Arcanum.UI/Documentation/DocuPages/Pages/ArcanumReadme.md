@@ -1,5 +1,5 @@
 ---
-id: "editor.queastor" # The id of the feature the documentaiton is about. Ids can be browsed in debug mode.
+id: "debug.hello" # The id of the feature the documentaiton is about. Ids can be browsed in debug mode.
 title: "Some search and rescue" # Title of the page.
 summary: "Be ambitious" # Short summary of what this page is about.
 links: ["security.md", "profile.md"] # Links to e.g. the wiki page for this page.
@@ -9,6 +9,9 @@ level: "System" # Possible options: System, Module, Panel, Widget, Action
 scale: "Full" # Possible options: Compact, Standard, Major, Full
 location: "Right" # Possible options: Center, Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft
 status: "Stable" # Possible options: Stable, Beta, Experimental, Legacy
+iconPath: "map.png" # OPTIONAL Icon path realtive to Documentation/Icons/
+associatedScopes: ["Global", "Editor"] # Options can be seen dev tools.
+introducedIn: "1.0.7.2" # Version the feature was introduced in.
 ---
 
 # The Arcanum Project

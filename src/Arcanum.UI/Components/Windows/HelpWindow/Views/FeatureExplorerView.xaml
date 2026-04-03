@@ -16,11 +16,12 @@
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
                 <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultGeometry.xaml" />
-                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTreeView.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseListView.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
 
             <converters:InvertedStringToVisibilityConverter x:Key = "InvertedStringToVisibilityConverter" />
+            <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
             <!-- status chip border style -->
             <Style x:Key = "StatusChipBorderStyle" TargetType = "Border">
                 <Setter Property = "BorderThickness" Value = "1" />
@@ -64,102 +65,71 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid d:DataContext = "{d:DesignInstance viewModels:FeatureExplorerViewModel}" HorizontalAlignment = "Stretch">
+    <Grid d:DataContext = "{d:DesignInstance viewModels:FeatureExplorerViewModel}" HorizontalAlignment = "Stretch"
+          Margin = "0, 4">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "280" /> <!-- Explorer -->
-            <ColumnDefinition Width = "10" />   <!-- Splitter -->
-            <ColumnDefinition Width = "*" />   <!-- Detail -->
+            <ColumnDefinition Width = "180" MinWidth = "100" /> <!-- Explorer -->
+            <ColumnDefinition Width = "12" />   <!-- Splitter -->
+            <ColumnDefinition Width = "*" MinWidth = "350" />   <!-- Detail -->
         </Grid.ColumnDefinitions>
 
         <!-- LEFT: Explorer Pane -->
-        <Border Grid.Column = "0" DockPanel.Dock = "Top" CornerRadius = "3" Padding = "5,2" Margin = "4,4,4,0"
-                BorderThickness = "1" BorderBrush = "{StaticResource DefaultBorderColorBrush}"
-                SnapsToDevicePixels = "True" Background = "{StaticResource DefaultBackColorBrush}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width = "Auto" />
-                    <ColumnDefinition Width = "*" />
-                </Grid.ColumnDefinitions>
+        <Grid Grid.Column = "0" Margin = "6, 4, 0, 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width = "Auto" />
+                <ColumnDefinition Width = "*" />
+            </Grid.ColumnDefinitions>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height = "Auto" />
-                    <RowDefinition Height = "*" />
-                </Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "Auto" />
+                <RowDefinition Height = "*" />
+            </Grid.RowDefinitions>
 
-                <Path Grid.Row = "0" Grid.Column = "0" Data = "{StaticResource Icon.Search}" Height = "15" Width = "15"
-                      Style = "{StaticResource BaseIconPathStyle}" Margin = "0, 4, 4, 4" />
-                <styleClasses:CorneredTextBox Grid.Row = "0" Grid.Column = "1"
-                                              Background = "{StaticResource LightBackColorBrush}" BorderThickness = "1"
-                                              VerticalContentAlignment = "Center"
-                                              BorderBrush = "{StaticResource LightBackColorBrush}"
-                                              HorizontalAlignment = "Stretch" CornerRadiusValue = "3" Margin = "0"
-                                              Text = "{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Grid.Row = "0" Grid.Column = "1" Text = "Filter..." HorizontalAlignment = "Stretch"
-                           IsHitTestVisible = "False" Margin = "5, 0, 0, 0" VerticalAlignment = "Center"
-                           Visibility = "{Binding SearchQuery, Converter={StaticResource InvertedStringToVisibilityConverter} }">
-                </TextBlock>
+            <Path Grid.Row = "0" Grid.Column = "0" Data = "{StaticResource Icon.Search}" Height = "15" Width = "15"
+                  Style = "{StaticResource BaseIconPathStyle}" Margin = "0, 4, 4, 4" />
+            <styleClasses:CorneredTextBox Grid.Row = "0" Grid.Column = "1"
+                                          Background = "{StaticResource LightBackColorBrush}" BorderThickness = "1"
+                                          VerticalContentAlignment = "Center" Height = "20"
+                                          BorderBrush = "{StaticResource LightBackColorBrush}"
+                                          HorizontalAlignment = "Stretch" CornerRadiusValue = "3" Margin = "0"
+                                          Text = "{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Grid.Row = "0" Grid.Column = "1" Text = "Filter..." HorizontalAlignment = "Stretch"
+                       IsHitTestVisible = "False" Margin = "5, 0, 0, 0" VerticalAlignment = "Center"
+                       Visibility = "{Binding SearchQuery, Converter={StaticResource InvertedStringToVisibilityConverter} }" />
 
+            <!-- Splitter line -->
+            <Border Grid.Row = "1" Grid.Column = "0" Grid.ColumnSpan = "2" Height = "1"
+                    Background = "{StaticResource DefaultBorderColorBrush}" Margin = "0,4,0,4" />
 
-                <TreeView x:Name = "FeatureTreeView" Grid.Row = "1" Grid.Column = "0" Grid.ColumnSpan = "2"
-                          ItemsSource = "{Binding FeatureTree}" Background = "{StaticResource DarkBackColorBrush}"
-                          BorderThickness = "0" Margin = "0, 8, 0, 4"
-                          SelectedItemChanged = "TreeView_OnSelectedItemChanged" Padding = "2">
+            <ListView Grid.Column = "0" Grid.Row = "2" Padding = "2" Margin = "2" Grid.ColumnSpan = "2"
+                      SelectionChanged = "ListView_OnSelectedItemChanged" ItemsSource = "{Binding Features}"
+                      BorderThickness = "0" HorizontalAlignment = "Stretch" VerticalAlignment = "Stretch">
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType = "{x:Type viewModels:FeatureItem}">
+                        <TextBlock Text = "{Binding Documentation.Title}" VerticalAlignment = "Center" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
 
-                    <TreeView.ItemTemplate>
-                        <HierarchicalDataTemplate DataType = "{x:Type viewModels:FeatureTreeItem}"
-                                                  ItemsSource = "{Binding Children}">
-                            <TextBlock Text = "{Binding Feature.DisplayName}" VerticalAlignment = "Center" />
-                        </HierarchicalDataTemplate>
-                    </TreeView.ItemTemplate>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType = "ListViewItem" BasedOn = "{StaticResource DefaultListViewItemStyle}">
+                        <Setter Property = "Visibility"
+                                Value = "{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+        </Grid>
 
-                    <TreeView.Resources>
-                        <HierarchicalDataTemplate DataType = "{x:Type viewModels:FeatureTreeItem}"
-                                                  ItemsSource = "{Binding Children}">
-                            <TextBlock Text = "{Binding Feature.DisplayName}" VerticalAlignment = "Center" />
-                        </HierarchicalDataTemplate>
-                    </TreeView.Resources>
-
-                    <!-- Update the ItemContainerStyle to handle Visibility -->
-                    <TreeView.ItemContainerStyle>
-                        <Style TargetType = "TreeViewItem" BasedOn = "{StaticResource RiderTreeViewItemStyle}">
-                            <Setter Property = "Visibility"
-                                    Value = "{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        </Style>
-                    </TreeView.ItemContainerStyle>
-                </TreeView>
-            </Grid>
-        </Border>
-
-        <Border Grid.Column = "1" Background = "{StaticResource LightBackColorBrush}" Margin = "3, 3, 6, 3" />
+        <GridSplitter Grid.Column = "1" Margin = "4, 2" Width = "4" HorizontalAlignment = "Stretch"
+                      VerticalAlignment = "Stretch" />
 
         <!-- RIGHT: Detail Pane -->
-        <ScrollViewer Grid.Column = "2" Padding = "40,20, 40, 0" HorizontalAlignment = "Stretch">
+        <ScrollViewer Grid.Column = "2" Padding = "0" HorizontalAlignment = "Stretch">
             <StackPanel HorizontalAlignment = "Stretch" Margin = "0, 0, 8, 0">
-                <DockPanel LastChildFill = "True">
-                    <!-- <styleClasses:BaseButton DockPanel.Dock = "Right" Content = "Show in UI" -->
-                    <!--                          Command = "{Binding SpotlightCommand}" Padding = "12,5" -->
-                    <!--                          VerticalAlignment = "Top" /> -->
-
-                    <StackPanel Orientation = "Horizontal">
-                        <TextBlock Text = "{Binding SelectedFeature.DisplayName, FallbackValue=No-DisplayName}"
-                                   FontSize = "28" FontWeight = "Bold" />
-                        <!-- Version Badge -->
-                        <Border Style = "{StaticResource StatusChipBorderStyle}" Margin = "10,10,0,0">
-                            <TextBlock
-                                Text = "{Binding SelectedFeature.IntroducedIn.WithVPrefix, FallbackValue=No-IntroducedValue}"
-                                FontSize = "10" ToolTip = "The Version in which this feature was introduced" />
-                        </Border>
-                        <!-- Status Chip -->
-                        <Border Style = "{StaticResource StatusChipBorderStyle}" Margin = "10,10,0,0">
-                            <TextBlock Text = "{Binding SelectedFeature.Status, FallbackValue=No-Status}"
-                                       Style = "{StaticResource StatusChipTextStyle}"
-                                       ToolTip = "The current development status of this feature." />
-                        </Border>
-
-                    </StackPanel>
+                <StackPanel Orientation = "Horizontal">
                     <Border BorderBrush = "{StaticResource DefaultBorderColorBrush}" BorderThickness = "1.5"
                             Width = "36" Height = "36" Background = "{StaticResource DarkBackColorBrush}"
-                            DockPanel.Dock = "Right" Margin = "0"
+                            Margin = "0, 0, 4, 0" VerticalAlignment = "Center"
                             ToolTip = "A visual representation of where this feature is located in the UI.">
                         <Grid>
                             <!-- Background Grid Lines -->
@@ -217,101 +187,97 @@
                             </ItemsControl>
                         </Grid>
                     </Border>
-                    <!-- Filler border to ensure proper spacing -->
-                    <Border Width = "20" Background = "Transparent" DockPanel.Dock = "Right" />
-                </DockPanel>
+                    <TextBlock Text = "{Binding SelectedFeature.Title, FallbackValue=No-DisplayName}" FontSize = "34"
+                               FontWeight = "Bold" />
+                    <!-- Version Badge -->
+                    <Border Style = "{StaticResource StatusChipBorderStyle}" Margin = "10,10,0,0">
+                        <TextBlock
+                            Text = "{Binding SelectedFeature.IntroducedIn.WithVPrefix, FallbackValue=No-IntroducedValue}"
+                            FontSize = "10" ToolTip = "The Version in which this feature was introduced" />
+                    </Border>
+                    <!-- Status Chip -->
+                    <Border Style = "{StaticResource StatusChipBorderStyle}" Margin = "10,10,0,0">
+                        <TextBlock Text = "{Binding SelectedFeature.Status, FallbackValue=No-Status}"
+                                   Style = "{StaticResource StatusChipTextStyle}"
+                                   ToolTip = "The current development status of this feature." />
+                    </Border>
 
+                </StackPanel>
 
-                <!-- 3. DESCRIPTION -->
-                <TextBlock Text = "{Binding SelectedFeature.Description, FallbackValue=None}" Margin = "4,7,0,0"
+                <TextBlock Text = "{Binding SelectedFeature.Summary, FallbackValue=None}" Margin = "4,7,0,0"
                            FontSize = "14" LineHeight = "22" TextWrapping = "Wrap" />
 
                 <Border Height = "1" Background = "{StaticResource DefaultBorderColorBrush}" Margin = "0, 5" />
 
-                <TextBlock Text = "Overview" Margin = "0,0,0,0" FontWeight = "SemiBold" FontSize = "16"
-                           ToolTip = "A high-level summary of what capabilities and underlying functions this feature has to offer." />
+                <baseControls:ArcMarkdownViewer ScrollViewer.VerticalScrollBarVisibility = "Disabled"
+                                                ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
+                                                Markdown = "{Binding SelectedFeature.Content, FallbackValue='#NO DATA'}" />
 
-                <!-- 4. QUICK POINTS (Pro-Tips) -->
-                <ItemsControl ItemsSource = "{Binding SelectedFeature.QuickPoints, FallbackValue=''}"
-                              Margin = "0,5,0,0">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Background = "{StaticResource InlineBackColorBrush}" Margin = "10,0,0,10"
-                                    CornerRadius = "4" Padding = "4">
-                                <StackPanel>
-                                    <TextBlock Text = "{Binding Label}" FontWeight = "Bold"
-                                               Foreground = "{StaticResource BlueAccentColorBrush}" Margin = "0,0,0,4" />
-                                    <TextBlock Text = "{Binding Description}" TextWrapping = "Wrap" />
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
 
                 <Border Height = "1" Background = "{StaticResource DefaultBorderColorBrush}" Margin = "0, 5" />
 
-                <TextBlock Text = "Keyboard Shortcuts" Margin = "0,0,0,0" FontWeight = "SemiBold" FontSize = "16"
-                           ToolTip = "All keybound commands that appear in the scope of this feature." />
+                <Expander Header = "Keyboard Shortcuts" IsExpanded = "False"
+                          ToolTip = "All keybound commands that appear in the scope of this feature.">
+                    <ItemsControl ItemsSource = "{Binding AssociatedCommands}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border x:Name = "PART_ItemBorder" Margin = "4" CornerRadius = "4"
+                                        Background = "{StaticResource DefaultBackColorBrush}"
+                                        ToolTip = "{Binding Description}"
+                                        MouseLeftButtonDown = "Border_MouseLeftButtonDown">
 
-                <ItemsControl ItemsSource = "{Binding AssociatedCommands}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border x:Name = "PART_ItemBorder" Margin = "4" CornerRadius = "4"
-                                    Background = "{StaticResource DefaultBackColorBrush}"
-                                    ToolTip = "{Binding Description}"
-                                    MouseLeftButtonDown = "Border_MouseLeftButtonDown">
+                                    <Grid x:Name = "PART_ItemGrid" Margin = "4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width = "*" />
+                                            <ColumnDefinition Width = "Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height = "Auto" />
+                                            <RowDefinition Height = "Auto" />
+                                        </Grid.RowDefinitions>
 
-                                <Grid x:Name = "PART_ItemGrid" Margin = "4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width = "*" />
-                                        <ColumnDefinition Width = "Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height = "Auto" />
-                                        <RowDefinition Height = "Auto" />
-                                    </Grid.RowDefinitions>
+                                        <StackPanel Grid.Row = "0" Grid.Column = "0" Orientation = "Horizontal">
+                                            <baseControls:ToggleIcon Width = "16" Height = "16"
+                                                                     IsChecked = "{Binding CouldExecute}"
+                                                                     UncheckedIcon = "{StaticResource Icon.Disabled}"
+                                                                     CheckedIcon = "{StaticResource Icon.Enabled}"
+                                                                     Padding = "4"
+                                                                     ToolTip = "Whether the command can be executed from here." />
+                                            <TextBlock Text = "{Binding DisplayName}" FontWeight = "SemiBold" />
+                                        </StackPanel>
 
-                                    <StackPanel Grid.Row = "0" Grid.Column = "0" Orientation = "Horizontal">
-                                        <baseControls:ToggleIcon Width = "16" Height = "16"
-                                                                 IsChecked = "{Binding CouldExecute}"
-                                                                 UncheckedIcon = "{StaticResource Icon.Disabled}"
-                                                                 CheckedIcon = "{StaticResource Icon.Enabled}"
-                                                                 Padding = "4"
-                                                                 ToolTip = "Whether the command can be executed from here." />
-                                        <TextBlock Text = "{Binding DisplayName}" FontWeight = "SemiBold" />
-                                    </StackPanel>
+                                        <!-- Shortcut Pill -->
+                                        <Border Grid.Row = "0" Grid.Column = "1" x:Name = "PART_PillBorder"
+                                                Background = "{StaticResource LightBackColorBrush}" CornerRadius = "3"
+                                                Padding = "4,1">
+                                            <TextBlock Text = "{Binding FullShortcutText, FallbackValue=NONE}"
+                                                       FontFamily = "{StaticResource DefaultMonospacedFont}"
+                                                       FontSize = "11" />
+                                        </Border>
 
-                                    <!-- Shortcut Pill -->
-                                    <Border Grid.Row = "0" Grid.Column = "1" x:Name = "PART_PillBorder"
-                                            Background = "{StaticResource LightBackColorBrush}" CornerRadius = "3"
-                                            Padding = "4,1">
-                                        <TextBlock Text = "{Binding FullShortcutText, FallbackValue=NONE}"
-                                                   FontFamily = "{StaticResource DefaultMonospacedFont}"
-                                                   FontSize = "11" />
-                                    </Border>
+                                        <TextBlock Grid.Column = "0" Grid.Row = "1" Grid.ColumnSpan = "2"
+                                                   Text = "{Binding Description}"
+                                                   Foreground = "{StaticResource LightContrastForeColorBrush}"
+                                                   FontSize = "11" TextWrapping = "Wrap" Margin = "7,2,0,0" />
 
-                                    <TextBlock Grid.Column = "0" Grid.Row = "1" Grid.ColumnSpan = "2"
-                                               Text = "{Binding Description}"
-                                               Foreground = "{StaticResource LightContrastForeColorBrush}"
-                                               FontSize = "11" TextWrapping = "Wrap" Margin = "7,2,0,0" />
+                                    </Grid>
+                                </Border>
 
-                                </Grid>
-                            </Border>
+                                <DataTemplate.Triggers>
+                                    <Trigger SourceName = "PART_ItemBorder" Property = "IsMouseOver" Value = "True">
 
-                            <DataTemplate.Triggers>
-                                <Trigger SourceName = "PART_ItemBorder" Property = "IsMouseOver" Value = "True">
+                                        <Setter TargetName = "PART_ItemBorder" Property = "Background"
+                                                Value = "{StaticResource LightBackColorBrush}" />
 
-                                    <Setter TargetName = "PART_ItemBorder" Property = "Background"
-                                            Value = "{StaticResource LightBackColorBrush}" />
+                                        <Setter TargetName = "PART_PillBorder" Property = "Background"
+                                                Value = "{StaticResource DefaultBackColorBrush}" />
 
-                                    <Setter TargetName = "PART_PillBorder" Property = "Background"
-                                            Value = "{StaticResource DefaultBackColorBrush}" />
-
-                                </Trigger>
-                            </DataTemplate.Triggers>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                                    </Trigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Expander>
 
             </StackPanel>
         </ScrollViewer>

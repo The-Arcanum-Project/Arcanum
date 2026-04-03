@@ -61,6 +61,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Documentation\DocuPages\Icons\"/>
         <Folder Include="Documentation\DocuPages\Images\"/>
     </ItemGroup>
 

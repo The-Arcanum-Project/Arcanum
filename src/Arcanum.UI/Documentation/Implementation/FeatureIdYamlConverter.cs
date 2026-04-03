@@ -1,9 +1,13 @@
-﻿using Arcanum.UI.AppFeatures;
+﻿#region
+
+using Arcanum.UI.AppFeatures;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-namespace Arcanum.UI.Documentation;
+#endregion
+
+namespace Arcanum.UI.Documentation.Implementation;
 
 public class FeatureIdYamlConverter : IYamlTypeConverter
 {

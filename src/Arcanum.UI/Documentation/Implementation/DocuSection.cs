@@ -1,4 +1,4 @@
-﻿namespace Arcanum.UI.Documentation;
+﻿namespace Arcanum.UI.Documentation.Implementation;
 
 public struct DocuSection
 {
@@ -10,5 +10,6 @@ public enum FeatureSection
 {
    Notes,
    Debug,
+   Tips,
    // expand if required
 }

@@ -1,7 +1,7 @@
 ﻿---
-id: "editor.map" # The id of the feature the documentaiton is about. Ids can be browsed in debug mode.
-title: "Preferences and Settings" # Title of the page.
-summary: "Manage your app preferences, themes, and account data here." # Short summary of what this page is about.
+id: "editor.map" # The id of the feature the documentaiton is about. Ids can be browsed in debug mode. If Id starts with debug. all the following is optional.
+title: "Markdown Guide" # Title of the page.
+summary: "A onverview of all supported features in the Arcanum documentation markdown format." # Short summary of what this page is about.
 links: ["security.md", "profile.md"] # Links to e.g. the wiki page for this page.
 searchKeywords: ["preferences", "settings", "account", "themes", "privacy"] # Any number of keywords that are associated with this page for search purposes.
 category: "SpecializedEditor" # Possible options: SpecializedEditor, Editor, Debug, Configuration, EditorMap
@@ -9,6 +9,9 @@ level: "Module" # Possible options: System, Module, Panel, Widget, Action
 scale: "Standard" # Possible options: Compact, Standard, Major, Full
 location: "Center" # Possible options: Center, Top, TopRight, Right, BottomRight, Bottom, BottomLeft, Left, TopLeft
 status: "Beta" # Possible options: Stable, Beta, Experimental, Legacy
+iconPath: "Icon.Sync" # OPTIONAL Icon path realtive to Documentation/Icons/
+associatedScopes: ["Global", "Editor"] # Options can be seen dev tools.
+introducedIn: "1.0.7.2" # Version the feature was introduced in.
 ---
 
 # Arcanum Markdown Guide
@@ -159,3 +162,10 @@ You can restrict parts of the documentation to only show up in specific contexts
 ---section/:Debug---
 Developer Note: This section is explicitly marked as Debug. It will only be rendered and visible if the documentation viewer is instantiated in a developer/debug context or an advanced tech-popup.
 ```
+
+---section:tips---
+I you have documentation for every feature, people will actually read it.
+- Step 1 I
+- Step 2 like
+- Step 3 Cookies.
+- Step 4 - Succeff

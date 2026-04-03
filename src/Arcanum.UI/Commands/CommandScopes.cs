@@ -15,4 +15,9 @@ public static class CommandScopes
    public const string HELP_WINDOW = "HelpWindow";
    public const string HELP_FEATURE_EXPLORER = "HelpFeatureExplorer";
    public const string HELP_DASHBOARD = "HelpDashboard";
+
+   public static string[] AllScopes =>
+   [
+      GLOBAL, INPUT, DIALOG, EDITOR, POLITICAL_EDITOR, INSTITUTION_EDITOR, QUEASTOR, HELP_WINDOW, HELP_FEATURE_EXPLORER, HELP_DASHBOARD,
+   ];
 }

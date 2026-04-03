@@ -1,23 +1,16 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Arcanum.UI.AppFeatures;
+using Arcanum.UI.Documentation.Implementation;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
 
-public sealed class FeatureTreeItem(IAppFeature feature) : INotifyPropertyChanged
+public sealed class FeatureItem(FeatureDoc documentation) : INotifyPropertyChanged
 {
-   public IAppFeature Feature { get; } = feature;
-   public ObservableCollection<FeatureTreeItem> Children { get; } = [];
-   public bool IsExpanded
-   {
-      get;
-      set
-      {
-         field = value;
-         OnPropertyChanged();
-      }
-   } = true;
+   public FeatureDoc Documentation { get; } = documentation;
    public bool IsVisible
    {
       get;

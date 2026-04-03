@@ -1,8 +1,13 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.Windows.DebugWindows;
+using Arcanum.UI.Documentation.Implementation;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
 
@@ -10,15 +15,15 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 {
    public FeatureExplorerViewModel()
    {
-      BuildTree();
+      SetFeatures();
       SpotlightCommand = new RelayCommand(_ => ExecuteSpotlight());
       UpdateLocationGrid(FeatureLocation.Center, FeatureScale.Standard); // Default
    }
 
    public override string Title => "Feature Explorer";
 
-   public ObservableCollection<FeatureTreeItem> FeatureTree { get; } = [];
-   public event Action<FeatureTreeItem?>? RequestSelectionUpdate;
+   public ObservableCollection<FeatureItem> Features { get; } = [];
+   public event Action<FeatureItem?>? RequestSelectionUpdate;
 
    public string SearchQuery
    {
@@ -31,7 +36,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       }
    } = "";
 
-   public FeatureTreeItem? SelectedItem
+   public FeatureItem? SelectedItem
    {
       get;
       set
@@ -43,7 +48,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       }
    }
 
-   public IAppFeature? SelectedFeature => SelectedItem?.Feature;
+   public FeatureDoc? SelectedFeature => SelectedItem?.Documentation;
 
    public List<IAppCommand> AssociatedCommands
    {
@@ -67,26 +72,17 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 
    public ICommand SpotlightCommand { get; }
 
-   private void BuildTree()
+   private void SetFeatures()
    {
-      FeatureTree.Clear();
-      var all = FeatureRegistry.GetAllFeatures().ToList();
+      Features.Clear();
 
-      // Find roots (no parent)
-      var roots = all.Where(f => string.IsNullOrEmpty(f.ParentFeatureId?.Value));
-
-      foreach (var rootFeature in roots)
-      {
-         var rootItem = new FeatureTreeItem(rootFeature);
-         AddChildrenRecursive(rootItem, all);
-         FeatureTree.Add(rootItem);
-      }
+      foreach (var feature in DocuRegistry.GetAllDocuPages)
+         Features.Add(new(feature));
    }
 
-   public void SelectFeature(IAppFeature feature)
+   public void SelectFeature(FeatureDoc feature)
    {
-      // Find the corresponding tree item and select it
-      var item = FindTreeItem(FeatureTree, feature);
+      var item = FindFeature(Features, feature);
       if (item != null)
       {
          SelectedItem = item;
@@ -94,33 +90,13 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       }
    }
 
-   private static FeatureTreeItem? FindTreeItem(ObservableCollection<FeatureTreeItem> featureTree, IAppFeature feature)
+   private static FeatureItem? FindFeature(ObservableCollection<FeatureItem> features, FeatureDoc feature)
    {
-      foreach (var item in featureTree)
-      {
-         if (item.Feature.Id.Value == feature.Id.Value)
+      foreach (var item in features)
+         if (item.Documentation.Id == feature.Id)
             return item;
 
-         var foundInChildren = FindTreeItem(item.Children, feature);
-         if (foundInChildren != null)
-         {
-            item.IsExpanded = true;
-            return foundInChildren;
-         }
-      }
-
       return null;
-   }
-
-   private static void AddChildrenRecursive(FeatureTreeItem parent, List<IAppFeature> all)
-   {
-      var children = all.Where(f => f.ParentFeatureId?.Value == parent.Feature.Id.Value);
-      foreach (var childFeature in children)
-      {
-         var childItem = new FeatureTreeItem(childFeature);
-         AddChildrenRecursive(childItem, all);
-         parent.Children.Add(childItem);
-      }
    }
 
    private void UpdateDetails()
@@ -128,13 +104,13 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       if (SelectedFeature == null)
          return;
 
-      // 1. Find Commands for this feature's scopes
+      // Find Commands for this feature's scopes
       var scopes = SelectedFeature.AssociatedScopes.ToHashSet();
       AssociatedCommands = CommandRegistry.AllCommands
                                           .Where(c => scopes.Contains(c.Scope))
                                           .ToList();
 
-      // 2. Update the Spatial Map
+      // Update the Spatial Map
       UpdateLocationGrid(SelectedFeature.Location, SelectedFeature.Scale);
    }
 
@@ -143,7 +119,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       var primaries = new HashSet<int>();
       var secondaries = new HashSet<int>();
 
-      // 1. Identify the Core Index
+      // Identify the Core Index
       var core = location switch
       {
          FeatureLocation.TopLeft => 0,
@@ -160,7 +136,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 
       primaries.Add(core);
 
-      // 2. Calculate "Spillover" based on Scale
+      // Calculate "Spillover" based on Scale
       if (scale == FeatureScale.Full)
       {
          for (var i = 0; i < 9; i++)
@@ -205,7 +181,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
          }
       // Standard and Compact only occupy the core cell
 
-      // 3. Special visual for "Floating/Contextual"
+      // Special visual for "Floating/Contextual"
       // We can make these look distinct by always making them "Center" but adding 
       // a different secondary pattern.
 
@@ -217,42 +193,16 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 
    private void ApplyFilter()
    {
-      // Disable selection updates temporarily if needed for performance
-      foreach (var item in FeatureTree)
-         FilterRecursive(item, SearchQuery);
-   }
-
-   private bool FilterRecursive(FeatureTreeItem item, string query)
-   {
-      // Case 1: Empty Query - Show Everything
-      if (string.IsNullOrWhiteSpace(query))
+      var query = SearchQuery.Trim();
+      foreach (var item in Features)
       {
-         item.IsVisible = true;
-         foreach (var child in item.Children)
-            FilterRecursive(child, query);
-         return true;
+         var matches = item.Documentation.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                       item.Documentation.Summary.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                       item.Documentation.SearchKeywords.Any(s => s.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                       item.Documentation.Id.Value.Contains(query, StringComparison.OrdinalIgnoreCase);
+
+         item.IsVisible = matches;
       }
-
-      // Case 2: Check for matches in this specific node
-      var matches = item.Feature.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    item.Feature.Description.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    item.Feature.SearchSynonyms.Any(s => s.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                    item.Feature.Id.Value.Contains(query, StringComparison.OrdinalIgnoreCase);
-
-      // Case 3: Check children recursively
-      var anyChildMatches = false;
-      foreach (var child in item.Children)
-         if (FilterRecursive(child, query))
-            anyChildMatches = true;
-
-      // A node is visible if IT matches OR any of its CHILDREN match
-      item.IsVisible = matches || anyChildMatches;
-
-      // Auto-expand if a child is a match so the user sees the result
-      if (anyChildMatches)
-         item.IsExpanded = true;
-
-      return item.IsVisible;
    }
 
    private void ExecuteSpotlight()

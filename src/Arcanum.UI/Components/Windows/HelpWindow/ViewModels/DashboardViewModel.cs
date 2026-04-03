@@ -1,9 +1,14 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.Windows.DebugWindows;
+using Arcanum.UI.Documentation.Implementation;
 using Common;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
 
@@ -12,7 +17,7 @@ public class DashboardViewModel : HelpPageViewModelBase
    public override string Title => "Knowledge Dashboard";
 
    // 1. Live Context
-   public IAppFeature? ActiveFeature => FeatureRegistry.GetActiveFeatures().LastOrDefault();
+   public FeatureDoc? ActiveFeature => FeatureRegistry.GetActiveFeatures().LastOrDefault();
    public IEnumerable<IAppCommand> ContextCommands => GetContextCommands();
    public IAppCommand OpenFeatureCommand { get; } = CommandRegistry.Get(CommandIds.HelpWindow.OpenFeatureExplorerForFeature);
 
@@ -33,14 +38,15 @@ public class DashboardViewModel : HelpPageViewModelBase
    private int _currentTipIndex;
    public IAppCommand NextTipCommand { get; } = CommandRegistry.Get(CommandIds.HelpWindow.DashBoardView.NextRandomTip);
    public IAppCommand PreviousTipCommand { get; } = CommandRegistry.Get(CommandIds.HelpWindow.DashBoardView.PreviousRandomTip);
-   public ObservableCollection<IAppFeature> LatestFeatures { get; } = [];
-
+   public ObservableCollection<FeatureDoc> LatestFeatures { get; } = [];
+   public bool HasTipSection => ActiveFeature?.GetSection(FeatureSection.Tips) != null;
+   public string? TipSectionContent => ActiveFeature?.GetSection(FeatureSection.Tips)?.Content;
    public DashboardViewModel()
    {
       // Find features introduced in the latest version
-      var latest = FeatureRegistry.GetAllFeatures()
-                                  .OrderByDescending(f => f.IntroducedIn)
-                                  .Take(3);
+      var latest = DocuRegistry.GetAllDocuPages
+                               .OrderByDescending(f => f.IntroducedIn)
+                               .Take(3);
       foreach (var f in latest)
          LatestFeatures.Add(f);
 

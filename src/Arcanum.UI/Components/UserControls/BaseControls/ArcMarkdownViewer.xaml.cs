@@ -9,7 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Arcanum.UI.Commands;
-using Arcanum.UI.Documentation;
+using Arcanum.UI.Documentation.Implementation;
 using Arcanum.UI.Documentation.Renderers;
 using Markdig;
 using Markdig.Extensions.AutoIdentifiers;
@@ -55,7 +55,7 @@ public partial class ArcMarkdownViewer
    private static void OnMarkdownChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
    {
       if (d is ArcMarkdownViewer control)
-         control.InternalViewer.Markdown = DocuPathResolver.ProcessSnippets(e.NewValue?.ToString() ?? string.Empty);
+         control.InternalViewer.Markdown = DocuRegistry.ProcessSnippets(e.NewValue?.ToString() ?? string.Empty);
    }
 
    private void OpenHyperlink(object sender, ExecutedRoutedEventArgs e)
@@ -95,10 +95,10 @@ public partial class ArcMarkdownViewer
       else if (uri.StartsWith("id:"))
       {
          var parts = uri[3..].Split('#');
-         var page = DocuPathResolver.GetPage(new(parts[0]));
+         var page = DocuRegistry.GetPage(new(parts[0]));
          if (page != null)
          {
-            Markdown = DocuPathResolver.ProcessSnippets(page.Content);
+            Markdown = DocuRegistry.ProcessSnippets(page.Content);
             if (parts.Length > 1)
                Dispatcher.BeginInvoke(DispatcherPriority.Background, () => ScrollToTag(parts[1]));
          }
@@ -184,10 +184,28 @@ public partial class ArcMarkdownViewer
    private void Viewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
    {
       _internalScrollViewer ??= GetChildOfType<ScrollViewer>(InternalViewer);
-      if (_internalScrollViewer != null)
+
+      // If we have an internal scrollbar and there is actually something to scroll
+      if (_internalScrollViewer is { ScrollableHeight: > 0 })
       {
-         _internalScrollViewer.ScrollToVerticalOffset(_internalScrollViewer.VerticalOffset - e.Delta * 2.5 / 3.0);
+         const double speedMultiplier = 2.5;
+         var newOffset = _internalScrollViewer.VerticalOffset - e.Delta * speedMultiplier / 3.0;
+         _internalScrollViewer.ScrollToVerticalOffset(newOffset);
          e.Handled = true;
+      }
+      else
+      {
+         // The internal viewer is not meant to scroll so we boubble a new event down the tree to let the parent scrollviewer handle it.
+         e.Handled = true;
+
+         var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+         {
+            RoutedEvent = MouseWheelEvent, Source = sender,
+         };
+
+         // Raise it on the parent 
+         var parent = VisualTreeHelper.GetParent(this) as UIElement;
+         parent?.RaiseEvent(eventArg);
       }
    }
 
