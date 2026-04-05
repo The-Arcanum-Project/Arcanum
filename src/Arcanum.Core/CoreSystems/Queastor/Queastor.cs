@@ -13,7 +13,7 @@ using Arcanum.Core.Registry;
 
 namespace Arcanum.Core.CoreSystems.Queastor;
 
-public class Queastor : IQueastor
+public sealed class Queastor : IQueastor
 {
    public static readonly Queastor GlobalInstance = new(new QueastorSearchSettings());
 
@@ -400,6 +400,9 @@ public class Queastor : IQueastor
             var uid = eu5Obj.UniqueId;
             var start = 0;
             int next;
+
+            if (string.IsNullOrWhiteSpace(uid))
+               continue;
 
             while ((next = uid.IndexOf('_', start)) != -1)
             {
