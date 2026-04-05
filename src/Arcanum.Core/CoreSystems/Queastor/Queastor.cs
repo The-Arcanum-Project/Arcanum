@@ -1,5 +1,7 @@
 ﻿#define TIME_QUEASTOR
 
+#region
+
 using System.Diagnostics;
 using System.Reflection;
 using Arcanum.API.UtilServices.Search;
@@ -7,26 +9,27 @@ using Arcanum.API.UtilServices.Search.SearchableSetting;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.Registry;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Queastor;
 
 public class Queastor : IQueastor
 {
-   private readonly Dictionary<string, List<ISearchable>> _invertedIndex =
-      new(40_000, StringComparer.OrdinalIgnoreCase);
+   public static readonly Queastor GlobalInstance = new(new QueastorSearchSettings());
 
    private readonly BkTree _bkTree = new();
 
-   public bool IsInitializing { get; set; } = true;
+   private readonly Dictionary<string, List<ISearchable>> _invertedIndex =
+      new(40_000, StringComparer.OrdinalIgnoreCase);
+
    public readonly HashSet<string> BkTreeTerms = new(40_000, StringComparer.OrdinalIgnoreCase);
 
-   public int SearchIndexSize { get; private set; }
-
    public Queastor(IQueastorSearchSettings queastorSearchSettings)
-   {
-      Settings = queastorSearchSettings ?? throw new ArgumentNullException(nameof(queastorSearchSettings));
-   }
+      => Settings = queastorSearchSettings ?? throw new ArgumentNullException(nameof(queastorSearchSettings));
 
-   public static readonly Queastor GlobalInstance = new(new QueastorSearchSettings());
+   public bool IsInitializing { get; set; } = true;
+
+   public int SearchIndexSize { get; private set; }
 
    public bool UsesDefaultEnum { get; set; } = true;
    public IQueastorSearchSettings Settings { get; set; }
@@ -54,41 +57,10 @@ public class Queastor : IQueastor
       }
    }
 
-   private void InternalAddToIndex(ISearchable item, string term)
-   {
-      if (string.IsNullOrWhiteSpace(term))
-         return;
-
-      var lowerTerm = term.ToLowerInvariant();
-      if (!_invertedIndex.TryGetValue(lowerTerm, out var list))
-      {
-         list = [];
-         _invertedIndex[lowerTerm] = list;
-      }
-
-      list.Add(item);
-      if (IsInitializing)
-         BkTreeTerms.Add(lowerTerm.ToLowerInvariant());
-      SearchIndexSize++;
-   }
-
    public void RemoveFromIndex(ISearchable item)
    {
       foreach (var term in item.SearchTerms)
          RemoveFromIndex(item, term);
-   }
-
-   /// <summary>
-   /// Build the BK-Tree from the collected terms. This should be called after all initial indexing is done.
-   /// This is separated from the indexing process to optimize performance during bulk additions.
-   /// </summary>
-   public void RebuildBkTree()
-   {
-      _bkTree.Clear();
-      _bkTree.BuildFrom(BkTreeTerms);
-      IsInitializing = false;
-      BkTreeTerms.Clear();
-      BkTreeTerms.TrimExcess();
    }
 
    public void ModifyInIndex(ISearchable item, IReadOnlyList<string> oldTerms)
@@ -155,6 +127,66 @@ public class Queastor : IQueastor
       return exact.Concat(sortedFuzzy).ToList();
    }
 
+   public List<ISearchable> SearchExact(string query)
+   {
+      query = query.ToLowerInvariant();
+      if (_invertedIndex.TryGetValue(query, out var exact))
+         return exact;
+
+      return [];
+   }
+
+   public int MinLevinsteinDistanceToTerms(ISearchable item, string query)
+   {
+      var minDistance = int.MaxValue;
+      foreach (var term in item.SearchTerms)
+         if (LevinsteinDistance(term, query) < minDistance)
+            minDistance = LevinsteinDistance(term, query);
+      return minDistance;
+   }
+
+   public void IndexSettings()
+   {
+      var settings = FindAllSearchableSettings(Config.Settings);
+      foreach (var setting in settings)
+      {
+         var serachables = setting.GetAllSearchableObjects();
+         foreach (var searchable in serachables)
+            AddToIndex(searchable);
+      }
+   }
+
+   private void InternalAddToIndex(ISearchable item, string term)
+   {
+      if (string.IsNullOrWhiteSpace(term))
+         return;
+
+      var lowerTerm = term.ToLowerInvariant();
+      if (!_invertedIndex.TryGetValue(lowerTerm, out var list))
+      {
+         list = [];
+         _invertedIndex[lowerTerm] = list;
+      }
+
+      list.Add(item);
+      if (IsInitializing)
+         BkTreeTerms.Add(lowerTerm.ToLowerInvariant());
+      SearchIndexSize++;
+   }
+
+   /// <summary>
+   ///    Build the BK-Tree from the collected terms. This should be called after all initial indexing is done.
+   ///    This is separated from the indexing process to optimize performance during bulk additions.
+   /// </summary>
+   public void RebuildBkTree()
+   {
+      _bkTree.Clear();
+      _bkTree.BuildFrom(BkTreeTerms);
+      IsInitializing = false;
+      BkTreeTerms.Clear();
+      BkTreeTerms.TrimExcess();
+   }
+
    private List<ISearchable> ApplySorting(HashSet<SearchResult> results, string query)
    {
       if (results.Count == 0 || string.IsNullOrWhiteSpace(query))
@@ -208,24 +240,6 @@ public class Queastor : IQueastor
       }
 
       return itemsList.Select(x => x.Value).ToList();
-   }
-
-   public List<ISearchable> SearchExact(string query)
-   {
-      query = query.ToLowerInvariant();
-      if (_invertedIndex.TryGetValue(query, out var exact))
-         return exact;
-
-      return [];
-   }
-
-   public int MinLevinsteinDistanceToTerms(ISearchable item, string query)
-   {
-      var minDistance = int.MaxValue;
-      foreach (var term in item.SearchTerms)
-         if (LevinsteinDistance(term, query) < minDistance)
-            minDistance = LevinsteinDistance(term, query);
-      return minDistance;
    }
    //
    // public List<(string, ISearchable)> SortSearchResults(List<ISearchable> results,
@@ -315,23 +329,12 @@ public class Queastor : IQueastor
       return categoryCounts;
    }
 
-   public void IndexSettings()
-   {
-      var settings = FindAllSearchableSettings(Config.Settings);
-      foreach (var setting in settings)
-      {
-         var serachables = setting.GetAllSearchableObjects();
-         foreach (var searchable in serachables)
-            AddToIndex(searchable);
-      }
-   }
-
    /// <summary>
-   /// Returns all <see cref="SearchableSettings"/> found in the given object tree. <br/>
-   /// Currently collections of <see cref="SearchableSettings"/> are not supported, only single instances.
-   /// They can be enabled by uncommenting the collection support code in the method below but is currently not required.
+   ///    Returns all <see cref = "SearchableSettings" /> found in the given object tree. <br />
+   ///    Currently collections of <see cref = "SearchableSettings" /> are not supported, only single instances.
+   ///    They can be enabled by uncommenting the collection support code in the method below but is currently not required.
    /// </summary>
-   /// <param name="root"></param>
+   /// <param name = "root" ></param>
    /// <returns></returns>
    private static List<SearchableSettings> FindAllSearchableSettings(object root)
    {
@@ -387,8 +390,26 @@ public class Queastor : IQueastor
       foreach (var type in eu5ObjectTypes)
       {
          var empty = (IEu5Object)EmptyRegistry.Empties[type];
-         foreach (var obj in empty.GetGlobalItemsNonGeneric().Values)
-            queastor.AddToIndex((IEu5Object)obj);
+         var items = empty.GetGlobalItemsNonGeneric().Values;
+
+         foreach (var obj in items)
+         {
+            var eu5Obj = (IEu5Object)obj;
+            queastor.AddToIndex(eu5Obj);
+
+            var uid = eu5Obj.UniqueId;
+            var start = 0;
+            int next;
+
+            while ((next = uid.IndexOf('_', start)) != -1)
+            {
+               queastor.AddToIndex(eu5Obj, uid.Substring(start, next - start));
+               start = next + 1;
+            }
+
+            if (start < uid.Length)
+               queastor.AddToIndex(eu5Obj, uid[start..]);
+         }
       }
    }
 }
