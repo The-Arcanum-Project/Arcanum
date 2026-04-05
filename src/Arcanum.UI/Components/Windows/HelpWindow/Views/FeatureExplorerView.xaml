@@ -23,6 +23,7 @@
 
             <converters:InvertedStringToVisibilityConverter x:Key = "InvertedStringToVisibilityConverter" />
             <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
+            <viewModels:FeatureDocToLocationStringConverter x:Key = "FeatureDocToLocationStringConverter" />
             <!-- status chip border style -->
             <Style x:Key = "StatusChipBorderStyle" TargetType = "Border">
                 <Setter Property = "BorderThickness" Value = "1" />
@@ -166,7 +167,7 @@
                     <Border BorderBrush = "{StaticResource DefaultBorderColorBrush}" BorderThickness = "1.5"
                             Width = "36" Height = "36" Background = "{StaticResource DarkBackColorBrush}"
                             Margin = "0, 0, 4, 0" VerticalAlignment = "Center"
-                            ToolTip = "A visual representation of where this feature is located in the UI.">
+                            ToolTip = "{Binding SelectedFeature, Converter={StaticResource FeatureDocToLocationStringConverter}}">
                         <Grid>
                             <!-- Background Grid Lines -->
                             <UniformGrid Columns = "3" Rows = "3" Opacity = "0.1">
