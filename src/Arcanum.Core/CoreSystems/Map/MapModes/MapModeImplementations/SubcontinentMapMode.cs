@@ -9,7 +9,7 @@ using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class SubcontinentMapMode : LocationBasedMapMode
+public sealed class SubcontinentMapMode : LocationBasedMapMode
 {
    public override string Name => "Subcontinent";
    public override string Description => "Displays the Subcontinents the locations are situated in.";

@@ -1,10 +1,14 @@
-﻿using Arcanum.Core.GameObjects.InGame.Cultural;
+﻿#region
+
+using Arcanum.Core.GameObjects.InGame.Cultural;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class InsitutionMapMode : IVariableMapMode<Institution>
+public sealed class InsitutionMapMode : IVariableMapMode<Institution>
 {
    public override string Name => "Institutions";
    public override string Description => "Displays the whether the selected institution is present in the location.";

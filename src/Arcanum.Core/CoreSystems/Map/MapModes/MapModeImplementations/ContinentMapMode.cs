@@ -1,12 +1,16 @@
-﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
+﻿#region
+
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Continent;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ContinentMapMode : LocationBasedMapMode
+public sealed class ContinentMapMode : LocationBasedMapMode
 {
    public override string Name => "Continents";
    public override string Description => "Displays the Continents the locations are situated in.";

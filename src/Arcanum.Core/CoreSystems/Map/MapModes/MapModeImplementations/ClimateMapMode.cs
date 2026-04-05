@@ -1,9 +1,13 @@
-﻿using Climate = Arcanum.Core.GameObjects.InGame.Map.Climate;
+﻿#region
+
+using Climate = Arcanum.Core.GameObjects.InGame.Map.Climate;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ClimateMapMode : LocationBasedMapMode
+public sealed class ClimateMapMode : LocationBasedMapMode
 {
    public override Type[] DisplayTypes => [typeof(Climate)];
    public override bool IsLandOnly => false;

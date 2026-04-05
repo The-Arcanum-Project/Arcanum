@@ -1,10 +1,14 @@
-﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
+﻿#region
+
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ProvinceMapMode : LocationBasedMapMode
+public sealed class ProvinceMapMode : LocationBasedMapMode
 {
    public override string Name => "Provinces";
    public override string Description => "Displays the provinces the locations are situated in.";

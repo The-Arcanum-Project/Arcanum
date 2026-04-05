@@ -1,5 +1,7 @@
 ﻿#define ALLOW_PARALLEL
 
+#region
+
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
@@ -7,9 +9,11 @@ using Vortice.Mathematics;
 using Country = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Country;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class PoliticalMapMode : IMapMode
+public sealed class PoliticalMapMode : IMapMode
 {
    public string Name => "Political";
    public string Description => "Displays the owner of each location.";

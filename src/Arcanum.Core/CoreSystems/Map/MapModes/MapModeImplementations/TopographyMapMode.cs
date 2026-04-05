@@ -1,9 +1,13 @@
-﻿using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+﻿#region
+
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Topography = Arcanum.Core.GameObjects.InGame.Map.Topography;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class TopographyMapMode : LocationBasedMapMode
+public sealed class TopographyMapMode : LocationBasedMapMode
 {
    public override bool IsLandOnly => false;
    public override Type[] DisplayTypes => [typeof(Topography)];

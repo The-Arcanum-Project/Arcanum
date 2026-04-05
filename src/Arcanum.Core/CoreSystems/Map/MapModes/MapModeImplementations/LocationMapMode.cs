@@ -1,10 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region
+
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class LocationMapMode : LocationBasedMapMode
+public sealed class LocationMapMode : LocationBasedMapMode
 {
    private const string FIRST_STR = "Create a land adjacency between the previously set location and the currently selected location.";
    private Vector2 _fristAdjCoords = Vector2.Zero;

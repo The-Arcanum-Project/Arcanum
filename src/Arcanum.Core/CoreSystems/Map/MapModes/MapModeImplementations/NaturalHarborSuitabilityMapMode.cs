@@ -1,12 +1,16 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region
+
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Arcanum.Core.GameObjects.InGame.Map;
 using Arcanum.Core.Utils.Colors;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class NaturalHarborSuitabilityMapMode : LocationBasedMapMode
+public sealed class NaturalHarborSuitabilityMapMode : LocationBasedMapMode
 {
    public override string Name { get; } = "Natural Harbor Suitability";
    public override string Description { get; } = "Displays the natural harbor suitability of each coastal location on the map.";
