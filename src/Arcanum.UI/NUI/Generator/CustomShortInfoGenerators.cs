@@ -54,7 +54,7 @@ public static class CustomShortInfoGenerators
 
       var multiBinding = new MultiBinding
       {
-         Converter = new Eu5ShortInfoConverter(), Mode = BindingMode.OneWay,
+         Mode = BindingMode.OneWay,
       };
       multiBinding.Bindings.Add(new Binding { Source = primary });
 
@@ -62,6 +62,7 @@ public static class CustomShortInfoGenerators
       {
          Source = primary, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
       });
+      multiBinding.Converter = new Eu5ShortInfoConverter();
 
       var headerBlock =
          GridManager.GetNavigationHeader(navH,

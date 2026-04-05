@@ -4,31 +4,29 @@ using System.Collections;
 using System.Globalization;
 using System.Text;
 using System.Windows.Data;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.GameObjects.BaseTypes;
 
 #endregion
 
 namespace Arcanum.UI.NUI.Generator.StructConverters;
 
-public class Eu5ShortInfoConverter : IMultiValueConverter
+public sealed class Eu5ShortInfoConverter : IMultiValueConverter
 {
    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
    {
       // The first value is our 'primary' object
       // The rest are the values of the properties we are watching
       if (values.Length < 1 || values[0] is not IEu5Object primary)
-         return string.Empty;
+         return "Invalid Binding";
 
       var sb = new StringBuilder();
       var fields = primary.NUISettings.ShortInfoFields;
 
-      // Start at 1 because 0 is the 'primary' object itself
       for (var i = 0; i < fields.Length; i++)
       {
          var nxProp = fields[i];
-         // Get the value from the MultiBinding's provided values array
-         var value = i + 1 < values.Length ? values[i + 1] : null;
-
+         var value = Nx.Get<object>(primary, nxProp);
          var itemType = primary.GetNxItemType(nxProp);
 
          if (itemType == null)
