@@ -12,6 +12,21 @@ public class CacheNodeInfo(Node? node, BorderSegmentDirectional? segment, Direct
    public Node? Node = node;
 }
 
+/// <summary>
+/// Lightweight struct holding segment cache data. Stored inline in Node.
+/// </summary>
+public struct SegmentCache
+{
+   public BorderSegmentDirectional? Segment;
+   public Node? Node;
+}
+
+[InlineArray(4)]
+public struct SegmentCacheBuffer
+{
+   private SegmentCache _element0;
+}
+
 public class Node : ICoordinateAdder
 {
 #if DEBUG
@@ -23,204 +38,170 @@ public class Node : ICoordinateAdder
 #endif
 
    public readonly Vector2I Position;
-   public int XPos => Position.X;
-   public int YPos => Position.Y;
 
-   public readonly CacheNodeInfo[] Segments;
+   public int XPos
+   {
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+      get => Position.X;
+   }
+   
+   public int YPos
+   {
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+      get => Position.Y;
+   }
+
+   private SegmentCacheBuffer _segments;
 
    /// <summary>
-   /// Initializes a new instance of the <see cref="Node"/> class with the given segments and position.
+   /// Bitmask indicating which directions are valid exits. Bit i corresponds to Direction i.
    /// </summary>
-   /// <param name="segments">Array of cached node information for each direction.</param>
-   /// <param name="xPos">The X position of the node.</param>
-   /// <param name="yPos">The Y position of the node.</param>
-   public Node(CacheNodeInfo[] segments,
-               int xPos,
-               int yPos)
+   public byte ActiveMask;
+
+   /// <summary>
+   /// Bitmask indicating which directions have been visited during polygon tracing.
+   /// </summary>
+   private byte _visitedMask;
+   
+   
+   
+   private Node(Vector2I position)
    {
 #if DEBUG
-      _nodeId = _totalNodes;
-      _totalNodes++;
+      _nodeId = _totalNodes++;
 #endif
+      Position = position;
+   }
 
-      Segments = segments;
-      Position = new(xPos, yPos);
+   private Node(int x, int y) : this(new (x, y)) { }
+   
+   /// <summary>
+   /// Creates a border node with exits in left, forward, and right directions.
+   /// The right direction is pre-marked as visited (coming from a previous border segment).
+   /// </summary>
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public static Node CreateBorderNode(int x, int y, Direction forwardDir)
+   {
+      var node = new Node(x, y);
+      var left = forwardDir.RotateLeft();
+      var right = forwardDir.RotateRight();
+
+      node.ActiveMask = (byte)((1 << (int)left) | (1 << (int)forwardDir) | (1 << (int)right));
+      node._visitedMask = (byte)(1 << (int)right);
+      // Visited flags are set during TraceFromNode, not at creation
+      return node;
+   }
+   
+   /// <summary>
+   /// Creates a 3-way T-junction node with exits in left, forward, and right directions.
+   /// </summary>
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public static Node CreateThreeWayNode(int xPos, int yPos, Direction primaryDir)
+   {
+      var node = new Node(xPos, yPos)
+      {
+         ActiveMask = (byte)((1 << (int)primaryDir.RotateLeft()) | 
+                             (1 << (int)primaryDir) | 
+                             (1 << (int)primaryDir.RotateRight())),
+      };
+      return node;
    }
 
    /// <summary>
-   /// Creates a new node template with segments in all three directions (left, straight, right) based on the given direction.
+   /// Creates a 4-way crossroads node with exits in all directions.
    /// </summary>
-   /// <param name="xPos"></param>
-   /// <param name="yPos"></param>
-   /// <param name="dir"></param>
-   /// <param name="lastNodeVisited"></param>
-   public Node(int xPos, int yPos, Direction dir, bool lastNodeVisited = false) : this([
-                                                                                          new(null, null, dir.RotateLeft()), new(null, null, dir),
-                                                                                          new(null, null, dir.RotateRight(), visited: lastNodeVisited)
-                                                                                       ],
-                                                                                       xPos,
-                                                                                       yPos)
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public static Node CreateFourWayNode(int xPos, int yPos)
    {
+      return new(xPos, yPos) { ActiveMask = 0b1111, };
    }
 
-   public static Node GetThreeWayNode(int xPos, int yPos, Direction dir) => new([
-                                                                                   new(null, null, dir.RotateRight()), new(null, null, dir),
-                                                                                   new(null, null, dir.RotateLeft())
-                                                                                ],
-                                                                                xPos,
-                                                                                yPos);
-
-   public static Node GetOneWayNode(int xPos, int yPos, Direction dir) => new([new(null, null, dir),], xPos, yPos);
-
-   public static Node GetFourWayNode(int xPos, int yPos, Direction dir) => new([
-                                                                                  new(null, null, dir.Invert()), new(null, null, dir.RotateRight()),
-                                                                                  new(null, null, dir.RotateLeft()), new(null, null, dir)
-                                                                               ],
-                                                                               xPos,
-                                                                               yPos);
+   /// <summary>
+   /// Creates a 1-way node (single exit), used for closed loops.
+   /// </summary>
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public static Node CreateOneWayNode(int xPos, int yPos, Direction dir)
+   {
+      var node = new Node(xPos, yPos)
+      {
+         ActiveMask = (byte)(1 << (int)dir),
+      };
+      return node;
+   }
 
    /// <summary>
    /// Adds the node's position as a <see cref="Point"/> to the provided list.
    /// </summary>
    /// <param name="points">The list to add the point to.</param>
-   public void AddTo(List<Vector2I> points)
-   {
-      points.Add(new(XPos, YPos));
-   }
-
-   /// <summary>
-   /// Marks the segment in the specified direction as visited.
-   /// </summary>
-   /// <param name="dir">The direction of the segment to mark as visited.</param>
-   public void SetDirection(Direction dir)
-   {
-      GetSegment(dir).Visited = true;
-   }
-
-   /// <summary>
-   /// Checks if the segment in the specified direction has been visited.
-   /// </summary>
-   /// <param name="dir">The direction to check.</param>
-   /// <returns>True if the segment has been visited; otherwise, false.</returns>
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   public bool TestDirection(Direction dir) => GetSegment(dir).Visited;
+   public void AddTo(List<Vector2I> points) => points.Add(Position);
 
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public bool HasDirection(Direction dir) => (ActiveMask & (1 << (int)dir)) != 0;
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public bool IsVisited(Direction dir) => (_visitedMask & (1 << (int)dir)) != 0;
+
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public void SetVisited(Direction dir) => _visitedMask |= (byte)(1 << (int)dir);
+   
    /// <summary>
-   /// Retrieves the cached segment information for the specified direction.
+   /// Gets a reference to the segment cache for a direction. O(1) indexed access.
    /// </summary>
-   /// <param name="dir">The direction to retrieve the segment for.</param>
-   /// <returns>The <see cref="CacheNodeInfo"/> for the given direction.</returns>
-   /// <exception cref="InvalidOperationException">Thrown if no segment exists in the specified direction.</exception>
-   public CacheNodeInfo GetSegment(Direction dir)
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   public ref SegmentCache GetSegmentRef(Direction dir) => ref _segments[(int)dir];
+   
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   private Direction GetDirectionFrom(Vector2I point)
    {
-      foreach (var segment in Segments)
-         if (segment.Dir == dir)
-            return segment;
+      var dx = Position.X - point.X;
+      var dy = Position.Y - point.Y;
 
-      throw new InvalidOperationException($"Node does not have a segment in direction {dir}");
+      return (dx, dy) switch
+      {
+         (> 0, 0) => Direction.East,
+         (< 0, 0) => Direction.West,
+         (0, > 0) => Direction.South,
+         _ => Direction.North,
+      };
    }
 
-   /// <summary>
-   /// Attempts to retrieve the cached segment information for the specified direction.
-   /// </summary>
-   /// <param name="dir">The direction to retrieve the segment for.</param>
-   /// <param name="segment">The resulting <see cref="CacheNodeInfo"/> if found; otherwise, null.</param>
-   /// <returns>True if the segment was found; otherwise, false.</returns>
-   private bool TryGetSegment(Direction dir, [MaybeNullWhen(false)] out CacheNodeInfo segment)
+   public bool Visit(
+      ref Direction direction,
+      BorderSegmentDirectional input,
+      out BorderSegmentDirectional segment,
+      [MaybeNullWhen(false)] out Node nextNode)
    {
-      foreach (var cache in Segments)
+      // Step 1: Calculate the arrival direction from input
+      if (input.Segment.Points.Count > 0)
       {
-         if (cache.Dir != dir)
-            continue;
-
-         segment = cache;
-         return true;
+         var point = input.IsForward ? input.Segment.Points[^1] : input.Segment.Points[0];
+         direction = GetDirectionFrom(point);  // Small helper, easily inlined
       }
 
-      segment = null;
-      return false;
-   }
+      // Step 2: Determine the exit direction (right turn priority)
+      var rightDir = direction.RotateRight();
+      var outDir = HasDirection(rightDir) ? rightDir : direction;
+      direction = outDir;
 
-   /// <summary>
-   /// Visits the node using the given input node and segment, updating the direction and returning the next segment and node.
-   /// </summary>
-   /// <param name="direction">The direction to update.</param>
-   /// <param name="input">The input border segment used to determine the approach direction to the node.</param>
-   /// <param name="segment">The found border segment, if any.</param>
-   /// <param name="node">The node the segment leads to, if any.</param>
-   /// <returns>True if a segment and node were found; otherwise, false.</returns>
-   public bool Visit(ref Direction direction,
-                     BorderSegmentDirectional input,
-                     [MaybeNullWhen(false)] out CacheNodeInfo segment,
-                     [MaybeNullWhen(false)] out Node node)
-   {
-      if (input.Segment.Points.Count == 0)
-         return Visit(ref direction, out segment, out node);
-
-      // Get last point based on the direction
-      var point = input.IsForward ? input.Segment.Points[^1] : input.Segment.Points[0];
-
-      return Visit(ref direction, point.X, point.Y, out segment, out node);
-   }
-
-   /// <summary>
-   /// Visits the node using the given node position and the last segment position, updating the direction and returning the next segment and node.
-   /// </summary>
-   /// <param name="direction">The direction to update.</param>
-   /// <param name="x">The X coordinate of the last segment point.</param>
-   /// <param name="y">The Y coordinate of the last segment point.</param>
-   /// <param name="segment">The found border segment, if any.</param>
-   /// <param name="node">The node the segment leads to, if any.</param>
-   /// <returns>True if a segment and node were found; otherwise, false.</returns>
-   /// <exception cref="InvalidOperationException">Thrown if the movement between points is invalid, so not in a straight line.</exception>
-   private bool Visit(ref Direction direction,
-                      int x,
-                      int y,
-                      [MaybeNullWhen(false)] out CacheNodeInfo segment,
-                      [MaybeNullWhen(false)] out Node node)
-   {
-      // Get direction based of the difference between the two points
-      var dx = XPos - x;
-      var dy = YPos - y;
-
-      direction = dx switch
-      {
-         > 0 when dy == 0 => Direction.East,
-         < 0 when dy == 0 => Direction.West,
-         0 when dy > 0 => Direction.South,
-         0 when dy < 0 => Direction.North,
-         _ => throw new InvalidOperationException($"Invalid movement from ({XPos} {YPos}) to ({x}, {y})")
-      };
-      return Visit(ref direction, out segment, out node);
-   }
-
-   /// <summary>
-   /// Checks if a segment is cached in the given direction and returns it with the node it leads to.
-   /// </summary>
-   /// <param name="direction">The direction to check and update.</param>
-   /// <param name="segment">The found border segment, if any.</param>
-   /// <param name="node">The node the segment leads to, if any.</param>
-   /// <returns>True if a segment and node were found; otherwise, false.</returns>
-   private bool Visit(ref Direction direction,
-                      [MaybeNullWhen(false)] out CacheNodeInfo segment,
-                      [MaybeNullWhen(false)] out Node node)
-   {
-      // Not only check the right direction, since it is a T-shaped intersection a possible path is straight ahead.
-      var newDirection = direction.RotateRight();
-      if (TryGetSegment(newDirection, out var cache))
-         direction = newDirection;
-      else
-         cache = GetSegment(direction);
-
+      // Step 3: Return the cached segment if exists
+      ref var cache = ref _segments[(int)outDir];
       if (cache.Segment.HasValue)
       {
-         segment = cache;
-         node = cache.Node!;
+         segment = cache.Segment.Value;
+         nextNode = cache.Node!;
          return true;
       }
 
-      segment = null;
-      node = null;
+      segment = default;
+      nextNode = null;
       return false;
    }
+   
+   public int ActiveDirectionCount
+   {
+      [MethodImpl(MethodImplOptions.AggressiveInlining)]
+      get => System.Numerics.BitOperations.PopCount(ActiveMask);
+   }
+
 }

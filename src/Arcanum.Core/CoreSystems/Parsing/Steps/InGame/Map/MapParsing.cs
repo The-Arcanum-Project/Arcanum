@@ -54,7 +54,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       }
 
       TotalPolygonsCount = parsingPolygons.Count;
-
+      
       _ = Tessellate(parsingPolygons, mapSize);
       
       

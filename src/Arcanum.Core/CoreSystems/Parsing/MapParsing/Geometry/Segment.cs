@@ -3,9 +3,19 @@ using System.Runtime.InteropServices;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 
-public class BorderSegment()
+public class BorderSegment
 {
    public readonly List<Vector2I> Points = [];
+   
+   /// <summary>
+   /// Color of the polygon to the left when traversing forward (start to end).
+   /// </summary>
+   public int ColorLeft;
+   
+   /// <summary>
+   /// Color of the polygon to the right when traversing forward (start to end).
+   /// </summary>
+   public int ColorRight;
 }
 
 [SkipLocalsInit]
