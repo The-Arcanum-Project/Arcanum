@@ -122,7 +122,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
          loc.Bounds = GeoRect.CalculateBounds(loc.Polygons);
       }
-      
+      /*
       // TODO use locByColor above too
       var locationCount = Globals.Locations.Count;
       var globalEdgeLists = new List<List<EdgeGeometry>>(locationCount * 3);
@@ -229,7 +229,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
       foreach (var loc in Globals.Locations.Values)
          // Convert to array and clear the temp reference
-         loc.Adjacencies = tempAdjacencies[loc.ColorIndex].ToArray();
+         loc.Adjacencies = tempAdjacencies[loc.ColorIndex].ToArray();*/
 
       var data = new MapParsingData(mapSize, polygons);
 

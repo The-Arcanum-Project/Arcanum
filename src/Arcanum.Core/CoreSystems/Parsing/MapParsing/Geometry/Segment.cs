@@ -3,25 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 
-public readonly struct BorderSegment
+public class BorderSegment()
 {
-   public readonly int LeftColor;
-   public readonly int RightColor;
-   public readonly List<Vector2I> Points;
-
-   public BorderSegment()
-   {
-      LeftColor = 0;
-      RightColor = 0;
-      Points = [];
-   }
-
-   public BorderSegment(int leftColor, int rightColor)
-   {
-      LeftColor = leftColor;
-      RightColor = rightColor;
-      Points = [];
-   }
+   public readonly List<Vector2I> Points = [];
 }
 
 [SkipLocalsInit]

@@ -127,9 +127,9 @@ public sealed unsafe class MapTracing : IDisposable
       var lastColor = GetColor(0, 0);
 
       Node? firstNode = null;
-      var firstSegment = new BorderSegment(OUTSIDE_COLOR, lastColor);
+      var firstSegment = new BorderSegment();
       firstSegment.Points.Add(new(0, 0));
-      
+
       Node? lastNode = null;
 
       var currentSegment = firstSegment;
@@ -199,7 +199,7 @@ public sealed unsafe class MapTracing : IDisposable
       {
          // Color changed, finalize the current segment and start a new one
 
-         var newSegment = new BorderSegment(OUTSIDE_COLOR, color);
+         var newSegment = new BorderSegment();
          Node node = new(xPos, yPos, direction, true);
 
          // First node found
@@ -244,8 +244,8 @@ public sealed unsafe class MapTracing : IDisposable
       var rColor = GetColorWithOutsideCheck(points.Xr, points.Yr);
 
       var currentDirection = startDirection;
-      // TODO fix orientation colors here for Stub tracing this does not know what is left and right since Stubs do not have a defined clockwise or counter-clockwise direction.
-      var currentSegment = new BorderSegment(lColor, rColor); // Still allocated (necessary)
+      var currentSegment = new BorderSegment(); // Still allocated (necessary)
+
       var startPointX = points.Xpos;
       var startPointY = points.Ypos;
 
@@ -611,8 +611,7 @@ public sealed unsafe class MapTracing : IDisposable
       TraceEdge(position, Direction.South, out var endNode, out var endCache);
 
       // Create a new segment from start to end node and link them
-      var oldSegment = startCache.Segment!.Value.Segment;
-      var segment = new BorderSegment(oldSegment.LeftColor,oldSegment.RightColor);
+      var segment = new BorderSegment();
       var segmentDir = startCache.Segment!.Value;
       segmentDir.AddTo(segment.Points);
       endCache.Segment!.Value.Invert().AddTo(segment.Points);
