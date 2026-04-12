@@ -31,13 +31,12 @@ public readonly struct UncheckedColorGetter : IColorGetter
 public readonly struct CheckedColorGetter : IColorGetter
 {
     private const int ALPHA = 255 << 24;
-    private const int OUTSIDE_COLOR = 0x000000;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe int GetColor(nint scan0, int stride, int width, int height, int x, int y)
     {
         if ((uint)x >= (uint)width || (uint)y >= (uint)height)
-            return OUTSIDE_COLOR;
+            return MapTracing.OUTSIDE_COLOR;
 
         var pixel = (byte*)scan0 + y * stride + x * 3;
         return ALPHA | pixel[2] | (pixel[1] << 8) | (pixel[0] << 16);

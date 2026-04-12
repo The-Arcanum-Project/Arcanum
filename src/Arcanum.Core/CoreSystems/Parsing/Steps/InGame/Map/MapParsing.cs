@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
@@ -52,8 +51,223 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          parsingPolygons = tracing.Trace();
          mapSize = new (bitmap.Width, bitmap.Height);
       }
-
+      
       TotalPolygonsCount = parsingPolygons.Count;
+      
+      // Overall requirements:
+      // After tesselation data needs to include a single array containing all borders (finalBorder)
+      // A finalBorder in that context is an array of finalSegments that only contain Vector2 s, which contains not only the smoothed border segments but the node positions as well.
+      // A finalBorder exists for both the left and right side of a smoothed border. but this can easily be done by having only the left side index and the right side index is just the left one + the original number of borders
+      
+      // = Border Smoothing
+      // Border smoothing should therefore be more generalized, and convert Vector2I to Vector2
+      // However I do not know how to solve this since polygons orignially have the reference to the BorderSegmentDirectional
+      // The idea would be 
+      
+      // First Adjacency calculation needs to happen here, so what location is bordering which, that needs to be done with a dictionary which converts color to location which is created here also
+      
+      var sw = Stopwatch.StartNew();
+      
+      // Color Lookup for locations
+      var locationCount = Globals.Locations.Count;
+      var locByColor = new Dictionary<int, Location>(locationCount);
+      foreach (var loc in Globals.Locations.Values)
+         locByColor[loc.Color.AsInt()] = loc;
+
+      var colorPairToBorderIndex = new Dictionary<long, int>(locationCount * 3);
+      var borderSegmentsList = new List<BorderSegment>(parsingPolygons.Count * 3);
+
+      // Add holes for adjacency calculation
+      var tempAdjData = new List<(Location neighbour, int borderIndex, bool isLeftSide)>[locationCount];
+      foreach (var loc in Globals.Locations.Values)
+         tempAdjData[loc.ColorIndex] = new(4);
+
+      
+      foreach (var poly in parsingPolygons)
+      {
+         foreach (var adder in poly.Segments)
+         {
+            if (adder is not BorderSegmentDirectional { IsForward: true } bsd)
+               continue;
+            var segment = bsd.Segment;
+            borderSegmentsList.Add(segment);
+            
+            var colorKey = segment.ColorLeft < segment.ColorRight ? ((long)segment.ColorLeft << 32) | (uint)segment.ColorRight : ((long)segment.ColorRight << 32) | (uint)segment.ColorLeft;
+            
+            if (colorPairToBorderIndex.TryGetValue(colorKey, out var borderIndex)) continue;
+            
+            borderIndex = colorPairToBorderIndex.Count;
+            colorPairToBorderIndex[colorKey] = borderIndex;
+            
+            if (segment.ColorLeft == MapTracing.OUTSIDE_COLOR || segment.ColorRight == MapTracing.OUTSIDE_COLOR)
+               // TODO Handle left right warp
+               continue;
+            
+            var leftLoc = locByColor[segment.ColorLeft];
+            var rightLoc = locByColor[segment.ColorRight];
+            
+            tempAdjData[leftLoc.ColorIndex].Add((rightLoc, borderIndex, true));
+            tempAdjData[rightLoc.ColorIndex].Add((leftLoc, borderIndex, false));
+         }
+
+         for (var index = 0; index < poly.Holes.Count; index++)
+         {
+            var hole = poly.Holes[index];
+            for (var i = 0; i < hole.Segments.Count; i++)
+            {
+               var adder = hole.Segments[i];
+               if (adder is not BorderSegmentDirectional { IsForward: true } bsd)
+                  continue;
+               var segment = bsd.Segment;
+               borderSegmentsList.Add(segment);
+
+               var colorKey = segment.ColorLeft < segment.ColorRight
+                  ? ((long)segment.ColorLeft << 32) | (uint)segment.ColorRight
+                  : ((long)segment.ColorRight << 32) | (uint)segment.ColorLeft;
+
+               if (colorPairToBorderIndex.TryGetValue(colorKey, out var borderIndex)) continue;
+
+               borderIndex = colorPairToBorderIndex.Count;
+               colorPairToBorderIndex[colorKey] = borderIndex;
+
+               if (segment.ColorLeft == MapTracing.OUTSIDE_COLOR || segment.ColorRight == MapTracing.OUTSIDE_COLOR)
+                  // TODO Handle left right warp
+                  continue;
+
+               var leftLoc = locByColor[segment.ColorLeft];
+               var rightLoc = locByColor[segment.ColorRight];
+
+               tempAdjData[leftLoc.ColorIndex].Add((rightLoc, borderIndex, true));
+               tempAdjData[rightLoc.ColorIndex].Add((leftLoc, borderIndex, false));
+            }
+         }
+      }
+
+      var totalBorderCount = colorPairToBorderIndex.Count;
+      
+      foreach (var loc in Globals.Locations.Values)
+      {
+         var raw = tempAdjData[loc.ColorIndex];
+         var adjacencies = new Adjacency[raw.Count];
+
+         for (var i = 0; i < raw.Count; i++)
+         {
+            var (neighbor, baseIdx, isLeft) = raw[i];
+            adjacencies[i] = isLeft
+               ? new Adjacency(neighbor, baseIdx, baseIdx + totalBorderCount)
+               : new Adjacency(neighbor, baseIdx + totalBorderCount, baseIdx);
+         }
+
+         loc.Adjacencies = adjacencies;
+      }
+      
+      sw.Stop();
+      
+      /*
+      // Verify that no border is duplicate!
+      // Easy check draw a map with all the polygons and holes of the polygons. Each border should be drawn exactly 2 times. So e.g. if a border segment is first gone through paint it blue if it goes a second time green and any other time red
+      var mapBitmap = new Bitmap(mapSize.Item1 + 2, mapSize.Item2 + 2);
+      var errorCounter = 0;
+      
+      foreach (var poly in parsingPolygons)
+      {
+         // Get all polygons with the holes
+
+
+         for (var index = 0; index < poly.Holes.Count; index++)
+         {
+            var hole = poly.Holes[index];
+
+            foreach (var adder in hole.Segments)
+            {
+               if (adder is not BorderSegmentDirectional bsd)
+                  continue;
+               var segment = bsd.Segment;
+               foreach (var point in segment.Points)
+               {
+                  var existingColor = mapBitmap.GetPixel(point.X, point.Y);
+                  if (existingColor.ToArgb() == 0) // Not drawn yet
+                     mapBitmap.SetPixel(point.X, point.Y, Color.Blue);
+                  else if (existingColor.ToArgb() == Color.Blue.ToArgb()) // Drawn once before
+                     mapBitmap.SetPixel(point.X, point.Y, Color.Green);
+                  else if (existingColor.ToArgb() != Color.Red.ToArgb())
+                  {
+                     mapBitmap.SetPixel(point.X, point.Y, Color.Red);
+                     errorCounter++;
+                  }
+               }
+            }
+         }
+
+         foreach (var adder in poly.Segments)
+         {   
+            if (adder is not BorderSegmentDirectional bsd)
+               continue;
+            var segment = bsd.Segment;
+            foreach (var point in segment.Points)
+            {
+               var existingColor = mapBitmap.GetPixel(point.X, point.Y);
+               if (existingColor.ToArgb() == 0) // Not drawn yet
+                  mapBitmap.SetPixel(point.X, point.Y, Color.Blue);
+               else if (existingColor.ToArgb() == Color.Blue.ToArgb()) // Drawn once before
+                  mapBitmap.SetPixel(point.X, point.Y, Color.Green);
+               else if (existingColor.ToArgb() != Color.Red.ToArgb())
+               {
+                  mapBitmap.SetPixel(point.X, point.Y, Color.Red);
+                  errorCounter++;
+               }
+            }
+         }
+      }
+      
+      ArcLog.Write("MPS", LogLevel.INF, $"Finished border verification. Time taken: {sw.Elapsed.TotalMilliseconds} ms. Total borders: {totalBorderCount}. Error count: {errorCounter}.");
+      
+      // save bitmap
+      mapBitmap.Save("mapDebug.png");*/
+
+
+      ArcLog.Write("MPS", LogLevel.INF, $"Finished border extraction and adjacency generation. Time taken: {sw.Elapsed.TotalMilliseconds} ms. Total borders: {totalBorderCount}.");
+      // foreach (var poly in parsingPolygons)
+      // foreach (var hole in poly.Holes)
+      // foreach (var adder in hole.Segments)
+      // {
+      //    if (adder is not BorderSegmentDirectional bsd)
+      //       continue;
+      //    var segment = bsd.Segment;
+      //    
+      //    var leftColor = segment.ColorLeft;
+      //    var rightColor = segment.ColorRight;
+      //    
+      //    // check colors for hole and polygon
+      //    if (!bsd.IsForward)
+      //       if (leftColor != poly.Color || rightColor != hole.Color)
+      //       {
+      //          ArcLog.WriteLine("MPS", LogLevel.WRN, $"Invalid border direction for polygon with color {poly.Color} and hole with color {hole.Color}. Expected forward direction.");
+      //       }
+      //       else if (leftColor != hole.Color || rightColor != poly.Color)
+      //       {
+      //          ArcLog.WriteLine("MPS", LogLevel.WRN, $"Invalid border direction for polygon with color {poly.Color} and hole with color {hole.Color}. Expected forward direction.");
+      //       }
+      // }
+      
+      // Check if there arent any duplicate holes with the same nodes
+      /*
+      foreach (var poly in parsingPolygons)
+      {
+         var nodes = new HashSet<Node>();
+         
+         foreach (var hole in poly.Holes)
+         {
+            var holeNodes = hole.Segments.OfType<Node>();
+            foreach (var node in holeNodes)
+            {
+               if (!nodes.Add(node))
+                  ArcLog.WriteLine("MPS", LogLevel.WRN, $"Duplicate node found in holes of polygon with color {poly.Color}. Node position: {node.Position}");
+            }
+         }
+      }*/
+
+      // use borders and locByColor and borders later in Tesselate!
       
       _ = Tessellate(parsingPolygons, mapSize);
       
@@ -78,7 +292,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          return;
       }
 
-
+      
       if (Config.Settings.MapSettings.UseFastBorderSmoothing)
       {
          await Scheduler.QueueWorkInForParallel(parsingPolygons.Count,
@@ -92,7 +306,9 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
          ArcLog.WriteLine("MPS", LogLevel.INF, "Finished smoothing of map polygons.");
       }
-
+      
+      
+      
       await Scheduler.QueueWorkInForParallel(parsingPolygons.Count,
                                              i => polygons[i] = parsingPolygons[i].Tessellate(),
                                              Scheduler.AvailableHeavyWorkers - 2);
@@ -122,6 +338,7 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
          loc.Bounds = GeoRect.CalculateBounds(loc.Polygons);
       }
+      
       /*
       // TODO use locByColor above too
       var locationCount = Globals.Locations.Count;

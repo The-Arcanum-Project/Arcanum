@@ -312,11 +312,14 @@ public static class PolygonExtensions
                 double edge2X = v2.X - v1.X;
                 double edge3Y = v0.Y - v2.Y;
                 double edge3X = v0.X - v2.X;
-
+                
+                var startYCenter = startY + 0.51;
+                var minXCenter = minX + 0.51;
+                
                 // Calculate rowVal based on startY (the clipped top), not the triangle top.
-                var rowVal1 = edge1X * (startY - v0.Y) - edge1Y * (minX - v0.X);
-                var rowVal2 = edge2X * (startY - v1.Y) - edge2Y * (minX - v1.X);
-                var rowVal3 = edge3X * (startY - v2.Y) - edge3Y * (minX - v2.X);
+                var rowVal1 = edge1X * (startYCenter - v0.Y) - edge1Y * (minXCenter - v0.X);
+                var rowVal2 = edge2X * (startYCenter - v1.Y) - edge2Y * (minXCenter - v1.X);
+                var rowVal3 = edge3X * (startYCenter - v2.Y) - edge3Y * (minXCenter - v2.X);
 
                 for (var y = startY; y <= endY; y++)
                 {

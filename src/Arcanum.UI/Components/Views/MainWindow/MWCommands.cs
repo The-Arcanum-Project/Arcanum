@@ -232,4 +232,13 @@ public static class MwCommands
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenClipboardHistory },
    };
+
+   public static readonly RoutedCommand ShrinkCommand = new("ShrinkCommand", typeof(MainWindowView))
+   {
+      InputGestures = { new KeyGesture(Key.OemMinus) },
+   };
+   public static readonly RoutedCommand ExpandCommand =  new("ExpandCommand", typeof(MainWindowView))
+   {
+      InputGestures = { new KeyGesture(Key.OemPlus) },
+   };
 }

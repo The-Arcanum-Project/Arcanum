@@ -782,4 +782,14 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
       SelectionManager.SelectWater = selectWater.IsChecked ?? true;
    }
+
+   private void MapShrink(object sender, ExecutedRoutedEventArgs e)
+   {
+      MainMap.ShrinkSelection(null, null);
+   }
+
+   private void MapExpand(object sender, ExecutedRoutedEventArgs e)
+   {
+      MainMap.ExpandSelection(null, null);
+   }
 }

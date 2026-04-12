@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -10,21 +11,22 @@ namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 public sealed unsafe class MapTracing : IDisposable
 {
    private const int ALPHA = 255 << 24;
-   private const int OUTSIDE_COLOR = 0x000000;
+   public const int OUTSIDE_COLOR = 0x000000;
    private readonly int _width;
    private readonly int _height;
    private readonly int _stride;
-   private readonly IntPtr _scan0;
+   private readonly nint _scan0;
    private readonly Bitmap _bitmap;
    private readonly BitmapData _bitmapData;
    private readonly Bitmap _visitedBitmap;
    private readonly BitmapData _visitedBitmapData;
-   private readonly IntPtr _visitedBitmapDataPtr;
+   private readonly nint _visitedScan0;
    private readonly int _visitedStride;
 
    private readonly Queue<Node> _nodeQueue = new();
-
    private Dictionary<Vector2I, Node> NodeCache { get; } = new();
+
+   private static ReadOnlySpan<byte> BitMasks => [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01];
 
    public MapTracing(Bitmap bmp)
    {
@@ -40,69 +42,62 @@ public sealed unsafe class MapTracing : IDisposable
       _visitedBitmapData = _visitedBitmap.LockBits(new(0, 0, bmp.Width, bmp.Height),
                                                    ImageLockMode.ReadWrite,
                                                    PixelFormat.Format1bppIndexed);
-      _visitedBitmapDataPtr = _visitedBitmapData.Scan0;
+      _visitedScan0 = _visitedBitmapData.Scan0;
       _visitedStride = _visitedBitmapData.Stride;
    }
+
+   #region Pixel Access
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private int GetColor(int x, int y)
    {
-      var row = (byte*)_scan0 + (y * _stride);
-      var pixel = row + x * 3;
-
-      return ALPHA |
-             (pixel[2]) | // Red
-             (pixel[1] << 8) | // Green
-             (pixel[0] << 16); // Blue
+      var pixel = (byte*)_scan0 + y * _stride + x * 3;
+      return ALPHA | pixel[2] | (pixel[1] << 8) | (pixel[0] << 16);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   private static int GetColorRowPtr(byte* pixelPtr) => ALPHA |
-                                                        (pixelPtr[2]) |
-                                                        (pixelPtr[1] << 8) |
-                                                        (pixelPtr[0] << 16);
-
-   private static ReadOnlySpan<byte> BitMasks => [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01];
+   private static int GetColorRowPtr(byte* pixelPtr)
+      => ALPHA | pixelPtr[2] | (pixelPtr[1] << 8) | (pixelPtr[0] << 16);
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   private void ClearPixel(int x, int y)
+   private void MarkVisited(int x, int y)
    {
       if ((uint)x >= (uint)_width || (uint)y >= (uint)_height)
          return;
-
-      var row = (byte*)_visitedBitmapDataPtr + y * _visitedStride;
+      var row = (byte*)_visitedScan0 + y * _visitedStride;
       row[x >> 3] |= BitMasks[x & 7];
    }
 
-   private bool IsPixelCleared(int i, int i1)
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   private void MarkVisitedUnchecked(int x, int y)
    {
-      var row = (byte*)_visitedBitmapDataPtr + i1 * _visitedStride;
-      return (row[i / 8] & (byte)(0x80 >> (i % 8))) != 0;
+      var row = (byte*)_visitedScan0 + y * _visitedStride;
+      row[x >> 3] |= BitMasks[x & 7];
    }
+
+   #endregion
+
+   #region Segment Color Assignment
+
+   /// <summary>
+   /// Sets the polygon color on the appropriate side of the segment.
+   /// When traversing forward (IsForward=true), the polygon is on the RIGHT.
+   /// When traversing backward (IsForward=false), the polygon is on the LEFT.
+   /// </summary>
+   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+   private static void SetSegmentColor(BorderSegmentDirectional directional, int color)
+   {
+      if (directional.IsForward)
+         directional.Segment.ColorRight = color;
+      else
+         directional.Segment.ColorLeft = color;
+   }
+
+   #endregion
+
+   #region Node Linking
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   private int GetColorWithOutsideCheck(int x, int y)
-   {
-      if ((uint)x >= (uint)_width || (uint)y >= (uint)_height)
-         return OUTSIDE_COLOR;
-
-      return GetColor(x, y);
-   }
-
-   private int GetColorAndSetCleared(int x, int y)
-   {
-      if (x < 0 || x >= _width || y < 0 || y >= _height)
-         return OUTSIDE_COLOR;
-
-      ClearPixel(x, y);
-      return GetColor(x, y);
-   }
-
-   private int GetColorWithOutsideCheck(Vector2I pos)
-   {
-      return GetColorWithOutsideCheck(pos.X, pos.Y);
-   }
-
    private static void LinkNodes(Node a, Direction aDir, Node b, Direction bDir, BorderSegment segment)
    {
       ref var aCache = ref a.GetSegmentRef(aDir);
@@ -113,6 +108,10 @@ public sealed unsafe class MapTracing : IDisposable
       bCache.Node = a;
       bCache.Segment = new BorderSegmentDirectional(segment, false);
    }
+
+   #endregion
+
+   #region Image Edge Tracing
 
    private void TraceImageEdges()
    {
@@ -128,47 +127,48 @@ public sealed unsafe class MapTracing : IDisposable
 
       var currentSegment = firstSegment;
 
-      ClearPixel(0, 0);
-      for (var y = 1; y <= _height - 1; y++)
+      MarkVisitedUnchecked(0, 0);
+
+      // Left edge (top to bottom)
+      for (var y = 1; y < _height; y++)
       {
          var color = GetColor(0, y);
          if (color != lastColor)
             FinalizeSegment(0, y, color, Direction.East);
-
-         ClearPixel(0, y);
+         MarkVisitedUnchecked(0, y);
       }
 
       currentSegment.Points.Add(new(0, _height));
-      ClearPixel(0, _height - 1);
-      for (var x = 1; x <= _width - 1; x++)
+
+      // Bottom edge (left to right)
+      for (var x = 1; x < _width; x++)
       {
          var color = GetColor(x, _height - 1);
          if (color != lastColor)
             FinalizeSegment(x, _height, color, Direction.North);
-
-         ClearPixel(x, _height - 1);
+         MarkVisitedUnchecked(x, _height - 1);
       }
 
       currentSegment.Points.Add(new(_width, _height));
-      ClearPixel(_width - 1, _height - 1);
-      for (var y = _height - 1; y > 0; y--)
-      {
-         var color = GetColor(_width - 1, y - 1);
-         if (color != lastColor)
-            FinalizeSegment(_width, y, color, Direction.West);
 
-         ClearPixel(_width - 1, y - 1);
+      // Right edge (bottom to top)
+      for (var y = _height - 2; y >= 0; y--)
+      {
+         var color = GetColor(_width - 1, y);
+         if (color != lastColor)
+            FinalizeSegment(_width, y + 1, color, Direction.West);
+         MarkVisitedUnchecked(_width - 1, y);
       }
 
       currentSegment.Points.Add(new(_width, 0));
-      ClearPixel(_width - 1, 0);
-      for (var x = _width - 1; x > 0; x--)
-      {
-         var color = GetColor(x - 1, 0);
-         if (color != lastColor)
-            FinalizeSegment(x, 0, color, Direction.South);
 
-         ClearPixel(x - 1, 0);
+      // Top edge (right to left)
+      for (var x = _width - 2; x >= 0; x--)
+      {
+         var color = GetColor(x, 0);
+         if (color != lastColor)
+            FinalizeSegment(x + 1, 0, color, Direction.South);
+         MarkVisitedUnchecked(x, 0);
       }
 
       currentSegment.Points.AddRange(firstSegment.Points);
@@ -206,9 +206,14 @@ public sealed unsafe class MapTracing : IDisposable
       }
    }
 
-   private Node TraceEdgeStartNodeWithOutsideCheck(Node startNode, Direction startDirection)
+   #endregion
+
+   #region Edge Tracing with Generic Color Getter
+
+   private Node TraceEdgeFromNode<TGetter>(Node startNode, Direction startDirection)
+      where TGetter : struct, IColorGetter
    {
-      TraceEdge(startNode.Position, startDirection, out var node, out var arriveDir);
+      TraceEdge<TGetter>(startNode.Position, startDirection, out var node, out var arriveDir, false);
 
       ref var endCache = ref node.GetSegmentRef(arriveDir);
       endCache.Node = startNode;
@@ -220,12 +225,14 @@ public sealed unsafe class MapTracing : IDisposable
       return node;
    }
 
-   private void TraceEdge(Vector2I startPos, Direction startDirection, out Node resultNode, out Direction resultArriveDir, bool loopCheck = false)
+   private void TraceEdge<TGetter>(Vector2I startPos, Direction startDirection, out Node resultNode, out Direction resultArriveDir, bool loopCheck)
+      where TGetter : struct, IColorGetter
    {
+      TGetter getter = default;
       var points = DirectionHelper.GetStartPos(startPos.X, startPos.Y, startDirection);
 
-      var lColor = GetColorWithOutsideCheck(points.Xl, points.Yl);
-      var rColor = GetColorWithOutsideCheck(points.Xr, points.Yr);
+      var lColor = getter.GetColor(_scan0, _stride, _width, _height, points.Xl, points.Yl);
+      var rColor = getter.GetColor(_scan0, _stride, _width, _height, points.Xr, points.Yr);
 
       var currentDirection = startDirection;
       var currentSegment = new BorderSegment();
@@ -235,38 +242,77 @@ public sealed unsafe class MapTracing : IDisposable
 
       while (true)
       {
-         ClearPixel(points.Xl, points.Yl);
-         ClearPixel(points.Xr, points.Yr);
+         MarkVisited(points.Xl, points.Yl);
+         MarkVisited(points.Xr, points.Yr);
 
          currentDirection.Move(ref points, out var cachePos, out var xaxis);
-
+         
+         var lTest = getter.GetColor(_scan0, _stride, _width, _height, points.Xl, points.Yl);
+         var rTest = getter.GetColor(_scan0, _stride, _width, _height, points.Xr, points.Yr);
+         var arriveDirection = currentDirection.Invert();
+         
          if (loopCheck && points.Xpos == startPointX && points.Ypos == startPointY)
          {
+            // Need to check first if it is a complex node or just a simple node
+            // E.g. in an edge case this might be a three or even 4 way node!
+            
             currentSegment.Points.Add(points.GetPosition());
-            var loopNode = Node.CreateOneWayNode(points.Xpos, points.Ypos, startDirection);
+            Node loopNode;
+            
+            // L line inverted L
+            if ((lTest == lColor && rTest == lColor) || (lTest == lColor && rTest == rColor) ||
+                (lTest == rColor && rTest == rColor))
+            {
+               loopNode = Node.CreateOneWayNode(points.Xpos, points.Ypos, startDirection);
+               resultArriveDir = startDirection;
+            }
+            else
+            {
+               var dir = arriveDirection;
+               var isThreeWayNode = rTest == lTest;
 
+               if (lTest == lColor)
+               {
+                  dir = (Direction)(((int)currentDirection + 1) & 3);
+                  isThreeWayNode = true;
+               }
+               else if (rTest == rColor)
+               {
+                  dir = (Direction)(((int)currentDirection - 1) & 3);
+                  isThreeWayNode = true;
+               }
+
+               loopNode = isThreeWayNode
+                  ? Node.CreateThreeWayNode(points.Xpos, points.Ypos, dir)
+                  : Node.CreateFourWayNode(points.Xpos, points.Ypos);
+               
+               ref var startCache = ref loopNode.GetSegmentRef(arriveDirection);
+               startCache.Segment = new BorderSegmentDirectional(currentSegment, false); 
+               startCache.Node = loopNode;
+               
+               resultArriveDir = currentDirection;
+            }
+
+            MarkVisited(points.Xl, points.Yl);
+            MarkVisited(points.Xr, points.Yr);
+            
             ref var loopCache = ref loopNode.GetSegmentRef(startDirection);
-            loopCache.Segment = new BorderSegmentDirectional(currentSegment, false);
-
+            loopCache.Segment = new BorderSegmentDirectional(currentSegment, true);
+            loopCache.Node = loopNode;
+            
             resultNode = loopNode;
-            resultArriveDir = startDirection;
             return;
          }
-
-         var lTest = GetColorWithOutsideCheck(points.Xl, points.Yl);
-         var rTest = GetColorWithOutsideCheck(points.Xr, points.Yr);
 
          if (lTest == lColor && rTest == rColor)
             continue;
 
+         // Right turn
          if (lTest == lColor && rTest == lColor)
          {
             points.Xl = points.Xr;
             points.Yl = points.Yr;
-            if (xaxis)
-               points.Xr = cachePos;
-            else
-               points.Yr = cachePos;
+            if (xaxis) points.Xr = cachePos; else points.Yr = cachePos;
 
             currentDirection = (Direction)(((int)currentDirection + 1) & 3);
             lColor = lTest;
@@ -274,14 +320,12 @@ public sealed unsafe class MapTracing : IDisposable
             continue;
          }
 
+         // Left turn
          if (lTest == rColor && rTest == rColor)
          {
             points.Xr = points.Xl;
             points.Yr = points.Yl;
-            if (xaxis)
-               points.Xl = cachePos;
-            else
-               points.Yl = cachePos;
+            if (xaxis) points.Xl = cachePos; else points.Yl = cachePos;
 
             currentDirection = (Direction)(((int)currentDirection - 1) & 3);
             rColor = lTest;
@@ -289,12 +333,12 @@ public sealed unsafe class MapTracing : IDisposable
             continue;
          }
 
-         var arriveDirection = currentDirection.Invert();
+         // Node found
 
          if (!NodeCache.TryGetValue(points.GetPosition(), out var node))
          {
             var dir = arriveDirection;
-            var isThreeWayNode = (rTest == lTest);
+            var isThreeWayNode = rTest == lTest;
 
             if (lTest == lColor)
             {
@@ -323,8 +367,8 @@ public sealed unsafe class MapTracing : IDisposable
             cache.Segment = new BorderSegmentDirectional(currentSegment, false);
          }
 
-         ClearPixel(points.Xl, points.Yl);
-         ClearPixel(points.Xr, points.Yr);
+         MarkVisited(points.Xl, points.Yl);
+         MarkVisited(points.Xr, points.Yr);
 
          resultNode = node;
          resultArriveDir = arriveDirection;
@@ -332,9 +376,13 @@ public sealed unsafe class MapTracing : IDisposable
       }
    }
 
+   #endregion
+
+   #region Stub Tracing
+
    private void TraceEdgeStubs()
    {
-      var nodes = NodeCache.Values.ToArray().AsSpan();
+      var nodes = NodeCache.Values.ToArray();
       for (var i = 0; i < nodes.Length; i++)
       {
          var node = nodes[i];
@@ -349,11 +397,16 @@ public sealed unsafe class MapTracing : IDisposable
             if (cache.Node != null)
                continue;
 
-            TraceEdgeStartNodeWithOutsideCheck(node, dir);
+            // Stubs trace INTO the map - use unchecked getter
+            TraceEdgeFromNode<CheckedColorGetter>(node, dir);
             break;
          }
       }
    }
+
+   #endregion
+
+   #region Polygon Tracing
 
    private PolygonParsing TraceFromNode(Node startNode, Direction startDirection)
    {
@@ -363,18 +416,18 @@ public sealed unsafe class MapTracing : IDisposable
       ref var firstCache = ref startNode.GetSegmentRef(currentDirection);
 
       var rightPixel = DirectionHelper.GetRightPixel(startNode.XPos, startNode.YPos, currentDirection);
-
       var polygon = new PolygonParsing(GetColor(rightPixel.Item1, rightPixel.Item2));
+
       startNode.SetVisited(currentDirection);
+      polygon.Segments.Add(currentNode);
 
       BorderSegmentDirectional currentSegment;
 
-      polygon.Segments.Add(currentNode);
       if (!firstCache.Segment.HasValue)
       {
-         var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
-         currentSegment = currentNode.GetSegmentRef(currentDirection).Segment!.Value;
-         currentNode = newNode;
+         // Need to trace - use unchecked since we're tracing interior
+         currentNode = TraceEdgeFromNode<UncheckedColorGetter>(startNode, currentDirection);
+         currentSegment = startNode.GetSegmentRef(currentDirection).Segment!.Value;
       }
       else
       {
@@ -383,16 +436,16 @@ public sealed unsafe class MapTracing : IDisposable
       }
 
       polygon.Segments.Add(currentSegment);
-      while (true)
-      {
-         if (currentNode == startNode)
-            break;
+      SetSegmentColor(currentSegment, polygon.Color);
 
+      while (currentNode != startNode)
+      {
          if (currentNode.Visit(ref currentDirection, currentSegment, out var newSegment, out var nextNode))
          {
             currentNode.SetVisited(currentDirection);
             polygon.Segments.Add(currentNode);
             polygon.Segments.Add(newSegment);
+            SetSegmentColor(newSegment, polygon.Color);
             currentNode = nextNode;
             currentSegment = newSegment;
          }
@@ -400,10 +453,11 @@ public sealed unsafe class MapTracing : IDisposable
          {
             polygon.Segments.Add(currentNode);
             currentNode.SetVisited(currentDirection);
-            var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
+            var newNode = TraceEdgeFromNode<UncheckedColorGetter>(currentNode, currentDirection);
             currentSegment = currentNode.GetSegmentRef(currentDirection).Segment!.Value;
-            currentNode = newNode;
             polygon.Segments.Add(currentSegment);
+            SetSegmentColor(currentSegment, polygon.Color);
+            currentNode = newNode;
          }
       }
 
@@ -415,16 +469,14 @@ public sealed unsafe class MapTracing : IDisposable
       for (var i = 0; i < 4; i++)
       {
          var direction = (Direction)i;
-
          if (!node.HasDirection(direction) || node.IsVisited(direction))
             continue;
 
-         var polygon = TraceFromNode(node, direction);
-         polygons.Add(polygon);
+         polygons.Add(TraceFromNode(node, direction));
       }
    }
 
-   private PolygonParsing[] VisitNode(Node node, Dictionary<int, List<PolygonParsing>> polygons, Direction[] arriveDirections)
+   private PolygonParsing[] VisitNode(Node node, Dictionary<int, List<PolygonParsing>> polygons, ReadOnlySpan<Direction> arriveDirections)
    {
 #if DEBUG
       foreach (var arrDir in arriveDirections)
@@ -437,19 +489,20 @@ public sealed unsafe class MapTracing : IDisposable
       for (var i = 0; i < 4; i++)
       {
          var direction = (Direction)i;
-
          if (!node.HasDirection(direction) || node.IsVisited(direction))
             continue;
 
          var polygon = TraceFromNode(node, direction);
 
          var isArriveDir = false;
-         for (var k = 0; k < arriveDirections.Length; k++)
-            if (arriveDirections[k] == direction)
+         foreach (var arrDir in arriveDirections)
+         {
+            if (arrDir == direction)
             {
                isArriveDir = true;
                break;
             }
+         }
 
          if (isArriveDir)
          {
@@ -457,13 +510,9 @@ public sealed unsafe class MapTracing : IDisposable
             continue;
          }
 
-         if (!polygons.TryGetValue(polygon.Color, out var polygonsList))
-         {
-            polygonsList = [];
-            polygons[polygon.Color] = polygonsList;
-         }
-
-         polygonsList.Add(polygon);
+         ref var listRef = ref CollectionsMarshal.GetValueRefOrAddDefault(polygons, polygon.Color, out var exists);
+         if (!exists) listRef = [];
+         listRef!.Add(polygon);
       }
 
       return foundPolygons;
@@ -474,26 +523,34 @@ public sealed unsafe class MapTracing : IDisposable
       for (var i = 0; i < 4; i++)
       {
          var direction = (Direction)i;
-
          if (!node.HasDirection(direction) || node.IsVisited(direction))
             continue;
 
          var polygon = TraceFromNode(node, direction);
          ref var listRef = ref CollectionsMarshal.GetValueRefOrAddDefault(polygons, polygon.Color, out var exists);
-
-         if (!exists)
-            listRef = [];
-
+         if (!exists) listRef = [];
          listRef!.Add(polygon);
       }
    }
 
+   #endregion
+
+   #region Island Handling
+
    private void HandleIsland(Vector2I position, Dictionary<int, List<PolygonParsing>> polygons, Vector2I borderPos, int parentColor)
    {
+      // Instead of parsing from a node, we parse from a segment by finding the start node and tracing from there.
+      // The edge case that no node exists will have to be taken into account.
+      // First, find the nodes at the start and end of the segment.
+
+      // We have a border on the left of the position
+      
       Debug.Assert(NodeCache.Count == 0);
       Debug.Assert(_nodeQueue.Count == 0);
 
-      TraceEdge(new(position.X, position.Y + 1), Direction.North, out var startNode, out var startArriveDir, true);
+      var startPosition = new Vector2I(position.X, position.Y + 1);
+      
+      TraceEdge<UncheckedColorGetter>(startPosition, Direction.North, out var startNode, out var startArriveDir, true);
 
       if (!polygons.TryGetValue(parentColor, out var parentPolygonCandidates))
       {
@@ -502,6 +559,7 @@ public sealed unsafe class MapTracing : IDisposable
          return;
       }
 
+      //TODO: @MelCo: Cache this value while being in the same polygon
       PolygonParsing? parent = null;
       var count = parentPolygonCandidates.Count;
       for (var i = 0; i < count; i++)
@@ -521,18 +579,24 @@ public sealed unsafe class MapTracing : IDisposable
          return;
       }
 
+      // Single-direction loop (simple island)
       if (startNode.ActiveDirectionCount == 1)
       {
-         var polygon = new PolygonParsing(GetColorWithOutsideCheck(position.X, position.Y));
+         // Loop detected so directly creates a polygon
+         var islandColor = GetColor(position.X, position.Y);
+         var polygon = new PolygonParsing(islandColor);
          ref var loopCache = ref startNode.GetSegmentRef(startArriveDir);
-         polygon.Segments.Add(loopCache.Segment!.Value.Invert());
-
-         if (!polygons.TryGetValue(polygon.Color, out var polygonsList))
-            polygons[polygon.Color] = [polygon];
-         else
-            polygonsList.Add(polygon);
-
-         var hole = new PolygonParsing(0);
+         var invertedSeg = loopCache.Segment!.Value.Invert();
+         polygon.Segments.Add(invertedSeg);
+         SetSegmentColor(invertedSeg, islandColor);
+         SetSegmentColor(loopCache.Segment!.Value, parentColor);
+         
+         ref var listRef = ref CollectionsMarshal.GetValueRefOrAddDefault(polygons, islandColor, out var exists);
+         if (!exists) listRef = [];
+         listRef!.Add(polygon);
+         
+         //TODO Color can be set to 0 again
+         var hole = new PolygonParsing(islandColor);
          hole.Segments.Add(loopCache.Segment!.Value);
          hole.Segments.Add(startNode);
          parent.Holes.Add(hole);
@@ -541,25 +605,43 @@ public sealed unsafe class MapTracing : IDisposable
          NodeCache.Clear();
          return;
       }
+      
+      
+      PolygonParsing[] holes;
+      // If more than one direction has been set -> loop but complex node
+      if (startNode.Position == startPosition)
+      {
+         // Complex island with existing loopNode
+         NodeCache.Add(startPosition, startNode);
 
-      TraceEdge(position, Direction.South, out var endNode, out var endArriveDir);
+         ReadOnlySpan<Direction> holeDirections = [startArriveDir, startArriveDir.Invert(),];
+         holes = VisitNode(startNode, polygons, holeDirections);
+      }
+      else
+      {
+         // Complex island with multiple nodes
+         TraceEdge<UncheckedColorGetter>(position, Direction.South, out var endNode, out var endArriveDir, false);
 
-      var segment = new BorderSegment();
-      ref var startCache = ref startNode.GetSegmentRef(startArriveDir);
-      startCache.Segment!.Value.AddTo(segment.Points);
+         var segment = new BorderSegment();
+         ref var startCache = ref startNode.GetSegmentRef(startArriveDir);
+         startCache.Segment!.Value.AddTo(segment.Points);
 
-      ref var endCache = ref endNode.GetSegmentRef(endArriveDir);
-      endCache.Segment!.Value.Invert().AddTo(segment.Points);
+         ref var endCache = ref endNode.GetSegmentRef(endArriveDir);
+         endCache.Segment!.Value.Invert().AddTo(segment.Points);
 
-      startCache.Segment = new BorderSegmentDirectional(segment, true);
-      endCache.Segment = new BorderSegmentDirectional(segment, false);
-      startCache.Node = endNode;
-      endCache.Node = startNode;
-
-      var holes = VisitNode(startNode,
-                            polygons,
-                            startNode == endNode ? [startArriveDir, startArriveDir.Invert()] : [startArriveDir]);
-
+         startCache.Segment = new BorderSegmentDirectional(segment, true);
+         endCache.Segment = new BorderSegmentDirectional(segment, false);
+         startCache.Node = endNode;
+         endCache.Node = startNode;
+      
+         // TODO instead of parsing forward and backward, parse forward and check if we arrive at the start node from the inverse direction
+         // if not then only parse inverse, this reduces duplicates
+         ReadOnlySpan<Direction> holeDirections =
+            startNode == endNode ? [startArriveDir, startArriveDir.Invert(),] : [startArriveDir,];
+         holes = VisitNode(startNode, polygons, holeDirections);
+      }
+      
+      
       NodeCache.Remove(startNode.Position);
 
       while (_nodeQueue.TryDequeue(out var node))
@@ -568,6 +650,10 @@ public sealed unsafe class MapTracing : IDisposable
       NodeCache.Clear();
       parent.Holes.AddRange(holes);
    }
+
+   #endregion
+
+   #region Main Entry Point
 
    public List<PolygonParsing> Trace()
    {
@@ -579,6 +665,7 @@ public sealed unsafe class MapTracing : IDisposable
       sw2.Stop();
       ArcLog.WriteLine("DBT", LogLevel.INF, $"TraceImageEdges in {sw2.ElapsedMilliseconds} ms");
 #endif
+
 #if DEBUG
       var sw3 = Stopwatch.StartNew();
 #endif
@@ -601,8 +688,9 @@ public sealed unsafe class MapTracing : IDisposable
 
       NodeCache.Clear();
 
-      var sw = new Stopwatch();
-      sw.Start();
+#if DEBUG
+      var sw = Stopwatch.StartNew();
+#endif
 
       Dictionary<int, List<PolygonParsing>> polygonsDict = new();
       var polySpan = CollectionsMarshal.AsSpan(polygons);
@@ -610,28 +698,25 @@ public sealed unsafe class MapTracing : IDisposable
       {
          var poly = polySpan[i];
          ref var listRef = ref CollectionsMarshal.GetValueRefOrAddDefault(polygonsDict, poly.Color, out var exists);
-         if (!exists)
-            listRef = [];
+         if (!exists) listRef = [];
          listRef!.Add(poly);
       }
 
       var counter = 0;
-
       var lastSwitchX = 0;
       var lastSwitchY = 0;
+
       fixed (byte* bitMaskPtr = BitMasks)
       {
          for (var y = 0; y < _height; y++)
          {
             var row = (byte*)_scan0 + y * _stride;
-            var visitedRow = (byte*)_visitedBitmapDataPtr + y * _visitedStride;
-
+            var visitedRow = (byte*)_visitedScan0 + y * _visitedStride;
             var lastColor = OUTSIDE_COLOR;
 
             for (var x = 0; x < _width; x++)
             {
                var color = GetColorRowPtr(row + x * 3);
-
                var byteIndex = x >> 3;
                var bitIndex = x & 7;
                var mask = bitMaskPtr[bitIndex];
@@ -656,34 +741,28 @@ public sealed unsafe class MapTracing : IDisposable
          }
       }
 
+#if DEBUG
       sw.Stop();
       ArcLog.WriteLine("MPT", LogLevel.DBG, $"Found and traced {counter} islands in {sw.ElapsedMilliseconds} ms.");
+#endif
 
       return polygonsDict.SelectMany(kvp => kvp.Value).ToList();
    }
 
-   #region Disposable
+   #endregion
 
-   public void Dispose()
-   {
-      Dispose(true);
-   }
+   #region Disposable
 
    private bool _disposed;
 
-   private void Dispose(bool disposing)
+   public void Dispose()
    {
-      if (_disposed)
-         return;
-
-      if (disposing)
-      {
-         _bitmap.UnlockBits(_bitmapData);
-         _visitedBitmap.UnlockBits(_visitedBitmapData);
-         _visitedBitmap.Dispose();
-      }
-
+      if (_disposed) return;
       _disposed = true;
+
+      _bitmap.UnlockBits(_bitmapData);
+      _visitedBitmap.UnlockBits(_visitedBitmapData);
+      _visitedBitmap.Dispose();
    }
 
    #endregion

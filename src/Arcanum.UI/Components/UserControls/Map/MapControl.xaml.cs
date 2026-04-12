@@ -459,7 +459,48 @@ public partial class MapControl
          pixelPtr[2] = r;
       }
    }
+   
+   private void SelectNeighbouringLocation_Click(object sender, RoutedEventArgs e)
+   {
+      var location = Selection.GetLocation(_contextMenuClickLocation);
+      if (location == Location.Empty)
+         return;
 
+      var neighbors = location.Adjacencies.Select(loc => loc.Neighbor).ToList();
+      Selection.Modify(SelectionTarget.Selection, SelectionMethod.Expand, neighbors, true, false);
+   }
+   
+   public void ExpandSelection(object sender, RoutedEventArgs e)
+   {
+      var locations = Selection.SelectedLocationsSet;
+      
+      var toAdd = new List<Location>();
+      
+      foreach (var location in locations)
+      {
+         var neighbors = location.Adjacencies.Select(loc => loc.Neighbor);
+         toAdd.AddRange(neighbors.Where(neighbor => !locations.Contains(neighbor)));
+      }
+      
+      Selection.Modify(SelectionTarget.Selection, SelectionMethod.Expand, toAdd, true, false);
+   }
+
+   public void ShrinkSelection(object sender, RoutedEventArgs e)
+   {
+      var locations = Selection.SelectedLocationsSet;
+      
+      var toRemove = new List<Location>();
+      
+      foreach (var location in locations)
+      {
+         var neighbors = location.Adjacencies.Select(loc => loc.Neighbor);
+         if (neighbors.Any(neighbor => !locations.Contains(neighbor)))
+            toRemove.Add(location);
+      }
+      
+      Selection.Modify(SelectionTarget.Selection, SelectionMethod.Expand, toRemove, true, true);
+   }
+   
    private void SelectProvince_Click(object sender, RoutedEventArgs e)
    {
       var location = Selection.GetLocation(_contextMenuClickLocation);

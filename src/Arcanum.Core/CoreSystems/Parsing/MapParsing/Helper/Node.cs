@@ -4,14 +4,6 @@ using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 
 namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Helper;
 
-public class CacheNodeInfo(Node? node, BorderSegmentDirectional? segment, Direction dir, bool visited = false)
-{
-   public readonly Direction Dir = dir;
-   public bool Visited = visited;
-   public BorderSegmentDirectional? Segment = segment;
-   public Node? Node = node;
-}
-
 /// <summary>
 /// Lightweight struct holding segment cache data. Stored inline in Node.
 /// </summary>
@@ -63,6 +55,7 @@ public class Node : ICoordinateAdder
    /// </summary>
    private byte _visitedMask;
    
+   public byte VisitedMask => _visitedMask;
    
    
    private Node(Vector2I position)

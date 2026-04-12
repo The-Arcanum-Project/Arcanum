@@ -109,7 +109,12 @@
                         CanExecute = "CommandCanStrepRedoExecute" />
         <CommandBinding Command = "mainWindow:MwCommands.OpenHistoryWindowCommand"
                         Executed = "OpenHistoryWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
-
+        
+        <CommandBinding Command = "mainWindow:MwCommands.ShrinkCommand"
+                        Executed = "MapShrink" CanExecute = "CommandCanAlwaysExecute" />
+        <CommandBinding Command = "mainWindow:MwCommands.ExpandCommand"
+                        Executed = "MapExpand" CanExecute = "CommandCanAlwaysExecute" />
+        
         <!-- Command Bindings for Error Log MenuItems -->
         <CommandBinding Command = "mainWindow:MwCommands.OpenErrorLogWindowCommand"
                         Executed = "OpenErrorLogWindow_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
@@ -268,7 +273,8 @@
                             <Image Source = "/Arcanum_UI;component/Assets/Icons/16x16/History16x16.png" />
                         </uc:SearchableMenuItem.Icon>
                     </uc:SearchableMenuItem>
-
+                    <MenuItem Header="Expand" Command="mainWindow:MwCommands.ExpandCommand"/>
+                    <MenuItem Header="Shrink" Command="mainWindow:MwCommands.ShrinkCommand"/>
                     <Separator />
 
                     <uc:SearchableMenuItem Header = "Queastor (Find)"

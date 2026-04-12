@@ -179,6 +179,7 @@ public static class Selection
    #region Convenience Getter
 
    public static List<Location> GetSelectedLocations => SelectedLocations.ToList();
+   public static HashSet<Location> SelectedLocationsSet => SelectedLocations;
    public static List<Location> GetHoveredLocations => HoveredLocations.ToList();
    public static List<Location> GetHighlightedLocations => HighlightedLocations.ToList();
    public static List<Location> GetSelectionPreviewLocations => SelectionPreview.ToList();

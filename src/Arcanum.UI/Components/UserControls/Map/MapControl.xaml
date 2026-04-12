@@ -27,6 +27,9 @@
             <ContextMenu x:Key = "MapContextMenu" Opened = "MapContextMenu_Opened">
                 <MenuItem Header = "Export MapMode" Click = "MenuItem_OnClick" />
                 <Separator />
+                <MenuItem Header = "Select Neighbouring Location" Click = "SelectNeighbouringLocation_Click" />
+                <MenuItem Header = "Expand Location Selection" Click = "ExpandSelection"/>
+                <MenuItem Header = "Shrink Location Selection"  Click = "ShrinkSelection"/>
                 <MenuItem Header = "Select Province" Click = "SelectProvince_Click" />
                 <MenuItem Header = "Select Area" Click = "SelectArea_Click" />
                 <MenuItem Header = "Select Region" Click = "SelectRegion_Click" />
