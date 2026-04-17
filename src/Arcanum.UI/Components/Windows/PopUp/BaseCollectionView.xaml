@@ -44,10 +44,10 @@
                 Margin = "2">
             <ListBox x:Name = "ListItems"
                      SelectionChanged = "ListItems_SelectionChanged"
-                     Background = "Transparent"
-                     VirtualizingStackPanel.IsVirtualizing = "True"
-                     VirtualizingStackPanel.VirtualizationMode = "Recycling"
-                     ScrollViewer.IsDeferredScrollingEnabled = "True">
+                     Background = "Transparent" VirtualizingPanel.IsVirtualizing = "True"
+                     VirtualizingPanel.VirtualizationMode = "Recycling" VirtualizingPanel.CacheLengthUnit = "Item"
+                     VirtualizingPanel.CacheLength = "10,10" VirtualizingPanel.ScrollUnit = "Pixel"
+                     ScrollViewer.CanContentScroll = "True" ScrollViewer.IsDeferredScrollingEnabled = "True">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel />

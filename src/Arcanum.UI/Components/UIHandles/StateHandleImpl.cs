@@ -16,7 +16,7 @@ public class StateHandleImpl : IStateHandle
 #if DEBUG
                                       DebugConfig.Settings.UseExternalDocumentation,
 #else
-                                         false
+                                         false,
 #endif
                                       true,
 #if DEBUG
