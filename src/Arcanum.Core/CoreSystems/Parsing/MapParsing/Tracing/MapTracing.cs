@@ -11,7 +11,7 @@ namespace Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 public sealed unsafe class MapTracing : IDisposable
 {
    private const int ALPHA = 255 << 24;
-   private const int OUTSIDE_COLOR = 0x000000;
+   public const int OUTSIDE_COLOR = 0x000000;
    private readonly int _width;
    private readonly int _height;
    private readonly int _stride;
