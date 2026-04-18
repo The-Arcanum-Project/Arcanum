@@ -437,17 +437,21 @@ public sealed unsafe class MapTracing : IDisposable
 
       polygon.Segments.Add(currentSegment);
       SetSegmentColor(currentSegment, polygon.Color);
-
-      while (currentNode != startNode)
+      
+      // False check. I need to check if the direction i want to go in is already visited not if the node is fine
+      while (true)
       {
          if (currentNode.Visit(ref currentDirection, currentSegment, out var newSegment, out var nextNode))
          {
+            if (currentNode.IsVisited(currentDirection))
+               break;
             currentNode.SetVisited(currentDirection);
             polygon.Segments.Add(currentNode);
             polygon.Segments.Add(newSegment);
             SetSegmentColor(newSegment, polygon.Color);
             currentNode = nextNode;
             currentSegment = newSegment;
+            
          }
          else
          {
@@ -460,6 +464,7 @@ public sealed unsafe class MapTracing : IDisposable
             currentNode = newNode;
          }
       }
+
 
       return polygon;
    }
@@ -474,6 +479,27 @@ public sealed unsafe class MapTracing : IDisposable
 
          polygons.Add(TraceFromNode(node, direction));
       }
+   }
+
+   private PolygonParsing TraceIsland(Node node, Dictionary<int, List<PolygonParsing>> polygons,
+      Direction outsideDirection)
+   {
+      // Trace the island into every direction, if outside direction save it for return and do not add to dictionary
+      var hole = TraceFromNode(node, outsideDirection);
+
+      for (var i = 0; i < 4; i++)
+      {
+         var direction = (Direction)i;
+         if (direction == outsideDirection || !node.HasDirection(direction) || node.IsVisited(direction))
+            continue;
+
+         var polygon = TraceFromNode(node, direction);
+         
+         ref var listRef = ref CollectionsMarshal.GetValueRefOrAddDefault(polygons, polygon.Color, out var exists);
+         if (!exists) listRef = [];
+         listRef!.Add(polygon);
+      }
+      return hole;
    }
 
    private PolygonParsing[] VisitNode(Node node, Dictionary<int, List<PolygonParsing>> polygons, ReadOnlySpan<Direction> arriveDirections)
@@ -537,7 +563,7 @@ public sealed unsafe class MapTracing : IDisposable
 
    #region Island Handling
 
-   private void HandleIsland(Vector2I position, Dictionary<int, List<PolygonParsing>> polygons, Vector2I borderPos, int parentColor)
+   private void HandleIsland(Vector2I position, Dictionary<int, List<PolygonParsing>> polygons, Vector2I borderPos, int parentColor, ref PolygonParsing? parent)
    {
       // Instead of parsing from a node, we parse from a segment by finding the start node and tracing from there.
       // The edge case that no node exists will have to be taken into account.
@@ -559,26 +585,28 @@ public sealed unsafe class MapTracing : IDisposable
          return;
       }
 
-      //TODO: @MelCo: Cache this value while being in the same polygon
-      PolygonParsing? parent = null;
-      var count = parentPolygonCandidates.Count;
-      for (var i = 0; i < count; i++)
+      // quick check the last polygon to see if it is still the parent
+      if (parent == null || parent.Color != parentColor || !parent.IsOnBorder(borderPos))
       {
-         var candidate = parentPolygonCandidates[i];
-         if (candidate.IsOnBorder(borderPos))
+         var count = parentPolygonCandidates.Count;
+         for (var i = 0; i < count; i++)
          {
+            var candidate = parentPolygonCandidates[i];
+            if (!candidate.IsOnBorder(borderPos)) continue;
             parent = candidate;
             break;
          }
+
+         if (parent == null)
+         {
+            NodeCache.Clear();
+            _nodeQueue.Clear();
+            return;
+         }
       }
 
-      if (parent == null)
-      {
-         NodeCache.Clear();
-         _nodeQueue.Clear();
-         return;
-      }
-
+      PolygonParsing hole;
+      
       // Single-direction loop (simple island)
       if (startNode.ActiveDirectionCount == 1)
       {
@@ -596,7 +624,7 @@ public sealed unsafe class MapTracing : IDisposable
          listRef!.Add(polygon);
          
          //TODO Color can be set to 0 again
-         var hole = new PolygonParsing(islandColor);
+         hole = new PolygonParsing(islandColor);
          hole.Segments.Add(loopCache.Segment!.Value);
          hole.Segments.Add(startNode);
          parent.Holes.Add(hole);
@@ -606,22 +634,15 @@ public sealed unsafe class MapTracing : IDisposable
          return;
       }
       
-      
-      PolygonParsing[] holes;
-      // If more than one direction has been set -> loop but complex node
       if (startNode.Position == startPosition)
       {
          // Complex island with existing loopNode
          NodeCache.Add(startPosition, startNode);
-
-         ReadOnlySpan<Direction> holeDirections = [startArriveDir, startArriveDir.Invert(),];
-         holes = VisitNode(startNode, polygons, holeDirections);
       }
       else
       {
          // Complex island with multiple nodes
          TraceEdge<UncheckedColorGetter>(position, Direction.South, out var endNode, out var endArriveDir, false);
-
          var segment = new BorderSegment();
          ref var startCache = ref startNode.GetSegmentRef(startArriveDir);
          startCache.Segment!.Value.AddTo(segment.Points);
@@ -633,22 +654,20 @@ public sealed unsafe class MapTracing : IDisposable
          endCache.Segment = new BorderSegmentDirectional(segment, false);
          startCache.Node = endNode;
          endCache.Node = startNode;
-      
-         // TODO instead of parsing forward and backward, parse forward and check if we arrive at the start node from the inverse direction
-         // if not then only parse inverse, this reduces duplicates
-         ReadOnlySpan<Direction> holeDirections =
-            startNode == endNode ? [startArriveDir, startArriveDir.Invert(),] : [startArriveDir,];
-         holes = VisitNode(startNode, polygons, holeDirections);
       }
+      //Debug.Assert(position.X != 14974 && position.Y != 5476);
+      //hole = TraceIsland(startNode, polygons, startArriveDir);
       
-      
-      NodeCache.Remove(startNode.Position);
+      // TODO maybe readd the TraceIsland method to prevent duplicates in the normal visitNodes
+      //hole = TraceFromNode(startNode, startArriveDir);
+      hole = TraceIsland(startNode, polygons, startArriveDir);
+      //NodeCache.Remove(startNode.Position);
 
       while (_nodeQueue.TryDequeue(out var node))
          VisitNode(node, polygons);
 
       NodeCache.Clear();
-      parent.Holes.AddRange(holes);
+      parent.Holes.Add(hole);
    }
 
    #endregion
@@ -705,7 +724,7 @@ public sealed unsafe class MapTracing : IDisposable
       var counter = 0;
       var lastSwitchX = 0;
       var lastSwitchY = 0;
-
+      PolygonParsing? lastPolygon = null;
       fixed (byte* bitMaskPtr = BitMasks)
       {
          for (var y = 0; y < _height; y++)
@@ -724,10 +743,10 @@ public sealed unsafe class MapTracing : IDisposable
                if (color != lastColor)
                {
                   var isVisited = (visitedRow[byteIndex] & mask) != 0;
-
+               
                   if (!isVisited)
                   {
-                     HandleIsland(new(x, y), polygonsDict, new(lastSwitchX, lastSwitchY), lastColor);
+                     HandleIsland(new(x, y), polygonsDict, new(lastSwitchX, lastSwitchY), lastColor, ref lastPolygon);
                      counter++;
                   }
 
@@ -745,7 +764,8 @@ public sealed unsafe class MapTracing : IDisposable
       sw.Stop();
       ArcLog.WriteLine("MPT", LogLevel.DBG, $"Found and traced {counter} islands in {sw.ElapsedMilliseconds} ms.");
 #endif
-
+   
+      // TODO return dictionary since we need it anyway
       return polygonsDict.SelectMany(kvp => kvp.Value).ToList();
    }
 

@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.UI.Components.UserControls.Map;
+using Common.Logger;
 
 namespace Arcanum.UI.MapInteraction.Strategy;
 
@@ -15,19 +16,20 @@ public class BrushSelectionStrategy : IMapInteractionStrategy
    private float _brushRadius = 0.05f;
    private float _brushMapRadius;
 
-   private void GenerateBrushPoints(Vector2 pos, float radius)
+   private void GenerateBrushPoints(Vector2 pos, float radius, float aspectRatio)
    {
-      for (int i = 0; i < BRUSH_RESOLUTION; i++)
+      ArcLog.WritePure($"{aspectRatio}");
+      for (var i = 0; i < BRUSH_RESOLUTION; i++)
       {
-         float angle = (float)(i) / BRUSH_RESOLUTION * MathF.PI * 2;
-         _brushPoints[i] = new(pos.X + radius * MathF.Cos(angle),
+         var angle = (float)i / BRUSH_RESOLUTION * MathF.PI * 2;
+         _brushPoints[i] = new(pos.X + radius * MathF.Cos(angle) / aspectRatio,
                                pos.Y + radius * MathF.Sin(angle));
       }
    }
 
    private void UpdateBrushOutline(MapControl map, Vector2 pos)
    {
-      GenerateBrushPoints(pos, _brushRadius);
+      GenerateBrushPoints(pos, _brushRadius,(float)(map.HwndHostContainer.ActualWidth / map.HwndHostContainer.ActualHeight));
       _brushMapRadius = map.Coords.NdcToMap(_brushRadius);
       map.LocationRenderer.UpdateSelectionOutline(_brushPoints, true);
       map.LocationRenderer.Render();
@@ -79,5 +81,9 @@ public class BrushSelectionStrategy : IMapInteractionStrategy
    {
       _brushRadius = e.Delta > 0 ? MathF.Min(_brushRadius * 1.3f, 0.5f) : MathF.Max(_brushRadius / 1.3f, 0.01f);
       UpdateBrushOutline(map, map.Coords.CurrentPosition.Ndc);
+      if (e.LeftButton != MouseButtonState.Pressed)
+         return;
+
+      ApplyBrushSelection(map);
    }
 }

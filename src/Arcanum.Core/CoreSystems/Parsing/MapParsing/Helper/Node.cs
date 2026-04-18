@@ -169,7 +169,7 @@ public class Node : ICoordinateAdder
       if (input.Segment.Points.Count > 0)
       {
          var point = input.IsForward ? input.Segment.Points[^1] : input.Segment.Points[0];
-         direction = GetDirectionFrom(point);  // Small helper, easily inlined
+         direction = GetDirectionFrom(point); 
       }
 
       // Step 2: Determine the exit direction (right turn priority)

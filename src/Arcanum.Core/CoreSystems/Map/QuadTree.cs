@@ -205,7 +205,7 @@ public sealed class QuadTree
 
       return results;
    }
-
+   
    public List<Location> FindLocations(Vector2 center, float radius)
    {
       // Define the search area as the bounding box of the circle.
@@ -214,34 +214,36 @@ public sealed class QuadTree
 
       QueryCircleRecursive(center, radius, area, foundLocations);
 
-      return [.. foundLocations];
+      return [.. foundLocations,];
    }
-
-   // ReSharper disable once InconsistentNaming
+   
    private void QueryCircleRecursive(Vector2 center,
-                                     float radius,
-                                     RectangleF circleAABB,
-                                     HashSet<Location> foundLocations)
+      float radius,
+      RectangleF circleAABB,
+      HashSet<Location> foundLocations)
    {
-      // Phase 1: Broad AABB Intersection Test (Existing)
-      // Prune nodes that do not intersect the circle's Axis-Aligned Bounding Box.
       if (!Bounds.IntersectsWith(circleAABB))
          return;
-
-      // Phase 2: Full Containment Test (Existing Optimization)
-      // If this node's bounding box is COMPLETELY INSIDE the circle, add all children directly.
-      if (IsFullyContained(Bounds, center, radius))
-      {
-         AddAllChildren(foundLocations);
+      
+      // Phase 1: Upgraded Broad Phase (Circle-Rectangle Intersection)
+      // This replaces the AABB-AABB check, preventing the empty corners of 
+      // the circle's bounding box from falsely triggering deeper recursion.
+      if (!BoundsIntersectCircle(Bounds, center, radius))
          return;
-      }
+
+      // [REMOVED Phase 2: Full Containment Test]
+      // Adding all children based purely on node containment is unsafe for polygons
+      // because a polygon's AABB might intersect the node, while its actual geometry does not.
 
       // Phase 3: Recursive Traversal
       if (_children != null)
+      {
          foreach (var child in _children)
             child.QueryCircleRecursive(center, radius, circleAABB, foundLocations);
+      }
       // Perform precise checks if this is a leaf node.
       else if (_references != null)
+      {
          foreach (var polyRef in _references)
          {
             var location = _allLocations[polyRef.LocationId];
@@ -250,10 +252,26 @@ public sealed class QuadTree
             if (foundLocations.Contains(location))
                continue;
 
-            // Precise and now much faster polygon-circle intersection test.
+            // Precise polygon-circle intersection test ensures no false positives.
             if (location.Polygons[polyRef.PolygonIndex].Intersects(center, radius))
                foundLocations.Add(location);
          }
+      }
+   }
+
+// Helper method for a fast, mathematically accurate Rectangle-Circle intersection
+   private bool BoundsIntersectCircle(RectangleF rect, Vector2 center, float radius)
+   {
+      // Find the closest point to the circle's center within the rectangle's bounds
+      float closestX = Math.Clamp(center.X, rect.Left, rect.Right);
+      float closestY = Math.Clamp(center.Y, rect.Top, rect.Bottom);
+
+      // Calculate the distance squared between the circle's center and this closest point
+      float distanceX = center.X - closestX;
+      float distanceY = center.Y - closestY;
+
+      // If the squared distance is less than or equal to the squared radius, they intersect
+      return (distanceX * distanceX + distanceY * distanceY) <= (radius * radius);
    }
 
    /// <summary>

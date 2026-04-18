@@ -188,6 +188,7 @@ public static class SelectionManager
    /// </summary>
    private static void InvalidateSelection()
    {
+      return;
       // If we are frozen, do nothing
       if (ObjectSelectionMode == ObjectSelectionMode.Frozen)
          return;

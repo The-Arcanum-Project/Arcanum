@@ -163,10 +163,10 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       
       sw.Stop();
       
-      /*
+      
       // Verify that no border is duplicate!
       // Easy check draw a map with all the polygons and holes of the polygons. Each border should be drawn exactly 2 times. So e.g. if a border segment is first gone through paint it blue if it goes a second time green and any other time red
-      var mapBitmap = new Bitmap(mapSize.Item1 + 2, mapSize.Item2 + 2);
+      /*var mapBitmap = new Bitmap(mapSize.Item1 + 2, mapSize.Item2 + 2);
       var errorCounter = 0;
       
       foreach (var poly in parsingPolygons)
@@ -177,7 +177,9 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          for (var index = 0; index < poly.Holes.Count; index++)
          {
             var hole = poly.Holes[index];
-
+            
+            Debug.Assert(hole.Holes.Count == 0, "Holes within holes should not happen");
+            
             foreach (var adder in hole.Segments)
             {
                if (adder is not BorderSegmentDirectional bsd)
@@ -219,14 +221,11 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
             }
          }
       }
-      
-      ArcLog.Write("MPS", LogLevel.INF, $"Finished border verification. Time taken: {sw.Elapsed.TotalMilliseconds} ms. Total borders: {totalBorderCount}. Error count: {errorCounter}.");
-      
-      // save bitmap
-      mapBitmap.Save("mapDebug.png");*/
+
+      mapBitmap.Save("mapDebug.png");
 
 
-      ArcLog.Write("MPS", LogLevel.INF, $"Finished border extraction and adjacency generation. Time taken: {sw.Elapsed.TotalMilliseconds} ms. Total borders: {totalBorderCount}.");
+      ArcLog.Write("MPS", LogLevel.INF, $"Finished border extraction and adjacency generation. Time taken: {sw.Elapsed.TotalMilliseconds} ms. Total borders: {totalBorderCount}.");*/
       // foreach (var poly in parsingPolygons)
       // foreach (var hole in poly.Holes)
       // foreach (var adder in hole.Segments)
