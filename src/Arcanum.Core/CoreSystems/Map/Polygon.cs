@@ -127,10 +127,7 @@ public sealed class Polygon
 
       // 3. Final Check: Test if the rectangle is fully contained within the polygon.
       // This is necessary for cases where no edges intersect, but one shape is inside the other.
-      if (Contains(rectMin))
-         return true;
-
-      return false;
+      return Contains(rectMin);
    }
 
    private static bool TriangleIntersectsAabb(Vector2 v0,
@@ -166,10 +163,7 @@ public sealed class Polygon
       // Edge 2: v0 - v2
       var edge2 = v0 - v2;
       var axis2 = new Vector2(-edge2.Y, edge2.X);
-      if (IsSeparatingAxis(axis2, v0, v1, v2, rectCenter, rectMax - rectCenter))
-         return false;
-
-      return true;
+      return !IsSeparatingAxis(axis2, v0, v1, v2, rectCenter, rectMax - rectCenter);
    }
 
    private static bool IsSeparatingAxis(Vector2 axis,
@@ -220,7 +214,8 @@ public sealed class Polygon
 
       var corners = new[]
       {
-         new Vector2(rect.Left, rect.Top), new Vector2(rect.Right, rect.Top), new Vector2(rect.Right, rect.Bottom), new Vector2(rect.Left, rect.Bottom),
+         new Vector2(rect.Left, rect.Top), new Vector2(rect.Right, rect.Top),
+         new Vector2(rect.Right, rect.Bottom), new Vector2(rect.Left, rect.Bottom),
       };
 
       foreach (var corner in corners)
@@ -335,10 +330,9 @@ public sealed class Polygon
       var j = polygon.Length - 1;
       for (var i = 0; i < polygon.Length; i++)
       {
-         if ((polygon[i].Y > point.Y) != (polygon[j].Y > point.Y) &&
-             (point.X <
-              (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) +
-              polygon[i].X))
+         if (polygon[i].Y > point.Y != polygon[j].Y > point.Y &&
+             point.X < (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + 
+             polygon[i].X)
             isInside = !isInside;
 
          j = i;
@@ -362,8 +356,8 @@ public sealed class Polygon
       var cp2 = (cX - bX) * (pY - bY) - (cY - bY) * (pX - bX);
       var cp3 = (aX - cX) * (pY - cY) - (aY - cY) * (pX - cX);
 
-      var hasNeg = (cp1 < 0) || (cp2 < 0) || (cp3 < 0);
-      var hasPos = (cp1 > 0) || (cp2 > 0) || (cp3 > 0);
+      var hasNeg = cp1 < 0 || cp2 < 0 || cp3 < 0;
+      var hasPos = cp1 > 0 || cp2 > 0 || cp3 > 0;
 
       return !(hasNeg && hasPos);
    }
@@ -381,6 +375,32 @@ public sealed class Polygon
          var v1 = vertices[indices[i + 1]];
          var v2 = vertices[indices[i + 2]];
 
+         // 1. Calculate Edges
+         var edge1X = v1.X - v0.X;
+         var edge1Y = v1.Y - v0.Y;
+         var edge2X = v2.X - v1.X;
+         var edge2Y = v2.Y - v1.Y;
+         var edge3X = v0.X - v2.X;
+         var edge3Y = v0.Y - v2.Y;
+
+         // 2. Determine Winding Order and Enforce CCW
+         // By enforcing Counter-Clockwise winding, we guarantee that "Inside" ALWAYS means w >= 0.
+         var area = edge1X * edge2Y - edge1Y * edge2X;
+         if (Math.Abs(area) < 1e-9) continue; // Skip zero-area (degenerate) triangles
+
+         if (area < 0) // If Clockwise, swap v1 and v2 to make it CCW
+         {
+            (v1, v2) = (v2, v1);
+
+            // Recompute edges for new winding
+            edge1X = v1.X - v0.X;
+            edge1Y = v1.Y - v0.Y;
+            edge2X = v2.X - v1.X;
+            edge2Y = v2.Y - v1.Y;
+            edge3X = v0.X - v2.X;
+            edge3Y = v0.Y - v2.Y;
+         }
+
          var triMinY = (int)MathF.Floor(MathF.Min(v0.Y, MathF.Min(v1.Y, v2.Y)));
          var triMaxY = (int)MathF.Ceiling(MathF.Max(v0.Y, MathF.Max(v1.Y, v2.Y)));
 
@@ -393,19 +413,16 @@ public sealed class Polygon
          var minX = (int)MathF.Floor(MathF.Min(v0.X, MathF.Min(v1.X, v2.X)));
          var maxX = (int)MathF.Ceiling(MathF.Max(v0.X, MathF.Max(v1.X, v2.X)));
 
-         // Precompute Edge Functions 
-         double edge1Y = v1.Y - v0.Y;
-         double edge1X = v1.X - v0.X;
-         double edge2Y = v2.Y - v1.Y;
-         double edge2X = v2.X - v1.X;
-         double edge3Y = v0.Y - v2.Y;
-         double edge3X = v0.X - v2.X;
+         // Return to standard 0.5 center sampling
+         var startYCenter = startY + 0.5;
+         var minXCenter = minX + 0.5;
 
-         // Calculate rowVal based on startY (the clipped top), not the triangle top.
-         var rowVal1 = edge1X * (startY - v0.Y) - edge1Y * (minX - v0.X);
-         var rowVal2 = edge2X * (startY - v1.Y) - edge2Y * (minX - v1.X);
-         var rowVal3 = edge3X * (startY - v2.Y) - edge3Y * (minX - v2.X);
 
+         var rowVal1 = edge1X * (startYCenter - v0.Y) - edge1Y * (minXCenter - v0.X);
+         var rowVal2 = edge2X * (startYCenter - v1.Y) - edge2Y * (minXCenter - v1.X);
+         var rowVal3 = edge3X * (startYCenter - v2.Y) - edge3Y * (minXCenter - v2.X);
+
+         // 4. Inner Rasterization Loop
          for (var y = startY; y <= endY; y++)
          {
             var w1 = rowVal1;
@@ -414,11 +431,9 @@ public sealed class Polygon
 
             for (var x = minX; x <= maxX; x++)
             {
-               var neg = (w1 < 0) | (w2 < 0) | (w3 < 0);
-               var pos = (w1 > 0) | (w2 > 0) | (w3 > 0);
-
-               if (!(neg && pos))
-                  action.Invoke(x, y);
+               // Because we guaranteed CCW winding and applied the Top-Left bias, 
+               // a pixel is strictly inside if all barycentric weights are >= 0.
+               if (w1 >= 0 && w2 >= 0 && w3 >= 0) action.Invoke(x, y);
 
                w1 -= edge1Y;
                w2 -= edge2Y;
