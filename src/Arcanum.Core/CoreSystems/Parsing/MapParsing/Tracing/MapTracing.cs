@@ -20,9 +20,11 @@ public sealed unsafe class MapTracing : IDisposable
    private readonly BitmapData _bitmapData;
    private readonly Bitmap _visitedBitmap;
    private readonly BitmapData _visitedBitmapData;
-   private readonly IntPtr _visitedBitmapDataPtr;
+   private readonly IntPtr _visitedScan0;
    private readonly int _visitedStride;
-
+   
+   private readonly UncheckedBitmapHandler _handler = default;
+   
    private readonly Queue<Node> _nodeQueue = new();
 
    private Dictionary<Vector2I, Node> NodeCache { get; } = new();
@@ -41,20 +43,15 @@ public sealed unsafe class MapTracing : IDisposable
       _visitedBitmapData = _visitedBitmap.LockBits(new(0, 0, bmp.Width, bmp.Height),
                                                    ImageLockMode.ReadWrite,
                                                    PixelFormat.Format1bppIndexed);
-      _visitedBitmapDataPtr = _visitedBitmapData.Scan0;
+      _visitedScan0 = _visitedBitmapData.Scan0;
       _visitedStride = _visitedBitmapData.Stride;
    }
-
+   
+   
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    private int GetColor(int x, int y)
    {
-      var row = (byte*)_scan0 + (y * _stride);
-      var pixel = row + x * 3;
-
-      return ALPHA |
-             (pixel[2]) | // Red
-             (pixel[1] << 8) | // Green
-             (pixel[0] << 16); // Blue
+      return _handler.GetColor(_scan0, _stride, _width, _height, x, y);
    }
 
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -63,54 +60,18 @@ public sealed unsafe class MapTracing : IDisposable
                                                         (pixelPtr[1] << 8) |
                                                         (pixelPtr[0] << 16);
 
-   // Pre-calculated masks for 1bpp access (0x80 >> i)
-   // Replaces: (byte)(0x80 >> (x % 8))
-   private static ReadOnlySpan<byte> BitMasks => [0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01];
-
-   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   private void ClearPixel(int x, int y)
-   {
-      if ((uint)x >= (uint)_width || (uint)y >= (uint)_height)
-         return;
-
-      var row = (byte*)_visitedBitmapDataPtr + y * _visitedStride;
-
-      row[x >> 3] |= BitMasks[x & 7];
-   }
-
    // ReSharper disable once UnusedMember.Local
    private bool IsPixelCleared(int i, int i1)
    {
-      var row = (byte*)_visitedBitmapDataPtr + i1 * _visitedStride;
+      var row = (byte*)_visitedScan0 + i1 * _visitedStride;
       return (row[i / 8] & (byte)(0x80 >> (i % 8))) != 0;
    }
-
-   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-   private int GetColorWithOutsideCheck(int x, int y)
+   
+   private void MarkVisited(int x, int y)
    {
-      // unsigned cast to do (x < 0 || x >= width) in a single CPU instruction
-      if ((uint)x >= (uint)_width || (uint)y >= (uint)_height)
-         return OUTSIDE_COLOR;
-
-      return GetColor(x, y);
+      _handler.MarkVisited(_visitedScan0, _visitedStride, _width, _height, x, y);
    }
-
-   // ReSharper disable once UnusedMember.Local
-   private int GetColorAndSetCleared(int x, int y)
-   {
-      if (x < 0 || x >= _width || y < 0 || y >= _height)
-         return OUTSIDE_COLOR;
-
-      ClearPixel(x, y);
-      return GetColor(x, y);
-   }
-
-   // ReSharper disable once UnusedMember.Local
-   private int GetColorWithOutsideCheck(Vector2I pos)
-   {
-      return GetColorWithOutsideCheck(pos.X, pos.Y);
-   }
-
+   
    private static void LinkNodes(Node a, Node b, BorderSegment segment)
    {
       a.Segments[2].Node = b;
@@ -135,7 +96,7 @@ public sealed unsafe class MapTracing : IDisposable
 
       var currentSegment = firstSegment;
 
-      ClearPixel(0, 0);
+      MarkVisited(0, 0);
       // Left Edge (top to bottom)
       for (var y = 1; y <= _height - 1; y++)
       {
@@ -143,12 +104,12 @@ public sealed unsafe class MapTracing : IDisposable
          if (color != lastColor)
             FinalizeSegment(0, y, color, Direction.East);
 
-         ClearPixel(0, y);
+         MarkVisited(0, y);
       }
 
       // Bottom Left Corner
       currentSegment.Points.Add(new(0, _height));
-      ClearPixel(0, _height - 1);
+      MarkVisited(0, _height - 1);
       // Bottom Edge (left to right)
       for (var x = 1; x <= _width - 1; x++)
       {
@@ -156,12 +117,12 @@ public sealed unsafe class MapTracing : IDisposable
          if (color != lastColor)
             FinalizeSegment(x, _height, color, Direction.North);
 
-         ClearPixel(x, _height - 1);
+         MarkVisited(x, _height - 1);
       }
 
       // Bottom Right Corner
       currentSegment.Points.Add(new(_width, _height));
-      ClearPixel(_width - 1, _height - 1);
+      MarkVisited(_width - 1, _height - 1);
       // Right Edge (bottom to top)
       for (var y = _height - 1; y > 0; y--)
       {
@@ -169,12 +130,12 @@ public sealed unsafe class MapTracing : IDisposable
          if (color != lastColor)
             FinalizeSegment(_width, y, color, Direction.West);
 
-         ClearPixel(_width - 1, y - 1);
+         MarkVisited(_width - 1, y - 1);
       }
 
       // Top Right Corner
       currentSegment.Points.Add(new(_width, 0));
-      ClearPixel(_width - 1, 0);
+      MarkVisited(_width - 1, 0);
       // Top Edge (right to left)
       for (var x = _width - 1; x > 0; x--)
       {
@@ -182,7 +143,7 @@ public sealed unsafe class MapTracing : IDisposable
          if (color != lastColor)
             FinalizeSegment(x, 0, color, Direction.South);
 
-         ClearPixel(x - 1, 0);
+         MarkVisited(x - 1, 0);
       }
 
       // Close the loop
@@ -224,11 +185,13 @@ public sealed unsafe class MapTracing : IDisposable
    /// </summary>
    /// <param name="startNode"></param>
    /// <param name="startDirection"></param>
-   private Node TraceEdgeStartNodeWithOutsideCheck(Node startNode,
-                                                   Direction startDirection)
+   private Node TraceEdgeFromNode<THandler>(Node startNode, Direction startDirection)
+      where THandler : struct, IBitmapHandler
    {
-      TraceEdge(startNode.Position, startDirection, out var node, out var cache);
+      TraceEdge<THandler>(startNode.Position, startDirection, out var node, out var cache);
+
       cache.Node = startNode;
+      
       var startCache = startNode.GetSegment(startDirection);
       startCache.Node = node;
       startCache.Segment = cache.Segment?.Invert();
@@ -236,13 +199,14 @@ public sealed unsafe class MapTracing : IDisposable
       return node;
    }
 
-   private void TraceEdge(Vector2I startPos, Direction startDirection, out Node resultNode, out CacheNodeInfo resultCache, bool loopCheck = false)
+   private void TraceEdge<THandler>(Vector2I startPos, Direction startDirection, out Node resultNode, out CacheNodeInfo resultCache, bool loopCheck = false) where THandler : struct, IBitmapHandler
    {
+      THandler handler = default;
       var points = DirectionHelper.GetStartPos(startPos.X, startPos.Y, startDirection);
 
       // Cache these to avoid repeated property access
-      var lColor = GetColorWithOutsideCheck(points.Xl, points.Yl);
-      var rColor = GetColorWithOutsideCheck(points.Xr, points.Yr);
+      var lColor = handler.GetColor(_scan0, _stride, _width, _height, points.Xl, points.Yl);
+      var rColor = handler.GetColor(_scan0, _stride, _width, _height, points.Xr, points.Yr);
 
       var currentDirection = startDirection;
       var currentSegment = new BorderSegment(); // Still allocated (necessary)
@@ -252,8 +216,8 @@ public sealed unsafe class MapTracing : IDisposable
 
       while (true)
       {
-         ClearPixel(points.Xl, points.Yl);
-         ClearPixel(points.Xr, points.Yr);
+         handler.MarkVisited(_visitedScan0, _visitedStride, _width, _height, points.Xl, points.Yl);
+         handler.MarkVisited(_visitedScan0, _visitedStride, _width, _height, points.Xr, points.Yr);
 
          currentDirection.Move(ref points, out var cachePos, out var xaxis);
 
@@ -270,8 +234,8 @@ public sealed unsafe class MapTracing : IDisposable
             return;
          }
 
-         var lTest = GetColorWithOutsideCheck(points.Xl, points.Yl);
-         var rTest = GetColorWithOutsideCheck(points.Xr, points.Yr);
+         var lTest = handler.GetColor(_scan0, _stride, _width, _height, points.Xl, points.Yl);
+         var rTest = handler.GetColor(_scan0, _stride, _width, _height, points.Xr, points.Yr);
 
          if (lTest == lColor && rTest == rColor)
             continue;
@@ -345,8 +309,8 @@ public sealed unsafe class MapTracing : IDisposable
             resultCache.Segment = new(currentSegment, false);
          }
 
-         ClearPixel(points.Xl, points.Yl);
-         ClearPixel(points.Xr, points.Yr);
+         handler.MarkVisited(_visitedScan0, _visitedStride, _width, _height, points.Xl, points.Yl);
+         handler.MarkVisited(_visitedScan0, _visitedStride, _width, _height, points.Xr, points.Yr);
 
          resultNode = node;
          return;
@@ -367,7 +331,7 @@ public sealed unsafe class MapTracing : IDisposable
             continue;
 
          var dir = node.Segments[1].Dir;
-         TraceEdgeStartNodeWithOutsideCheck(node, dir);
+         TraceEdgeFromNode<CheckedBitmapHandler>(node, dir);
       }
    }
 
@@ -388,7 +352,7 @@ public sealed unsafe class MapTracing : IDisposable
       polygon.Segments.Add(currentNode);
       if (firstCache.Segment == null)
       {
-         var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
+         var newNode = TraceEdgeFromNode<UncheckedBitmapHandler>(currentNode, currentDirection);
          currentSegment = currentNode.GetSegment(currentDirection).Segment!.Value;
          currentNode = newNode;
       }
@@ -422,7 +386,7 @@ public sealed unsafe class MapTracing : IDisposable
          {
             polygon.Segments.Add(currentNode);
             currentNode.SetDirection(currentDirection);
-            var newNode = TraceEdgeStartNodeWithOutsideCheck(currentNode, currentDirection);
+            var newNode = TraceEdgeFromNode<UncheckedBitmapHandler>(currentNode, currentDirection);
             currentSegment = currentNode.GetSegment(currentDirection).Segment!.Value;
             currentNode = newNode;
             polygon.Segments.Add(currentSegment);
@@ -559,7 +523,7 @@ public sealed unsafe class MapTracing : IDisposable
       Debug.Assert(NodeCache.Count == 0);
       Debug.Assert(_nodeQueue.Count == 0);
 
-      TraceEdge(new(position.X, position.Y + 1), Direction.North, out var startNode, out var startCache, true);
+      TraceEdge<UncheckedBitmapHandler>(new(position.X, position.Y + 1), Direction.North, out var startNode, out var startCache, true);
 
       if (!polygons.TryGetValue(parentColor, out var parentPolygonCandidates))
       {
@@ -591,7 +555,7 @@ public sealed unsafe class MapTracing : IDisposable
       if (startNode.Segments.Length == 1)
       {
          // Loop detected so directly creates a polygon
-         var polygon = new PolygonParsing(GetColorWithOutsideCheck(position.X, position.Y));
+         var polygon = new PolygonParsing(GetColor(position.X, position.Y));
          polygon.Segments.Add(startCache.Segment!.Value.Invert());
          if (!polygons.TryGetValue(polygon.Color, out var polygonsList))
             polygons[polygon.Color] = [polygon];
@@ -609,7 +573,7 @@ public sealed unsafe class MapTracing : IDisposable
          return;
       }
 
-      TraceEdge(position, Direction.South, out var endNode, out var endCache);
+      TraceEdge<UncheckedBitmapHandler>(position, Direction.South, out var endNode, out var endCache);
 
       // Create a new segment from start to end node and link them
       var segment = new BorderSegment();
@@ -688,12 +652,12 @@ public sealed unsafe class MapTracing : IDisposable
 
       var lastSwitchX = 0;
       var lastSwitchY = 0;
-      fixed (byte* bitMaskPtr = BitMasks)
+      fixed (byte* bitMaskPtr = IBitmapHandler.BitMasks)
       {
          for (var y = 0; y < _height; y++)
          {
             var row = (byte*)_scan0 + y * _stride;
-            var visitedRow = (byte*)_visitedBitmapDataPtr + y * _visitedStride;
+            var visitedRow = (byte*)_visitedScan0 + y * _visitedStride;
 
             var lastColor = OUTSIDE_COLOR;
 
