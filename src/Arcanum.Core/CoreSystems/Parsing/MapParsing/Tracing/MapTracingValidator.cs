@@ -26,19 +26,21 @@ public static class MapTracingValidator
 
          // Flatten the polygon to a list of absolute points
          var vertices = ExtractVertices(poly);
-         foreach (var v in vertices)
-         {
+         var normalized = NormalizeVertexOrder(vertices);
+
+         foreach (var v in normalized)
             sb.Append($"{v.X},{v.Y};");
-         }
 
          if (poly.Holes.Count > 0)
          {
             sb.Append("HOLES:[");
             var sortedHoles = SortPolygons(poly.Holes);
-            foreach (var hole in sortedHoles)
+            for (var index = 0; index < sortedHoles.Count; index++)
             {
+               var hole = sortedHoles[index];
                var hVerts = ExtractVertices(hole);
-               foreach (var hv in hVerts)
+               var hNormalized = NormalizeVertexOrder(hVerts);
+               foreach (var hv in hNormalized)
                   sb.Append($"{hv.X},{hv.Y};");
                sb.Append("|");
             }
@@ -66,21 +68,25 @@ public static class MapTracingValidator
       IO.IO.EnsureFileDirectoryExists(filepath);
       using var writer = new StreamWriter(filepath);
 
-      int i = 0;
+      var i = 0;
       foreach (var poly in sorted)
       {
          var vertices = ExtractVertices(poly);
-         writer.WriteLine($"Polygon[{i++}] Color: {poly.Color:X} Vertices: {vertices.Count}");
+         var normalized = NormalizeVertexOrder(vertices);
 
-         writer.WriteLine(string.Join(" -> ", vertices.Select(v => $"({v.X},{v.Y})")));
+         writer.WriteLine($"Polygon[{i++}] Color: {poly.Color:X} Vertices: {normalized.Count}");
+         writer.WriteLine(string.Join(" -> ", normalized.Select(v => $"({v.X},{v.Y})")));
 
          if (poly.Holes.Count > 0)
          {
             writer.WriteLine($"  Holes: {poly.Holes.Count}");
-            foreach (var hole in SortPolygons(poly.Holes))
+            var list = SortPolygons(poly.Holes);
+            for (var index = 0; index < list.Count; index++)
             {
+               var hole = list[index];
                var hVerts = ExtractVertices(hole);
-               writer.WriteLine("    Hole: " + string.Join(" -> ", hVerts.Select(v => $"({v.X},{v.Y})")));
+               var hNormalized = NormalizeVertexOrder(hVerts);
+               writer.WriteLine("    Hole: " + string.Join(" -> ", hNormalized.Select(v => $"({v.X},{v.Y})")));
             }
          }
 
@@ -115,8 +121,9 @@ public static class MapTracingValidator
          g.DrawPolygon(pen, points);
 
          using var holePen = new Pen(Color.Red, 1);
-         foreach (var hole in poly.Holes)
+         for (var index = 0; index < poly.Holes.Count; index++)
          {
+            var hole = poly.Holes[index];
             var hVerts = ExtractVertices(hole);
             if (hVerts.Count < 2)
                continue;
@@ -138,12 +145,12 @@ public static class MapTracingValidator
             .ThenBy(p => ExtractVertices(p).Count)
             .ThenBy(p =>
              {
-                var v = ExtractVertices(p);
+                var v = NormalizeVertexOrder(ExtractVertices(p));
                 return v.Count > 0 ? v[0].X : 0;
              }) // Start Point X
             .ThenBy(p =>
              {
-                var v = ExtractVertices(p);
+                var v = NormalizeVertexOrder(ExtractVertices(p));
                 return v.Count > 0 ? v[0].Y : 0;
              }) // Start Point Y
             .ToList();
@@ -154,16 +161,54 @@ public static class MapTracingValidator
       var result = new List<Vector2I>();
 
       foreach (var segment in poly.Segments)
-         if (segment is Node n)
-            result.Add(n.Position);
-         else if (segment is BorderSegmentDirectional bsd)
+         switch (segment)
          {
-            if (bsd.IsForward)
+            case Node n:
+               result.Add(n.Position);
+               break;
+            case BorderSegmentDirectional bsd when bsd.IsForward:
                result.AddRange(bsd.Segment.Points);
-            else
-               for (int i = bsd.Segment.Points.Count - 1; i >= 0; i--)
+               break;
+            case BorderSegmentDirectional bsd:
+            {
+               for (var i = bsd.Segment.Points.Count - 1; i >= 0; i--)
                   result.Add(bsd.Segment.Points[i]);
+               break;
+            }
          }
+
+      return result;
+   }
+
+   /// <summary>
+   /// Rotates the vertex list so that the lexicographically smallest point is first.
+   /// This makes comparison independent of starting point.
+   /// </summary>
+   private static List<Vector2I> NormalizeVertexOrder(List<Vector2I> vertices)
+   {
+      if (vertices.Count <= 1)
+         return vertices;
+
+      // Find the index of the lexicographically smallest point
+      var minIndex = 0;
+      for (var i = 1; i < vertices.Count; i++)
+      {
+         var current = vertices[i];
+         var min = vertices[minIndex];
+
+         if (current.X < min.X || (current.X == min.X && current.Y < min.Y))
+            minIndex = i;
+      }
+
+      // Rotate the list so minIndex becomes index 0
+      if (minIndex == 0)
+         return vertices;
+
+      var result = new List<Vector2I>(vertices.Count);
+      for (var i = minIndex; i < vertices.Count; i++)
+         result.Add(vertices[i]);
+      for (var i = 0; i < minIndex; i++)
+         result.Add(vertices[i]);
 
       return result;
    }

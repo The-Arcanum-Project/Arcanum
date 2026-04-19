@@ -12,19 +12,21 @@ using Common.UI;
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
-public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
+public sealed class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects { get; } = [];
+
+   // ReSharper disable MemberCanBePrivate.Global
    public int TotalPolygonsCount;
+
    public bool FinishedTesselation;
+   // ReSharper restore MemberCanBePrivate.Global
+
    private MapParsingData? _data;
    public override bool IsHeavyStep => true;
    public override bool HasPriority { get; set; } = true;
 
-   public override string GetFileDataDebugInfo()
-   {
-      return $"Number of polygons: {TotalPolygonsCount}";
-   }
+   public override string GetFileDataDebugInfo() => $"Number of polygons: {TotalPolygonsCount}";
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
                                          object? lockObject)
@@ -41,13 +43,14 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
       (int, int) mapSize;
       List<PolygonParsing> parsingPolygons;
-
       using (var bitmap = new Bitmap(fileObj.Path.FullPath))
       using (MapTracing tracing = new(bitmap))
       {
-         parsingPolygons = tracing.Trace();
+         parsingPolygons = tracing.Trace().SelectMany(kvp => kvp.Value).ToList();
          mapSize = new(bitmap.Width, bitmap.Height);
       }
+
+      ArcLog.WritePure(MapTracingValidator.GenerateFingerprint(parsingPolygons));
 
       TotalPolygonsCount = parsingPolygons.Count;
 
@@ -64,7 +67,8 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       if (AppData.IsHeadless)
       {
          // In headless mode, we do not need to tessellate the polygons
-         lock (this) FinishedTesselation = true;
+         lock (this)
+            FinishedTesselation = true;
          //UIHandle.Instance.MapHandle.NotifyMapLoaded();
          return;
       }
@@ -82,7 +86,6 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
 
          ArcLog.WriteLine("MPS", LogLevel.INF, "Finished smoothing of map polygons.");
       }
-
 
       await Scheduler.QueueWorkInForParallel(parsingPolygons.Count,
                                              i => polygons[i] = parsingPolygons[i].Tessellate(),
@@ -125,7 +128,6 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       UIHandle.Instance.MapHandle.NotifyMapLoaded();
    }
 
-
    /// <summary>
    /// Tries to get the map parsing data. This will only succeed if the tesselation is finished, otherwise it will return false and set data to null.
    /// If data has been disposed after UI init, this will also return false and set data to null.
@@ -149,12 +151,10 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
       _data = null;
    }
 
-   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
-   {
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject) =>
       // We do not really unload map data
       // TODO: @MelCo: Implement unloading of map data if necessary
-      return true;
-   }
+      true;
 
    public override bool CanBeReloaded => false;
 }

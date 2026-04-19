@@ -65,7 +65,7 @@ public static class ValidatorCommands
 
                     Bitmap bmmpp = new(DescriptorDefinitions.MapTracingDescriptor.Files[0].Path.FullPath);
                     using var tracer = new MapTracing(bmmpp);
-                    var result = tracer.Trace();
+                    var result = tracer.Trace().SelectMany(kvp => kvp.Value).ToList();
 
                     var hashAfter = MapTracingValidator.GenerateFingerprint(result);
 
