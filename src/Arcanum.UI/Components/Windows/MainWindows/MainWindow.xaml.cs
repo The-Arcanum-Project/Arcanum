@@ -788,4 +788,12 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
       var colorPicker = new LocationColorPicker();
       colorPicker.ShowDialog();
    }
+
+   private void Popup_Opened(object? sender, EventArgs e)
+   {
+      if (DataContext is not MainWindowView viewModel)
+         return;
+
+      viewModel.EasterEgg2026.SetMap(MainMap);
+   }
 }

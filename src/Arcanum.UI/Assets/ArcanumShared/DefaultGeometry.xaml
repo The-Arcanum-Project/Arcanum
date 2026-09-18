@@ -79,4 +79,23 @@
     <EllipseGeometry x:Key = "Institution.MixedState" Center = "12,12" RadiusX = "7" RadiusY = "7" />
 
     <StreamGeometry x:Key = "Institution.NoneState"> M6,6 L18,18 M18,6 L6,18 </StreamGeometry>
+    <Geometry x:Key = "Icon.EasterEgg">
+        M 0,0 M 24,24
+
+        M 12,3
+        C 7,3 5,8 5,14
+        C 5,20 8,22 12,22
+        C 16,22 19,20 19,14
+        C 19,8 17,3 12,3
+        Z
+
+        M 8,9 L 9.5,7.5 L 11,9
+        M 13,9 L 14.5,7.5 L 16,9
+
+        M 8,11.5 L 9.5,13 L 11,11.5
+        M 13,11.5 L 14.5,13 L 16,11.5
+
+        M 9,17.5 A 1,1 0 1,1 10,17.5 A 1,1 0 1,1 9,17.5
+        M 14,17.5 A 1,1 0 1,1 15,17.5 A 1,1 0 1,1 14,17.5
+    </Geometry>
 </ResourceDictionary>
