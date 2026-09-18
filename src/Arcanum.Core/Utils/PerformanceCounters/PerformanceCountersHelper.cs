@@ -8,28 +8,39 @@ namespace Arcanum.Core.Utils.PerformanceCounters;
 
 public static class PerformanceCountersHelper
 {
+   private const int UPDATE_INTERVAL_MS = 1000;
    private static float _memoryUsage;
    private static float _cpuUsage;
    private static float _gpuUsage;
    private static float _vramUsage;
 
-   private static Timer Updater { get; set; } = null!;
-
    private static DateTime _lastCpuCheck = DateTime.MinValue;
    private static TimeSpan _lastCpuTime = TimeSpan.Zero;
 
-   private static readonly GpuMonitor GPUMonitor = new ();
-
-   private const int UPDATE_INTERVAL_MS = 1000;
+   private static readonly GpuMonitor GPUMonitor = new();
+   private static Process _currentProcess = null!;
 
    private static IPerformanceMeasured? _window;
+   private static PerformanceCounter? _privateWorkingSetCounter;
+
+   private static Timer Updater { get; set; } = null!;
    public static bool HasDedicatedGpu { get; private set; } = true;
 
-   public async static void Initialize(IPerformanceMeasured? window)
+   public static async void Initialize(IPerformanceMeasured? window)
    {
       _window = window;
 
       var initialized = await Task.Run(() => GPUMonitor.Initialize());
+      _currentProcess = Process.GetCurrentProcess();
+
+      try
+      {
+         _privateWorkingSetCounter = new("Process", "Working Set - Private", _currentProcess.ProcessName, true);
+      }
+      catch (Exception ex)
+      {
+         ArcLog.WriteLine("PRF", LogLevel.WRN, "Could not init RAM counter: " + ex.Message);
+      }
 
       if (!initialized)
       {
@@ -43,7 +54,7 @@ public static class PerformanceCountersHelper
          HasDedicatedGpu = false;
       }
 
-      Updater = new () { Interval = UPDATE_INTERVAL_MS };
+      Updater = new() { Interval = UPDATE_INTERVAL_MS };
       Updater.Elapsed += OnTimerTick;
       Updater.Start();
    }
@@ -52,15 +63,19 @@ public static class PerformanceCountersHelper
    {
       try
       {
-         var process = Process.GetCurrentProcess();
+         _currentProcess.Refresh();
 
-         _memoryUsage = process.WorkingSet64 / 1024.0f / 1024.0f;
+         if (_privateWorkingSetCounter != null)
+            _memoryUsage = _privateWorkingSetCounter.NextValue() / 1024.0f / 1024.0f;
+         else
+            // Fallback just in case Windows Performance Counters are disabled on the user's PC
+            _memoryUsage = _currentProcess.WorkingSet64 / 1024.0f / 1024.0f;
 
          var now = DateTime.UtcNow;
-         // ReSharper disable once PossibleLossOfFraction
-         if ((now - _lastCpuCheck).TotalSeconds >= UPDATE_INTERVAL_MS / 1000)
+
+         if ((now - _lastCpuCheck).TotalSeconds >= UPDATE_INTERVAL_MS / 1000.0)
          {
-            var currentCpuTime = process.TotalProcessorTime;
+            var currentCpuTime = _currentProcess.TotalProcessorTime;
 
             var cpuUsedMs = (currentCpuTime - _lastCpuTime).TotalMilliseconds;
             var totalMsPassed = (now - _lastCpuCheck).TotalMilliseconds;
@@ -111,6 +126,9 @@ public static class PerformanceCountersHelper
 
       if (GPUMonitor != null!)
          GPUMonitor.Dispose();
+
+      _currentProcess.Dispose();
+      _privateWorkingSetCounter?.Dispose();
    }
 }
 

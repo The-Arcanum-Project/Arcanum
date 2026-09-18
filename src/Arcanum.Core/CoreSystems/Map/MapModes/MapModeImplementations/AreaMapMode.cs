@@ -1,11 +1,15 @@
-﻿using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
+﻿#region
+
+using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.BaseClasses;
 using Area = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Area;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class AreaMapMode : LocationBasedMapMode
+public sealed class AreaMapMode : LocationBasedMapMode
 {
    public override string Name => "Areas";
    public override string Description => "Displays the Areas the locations are situated in.";

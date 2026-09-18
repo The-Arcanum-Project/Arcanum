@@ -1,4 +1,8 @@
-﻿using System.Globalization;
+﻿#region
+
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
@@ -10,18 +14,22 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<Location>(dependencies)
 {
+   public static int ColorIndex = 0;
+
    public override void LoadSingleFile(RootNode rn,
                                        ref ParsingContext pc,
                                        Eu5FileObj fileObj,
                                        object? lockObject)
    {
       Dictionary<JominiColor, Location> colorToLocation = new(30_000);
-      var cIndex = 0;
+      ColorIndex = 0;
       CommentNode? lastComment = null;
       foreach (var sn in rn.Statements)
       {
@@ -79,7 +87,7 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
             continue;
 
          if (LUtil.TryAddToGlobals(skn.KeyToken, ref pc, loc))
-            loc.ColorIndex = cIndex++;
+            loc.ColorIndex = ColorIndex++;
       }
    }
 
@@ -90,4 +98,36 @@ public class LocationFileLoading(IEnumerable<IDependencyNode<string>> dependenci
       => throw new NotSupportedException("LocationFileLoading should only be used in discovery phase.");
 
    public override bool CanBeReloaded => false;
+
+   /// <summary>
+   ///    Parses the Eu5 placeholder hex values from the files from the comments. Mostly they appear as UNUSED = VALUE or =
+   ///    VALUE
+   /// </summary>
+   /// <param name = "colors" ></param>
+   public void AddPlaceholders(HashSet<int> colors)
+   {
+      var preUnused = colors.Count;
+      var regex = new Regex("([A-Fa-f0-9]{6})");
+      foreach (var fo in DescriptorDefinitions.LocationDescriptor.Files)
+      {
+         var lines = IO.IO.ReadAllLines(fo.GetFullPath(), Encoding.UTF8);
+         if (lines == null || lines.Length == 0)
+            continue;
+
+         foreach (var line in lines)
+         {
+            if (!line.TrimStart().StartsWith("#"))
+               continue;
+
+            var match = regex.Match(line);
+            if (!match.Success)
+               continue;
+
+            if (int.TryParse(match.Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var hex))
+               colors.Add(hex);
+         }
+      }
+
+      ArcLog.WritePure($"Added {colors.Count - preUnused} placeholder colors from comments in location files. Total unique colors: {colors.Count}");
+   }
 }

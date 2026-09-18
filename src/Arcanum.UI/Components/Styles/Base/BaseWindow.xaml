@@ -57,7 +57,8 @@
                                         Margin = "{TemplateBinding HeaderMargin}">
 
                                     <DockPanel Background = "{TemplateBinding HeaderBackGroundBrush}"
-                                               LastChildFill = "True">
+                                               LastChildFill = "True"
+                                               Tag = "{Binding RelativeSource={RelativeSource TemplatedParent}}">
                                         <DockPanel.Resources>
                                             <Style TargetType = "{x:Type base:BaseButton}"
                                                    BasedOn = "{StaticResource {x:Type base:BaseButton}}">
@@ -68,6 +69,21 @@
                                                 <Setter Property = "Margin" Value = "0" />
                                             </Style>
                                         </DockPanel.Resources>
+
+                                        <DockPanel.ContextMenu>
+                                            <ContextMenu>
+                                                <!-- ReSharper disable twice Xaml.BindingWithContextNotResolved -->
+                                                <MenuItem Header = "Always on Top" IsCheckable = "True"
+                                                          IsChecked = "{Binding PlacementTarget.Tag.Topmost, RelativeSource={RelativeSource AncestorType=ContextMenu}, Mode=TwoWay}"
+                                                          Command = "{Binding PlacementTarget.Tag.ToggleTopmostCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                                    <MenuItem.Icon>
+                                                        <Image
+                                                            Source = "/Arcanum_UI;component/Assets/Icons/20x20/Pin20x20.png"
+                                                            Width = "16" Height = "16" />
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </DockPanel.ContextMenu>
 
                                         <behaviors:Interaction.Behaviors>
                                             <customBehaviors:WindowDrag />

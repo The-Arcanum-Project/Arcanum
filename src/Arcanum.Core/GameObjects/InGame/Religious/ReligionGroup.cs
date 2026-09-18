@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -12,9 +14,12 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.InGame.Economy;
 using Arcanum.Core.GameObjects.InGame.Map;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Religious;
 
@@ -47,6 +52,18 @@ public partial class ReligionGroup : IEu5Object<ReligionGroup>, IMapInferable
    [ParseAs("modifier", itemNodeType: AstNodeType.ContentNode)]
    [Description("Modifiers applied to members of this ReligionGroup.")]
    public ObservableRangeCollection<ModValInstance> Modifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("clergy_goods_demand_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers affecting the demand for goods by clergy of this ReligionGroup.")]
+   public ObservableRangeCollection<GoodsDemand> ClergyGoodsDemandModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("goods_demand_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers affecting the demand for goods of this religion.")]
+   public ObservableRangeCollection<GoodsDemand> GoodsDemandModifiers { get; set; } = [];
 
    #endregion
 

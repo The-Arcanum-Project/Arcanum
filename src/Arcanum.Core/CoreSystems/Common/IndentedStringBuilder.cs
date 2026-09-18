@@ -4,7 +4,9 @@ using System.Globalization;
 using System.Text;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.CoreSystems.SavingSystem.Serialization;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.Registry;
 
 #endregion
 
@@ -606,6 +608,16 @@ public class IndentedStringBuilder
 
       PrependIndentIfNecessary();
       InnerBuilder.Append(value);
+      return this;
+   }
+
+   public IndentedStringBuilder Append(IEu5Object obj)
+   {
+      if (!Equals(obj, EmptyRegistry.Empties[obj.GetType()]))
+         return this;
+
+      PrependIndentIfNecessary();
+      InnerBuilder.Append(obj.UniqueId);
       return this;
    }
 

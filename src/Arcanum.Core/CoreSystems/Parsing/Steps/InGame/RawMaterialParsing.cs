@@ -1,13 +1,17 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
 using RawMaterial = Arcanum.Core.GameObjects.InGame.Economy.RawMaterial;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame;
 
-[ParserFor(typeof(RawMaterial))]
+[ParserFor(typeof(RawMaterial), IgnoredBlockKeys = ["location_potential", "disease_demand_modifier"])]
 public partial class RawMaterialParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<RawMaterial>(dependencies)
 {

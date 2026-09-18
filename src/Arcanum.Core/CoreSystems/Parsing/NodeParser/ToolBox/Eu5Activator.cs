@@ -1,6 +1,10 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.GameObjects.BaseTypes;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
@@ -30,6 +34,8 @@ public static class Eu5Activator
 
       return t;
    }
+
+   public static T CreateAnonymusInstance<T>(StatementNode node) where T : IEu5Object<T>, new() => CreateEmbeddedInstance<T>(null, node);
 
    public static T CreateInstance<T>(string uniqueId, Eu5FileObj source, StatementNode node)
       where T : IEu5Object<T>, new()

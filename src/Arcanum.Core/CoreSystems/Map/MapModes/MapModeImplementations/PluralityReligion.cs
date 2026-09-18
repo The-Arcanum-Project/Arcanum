@@ -1,10 +1,14 @@
-﻿using System.Runtime.InteropServices;
+﻿#region
+
+using System.Runtime.InteropServices;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class PluralityReligion : LocationBasedMapMode
+public sealed class PluralityReligion : LocationBasedMapMode
 {
    public override string Name => "Plurality Religion";
    public override string Description => "Displays the plurality culture of each location on the map.";

@@ -1,3 +1,5 @@
+#region
+
 using System.Diagnostics;
 using System.Windows;
 using Arcanum.Core.CoreSystems.ErrorSystem;
@@ -6,15 +8,14 @@ using Arcanum.Core.CoreSystems.SavingSystem;
 using Arcanum.Core.FlowControlServices;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI;
-using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
 using Arcanum.UI.Components.Windows.MainWindows;
+using Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
 using Common.Logger;
 using Common.UI;
-#if !DEBUG
-using Arcanum.UI.Components.Windows.MinorWindows.CrashHandler;
-#endif
+
+#endregion
 
 namespace Arcanum.App;
 
@@ -26,26 +27,26 @@ internal static class Program
    [STAThread]
    private static void Main(string[] args) // CHANGED: Added args
    {
-#if !DEBUG
       try
       {
          InternalApplicationRun(args);
       }
       catch (Exception e)
       {
+#if DEBUG
+         if (!DebugConfig.Settings.ProduceCrashLogs)
+            throw;
+#endif
          // In headless mode, write to console too
          if (args.Contains("--headless") || args.Contains("-batch"))
          {
             ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, $"CRITICAL ERROR: {e.Message}");
-            ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, e.StackTrace);
+            ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, e.StackTrace ?? string.Empty);
          }
 
          CrashHandler.Show(e);
          Application.Current?.Shutdown(1);
       }
-#else
-      InternalApplicationRun(args);
-#endif
    }
 
    private static void InternalApplicationRun(string[] args)
@@ -54,17 +55,18 @@ internal static class Program
       _ = typeof(BaseWindow);
       LoadApplicationResources(app);
 
+      AppData.IsHeadless = args.Contains("--headless") || args.Contains("-h");
+
       // Initialize Plugin Host and Lifecycle Manager
       var pluginHost = new PluginHost.PluginHost();
       UiHandlesInjector.InjectUiHandles();
       UIHandle.Instance.UIUtils.SetStartupScreen(true);
       LifecycleManager.Instance.DebugInit();
       CommandRegistry.Initialize();
-      FeatureLibrary.Initialize();
       LifecycleManager.Instance.RunStartUpSequence(pluginHost);
       var clean = false;
 
-      if (args.Contains("--headless") || args.Contains("-h"))
+      if (AppData.IsHeadless)
          // --- HEADLESS MODE ---
          try
          {
@@ -76,7 +78,6 @@ internal static class Program
                return;
             }
 
-            AppData.IsHeadless = true;
             Debug.Assert(config.ModPath != null);
             ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, "Init FileManager...");
             FileManager.InitHeadlessMode(config.ModPath, config.BaseMods);
@@ -84,6 +85,8 @@ internal static class Program
 
             ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, "Logic executed successfully.");
 
+            if (config.Clean)
+               ConsoleHelper.SafeClear();
             ErrorManager.PrintDiagnosticsToConsole(config.Clean);
             clean = config.Clean;
          }
@@ -96,6 +99,7 @@ internal static class Program
          {
             if (!clean)
                ArcLog.WriteLine(CommonLogSource.PRT, LogLevel.INF, "Shutting down...");
+            ArcLog.DequeueAll();
             LifecycleManager.Instance.RunShutdownSequence();
             ConsoleHelper.ReleaseConsole();
             app.Shutdown(Environment.ExitCode);
@@ -145,7 +149,7 @@ internal static class Program
          $"/{uiAssemblyName};component/Components/Styles/Specific/CenteredTabControlStyle.xaml",
          $"/{uiAssemblyName};component/Components/Styles/Base/BaseTreeView.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseListView.xaml",
          $"/{uiAssemblyName};component/Components/UserControls/BaseControls/AutoCompleteBox/AutoCompleteComboBoxStyle.xaml",
-         $"/{uiAssemblyName};component/Components/Styles/Base/MarkdownStyles.xaml",
+         $"/{uiAssemblyName};component/Components/Styles/Base/MarkdownStyles.xaml", $"/{uiAssemblyName};component/Components/Styles/Base/BaseExpander.xaml",
       };
 
       foreach (var path in resources)

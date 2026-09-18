@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -17,6 +19,8 @@ using Arcanum.Core.GameObjects.InGame.Economy.SubClasses;
 using Arcanum.Core.GameObjects.InGame.Map;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Economy;
 
@@ -69,10 +73,34 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    public bool Inflation { get; set; }
 
    [SaveAs]
+   [ParseAs("origin_in_old_world")]
+   [Description("Indicates whether this raw material originates in the Old World.")]
+   [DefaultValue(false)]
+   public bool OriginInOldWorld { get; set; }
+
+   [SaveAs]
+   [ParseAs("origin_in_new_world")]
+   [Description("Indicates whether this raw material originates in the New World.")]
+   [DefaultValue(false)]
+   public bool OriginInNewWorld { get; set; }
+
+   [SaveAs]
+   [ParseAs("no_demand_if_no_market_availability")]
+   [Description("Indicates whether this raw material has no demand if it's not available in the market.")]
+   [DefaultValue(false)]
+   public bool NoDemandIfNoMarketAvailability { get; set; }
+
+   [SaveAs]
    [ParseAs("base_production")]
    [Description("The base production amount of this raw material.")]
    [DefaultValue(0f)]
    public float BaseProduction { get; set; }
+
+   [SaveAs]
+   [ParseAs("market_unavailability_demand_modifier")]
+   [Description("The demand modifier applied when this raw material is unavailable in the market.")]
+   [DefaultValue(0f)]
+   public float MarketUnavailabilityDemandModifier { get; set; }
 
    [SaveAs]
    [ParseAs("food")]
@@ -93,6 +121,12 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    public float DefaultMarketPrice { get; set; } = 1f;
 
    [SaveAs]
+   [ParseAs("disease_demand_modifier")]
+   [Description("The disease demand modifier for this raw material.")]
+   [DefaultValue(1f)]
+   public float DiseaseDemandModifier { get; set; } = 1f;
+
+   [SaveAs]
    [ParseAs("ai_rgo_size_importance")]
    [Description("ai preference to avoid building a city on this rgo.")]
    [DefaultValue(1f)]
@@ -103,6 +137,36 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    [Description("The importance of this raw material for AI when expanding rgos.")]
    [DefaultValue(1f)]
    public float AiRgoExpansionPriority { get; set; } = 1f;
+
+   [SaveAs]
+   [ParseAs("max_rgo_size")]
+   [Description("The maximum size of RGOs that can be built with this raw material.")]
+   [DefaultValue(1f)]
+   public float MaxRgoSize { get; set; } = 1f;
+
+   [SaveAs]
+   [ParseAs("literacy_demand_factor")]
+   [Description("The factor by which literacy affects the demand for this raw material.")]
+   [DefaultValue(0f)]
+   public float LiteracyDemandFactor { get; set; } = 0f;
+
+   [SaveAs]
+   [ParseAs("demand_only_in_sub_continent")]
+   [Description("Indicates whether this raw material can only be demanded in specific sub-continents.")]
+   [DefaultValue(null)]
+   public SubContinent DemandOnlyInSubContinent { get; set; } = SubContinent.Empty;
+
+   [SaveAs]
+   [ParseAs("demand_only_in_continent")]
+   [Description("Indicates whether this raw material can only be demanded in specific continents.")]
+   [DefaultValue(null)]
+   public Continent DemandOnlyInContinent { get; set; } = Continent.Empty;
+
+   [SaveAs]
+   [ParseAs("demand_only_in_region")]
+   [Description("Indicates whether this raw material can only be demanded in specific regions.")]
+   [DefaultValue(null)]
+   public Region DemandOnlyInRegion { get; set; } = Region.Empty;
 
    [SaveAs]
    [ParseAs("custom_tags", itemNodeType: AstNodeType.KeyOnlyNode)]
@@ -128,6 +192,42 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    [DefaultValue(null)]
    public ObservableRangeCollection<DemandData> DemandMultiply { get; set; } = [];
 
+   [SaveAs]
+   [ParseAs("winter_demand_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description(" The winter demand modifier for this raw material.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<WinterGoodsDemand> WinterGoodsDemands { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("continent_demand_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Indicates whether this raw material can only be demanded in specific continents.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<ContinentDemand> ContinentDemandModifier { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("climate_demand_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Indicates whether this raw material can only be demanded in specific climates.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<ClimateDemand> ClimateDemandModifier { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("topography_demand_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description(" The topography demand modifier for this raw material.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<TopographyGoodsDemand> TopographyGoodsDemands { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("sub_continent_demand_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description(" The sub-continent demand modifier for this raw material.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<SubContinentGoodsDemand> SubContinentGoodsDemands { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("region_demand_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description(" The region demand modifier for this raw material.")]
+   [DefaultValue(null)]
+   public ObservableRangeCollection<RegionGoodsDemand> RegionGoodsDemands { get; set; } = [];
+
    [SaveAs(SavingValueType.IAgs, isEmbeddedObject: true, saveEmbeddedAsIdentifier: false)]
    [ParseAs("wealth_impact_threshold", itemNodeType: AstNodeType.BlockNode, iEu5KeyType: typeof(Estate))]
    [Description("The wealth impact thresholds for this raw material.")]
@@ -151,7 +251,7 @@ public partial class RawMaterial : IEu5Object<RawMaterial>, IMapInferable
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public bool IsReadonly => false;
+   public bool IsReadonly => true;
    public INUINavigation[] Navigations => [];
    public InjRepType InjRepType { get; set; } = InjRepType.None;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.RawMaterialSettings;

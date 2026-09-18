@@ -20,9 +20,6 @@ using Nexus.Core.Attributes;
 
 namespace Arcanum.Core.GameObjects.InGame.Map;
 
-[ParserFor(typeof(MapMovementAssist))]
-public static partial class MapMovementAssistParsingWhy;
-
 [NexusConfig]
 [ObjectSaveAs(asOneLine: true)]
 public partial class LocationTemplateData : IEu5Object<LocationTemplateData>, IMapInferable

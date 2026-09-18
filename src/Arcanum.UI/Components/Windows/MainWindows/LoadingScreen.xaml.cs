@@ -25,7 +25,6 @@ public partial class LoadingScreen : INotifyPropertyChanged
    private readonly string[] _loadingTips =
    [
       "Press `F10` to view the error log", "Press `F1` to open the settings", "Press `Ctrl + F` to open the application wide search: \"Queastor\"",
-      "Are you missing a feature? Open an issue on GitHub or join the Discord server to see if a member of the community created a plugin for it!",
       "You can customize which properties of each element are shown in the settings.",
       "Backing up your mod files before making changes is always a good idea!",
       "Are the popups of errors annoying? You can disable them in the settings individually or all at once.",
@@ -33,8 +32,9 @@ public partial class LoadingScreen : INotifyPropertyChanged
       "You can edit as many objects as you want at once! Just select them all and edit their properties in the sidebar.",
       "With `RMB` on a map mode button you can change the mapmode assigned to it.",
       "Working on several mods at once? You can access recently opened mods from the main menu!",
-      "You don't want to edit location data but climates/religions/cultures instead? Just switch the map mode and use `infer selection` mode!",
-      "You have errors in your mod? Use the Error Log (`F10`) to view and the \"navigat to file\" button on the bottom right to open the file at the errors location!",
+      "Use the 'Infer Selection' tool to edit religions, cultures, and climates from the map!",
+      "Use `F10` to open the Error Log to see what errors Arcanum finds with your mod",
+      "You can navigate to an error's location through the Error Log by using the `Navigate to File` button",
    ];
 
    private DispatcherTimer? _tipTimer;

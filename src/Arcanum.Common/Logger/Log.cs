@@ -1,6 +1,10 @@
-﻿using System.Collections.Concurrent;
+﻿#region
+
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+
+#endregion
 
 namespace Common.Logger;
 
@@ -208,4 +212,10 @@ public static class ArcLog
       Exception? Exception,
       object[]? Args,
       DateTime Timestamp);
+
+   public static void DequeueAll()
+   {
+      while (LogQueue.Count > 0)
+         ProcessLogQueue();
+   }
 }

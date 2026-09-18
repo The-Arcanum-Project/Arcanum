@@ -21,7 +21,7 @@
     <Style TargetType = "{x:Type FlowDocument}" x:Key = "{x:Static md:Styles.DocumentStyleKey}">
         <Setter Property = "Foreground" Value = "{StaticResource DefaultForeColorBrush}" />
         <Setter Property = "FontFamily" Value = "{StaticResource DefaultFont}" />
-        <Setter Property = "FontSize" Value = "{StaticResource DefaultFontSize}" />
+        <Setter Property = "FontSize" Value = "14" />
         <Setter Property = "TextAlignment" Value = "Left" />
         <Setter Property = "PagePadding" Value = "15" />
     </Style>

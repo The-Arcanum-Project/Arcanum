@@ -1,10 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region
+
+using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 
@@ -50,9 +54,9 @@ public static class BnHelpers
    }
 
    /// <summary>
-   /// !!!!!!! WARNING !!!!!!! <br/>
-   /// This is a placeholder for which validates the given content. <br/>
-   /// Only use if the objects needed to validate are not yet parsed! 
+   ///    !!!!!!! WARNING !!!!!!! <br />
+   ///    This is a placeholder for which validates the given content. <br />
+   ///    Only use if the objects needed to validate are not yet parsed!
    /// </summary>
    public static void SetIdentifierList(this BlockNode bn,
                                         ref ParsingContext pc,
@@ -71,7 +75,15 @@ public static class BnHelpers
    }
 
    public static Eu5ObjectLocation GetFileLocation(this BlockNode bn)
+      => new(bn.KeyNode.Column, bn.KeyNode.Line, bn.GetEndLocation().charPos - bn.KeyNode.Start, bn.KeyNode.Start);
+
+   public static Eu5ObjectLocation GetFileLocation(this RootNode rn)
    {
-      return new(bn.KeyNode.Column, bn.KeyNode.Line, bn.GetEndLocation().charPos - bn.KeyNode.Start, bn.KeyNode.Start);
+      var (line, col) = rn.GetLocation();
+
+      return new(col,
+                 line,
+                 rn.Length,
+                 rn.Start);
    }
 }

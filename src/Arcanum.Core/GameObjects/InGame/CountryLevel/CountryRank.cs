@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
@@ -11,6 +13,8 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.CountryLevel;
 
@@ -43,6 +47,12 @@ public partial class CountryRank : IEu5Object<CountryRank>
    [DefaultValue(1)]
    [Description("The AI level associated with this CountryRank, influencing how the AI utilizes this rank in gameplay.")]
    public int AiLevel { get; set; }
+
+   [SaveAs]
+   [ParseAs("ai_conquer_desire_multiplier")]
+   [DefaultValue(1)]
+   [Description("The multiplier that affects the AI's desire to conquer territories when holding this CountryRank.")]
+   public int AiConquerDesire { get; set; }
 
    [SaveAs]
    [ParseAs("character_ai_cooldown")]

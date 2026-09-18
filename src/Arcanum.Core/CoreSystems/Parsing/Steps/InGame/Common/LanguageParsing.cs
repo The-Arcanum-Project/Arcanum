@@ -1,9 +1,14 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
+using Arcanum.Core.GameObjects.InGame.Cultural;
 using Arcanum.Core.Utils.Sorting;
 using Language = Arcanum.Core.GameObjects.InGame.Cultural.Language;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
@@ -46,3 +51,9 @@ public partial class LanguageParsing(IEnumerable<IDependencyNode<string>> depend
                                                    ref ParsingContext pc,
                                                    bool allowUnknownNodes) => ParseProperties(block, target, ref pc, allowUnknownNodes);
 }
+
+[ParserFor(typeof(NameCollection), IgnoredBlockKeys = ["trigger"])]
+public static partial class NameCollectionParsing;
+
+[ParserFor(typeof(NamingWeight))]
+public static partial class NamingWeightParsing;

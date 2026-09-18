@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AiTags;
@@ -23,6 +25,8 @@ using Arcanum.Core.GameObjects.InGame.Cultural;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects;
 using Nexus.Core.Attributes;
 using ReligiousSchool = Arcanum.Core.GameObjects.InGame.Religious.ReligiousSchool;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 
@@ -58,7 +62,7 @@ public partial class Country : IEu5Object<Country>, IMapInferable
    [DefaultValue(null)]
    [Description("The capital location of this country.")]
    public Location Capital { get; set; } = Location.Empty;
-
+   
    [SaveAs]
    [ParseAs("revolt")]
    [DefaultValue(false)]
@@ -102,6 +106,18 @@ public partial class Country : IEu5Object<Country>, IMapInferable
    public Language LiturgicalLanguage { get; set; } = Language.Empty;
 
    [SaveAs]
+   [ParseAs("past_liturgical_dialects")]
+   [DefaultValue(null)]
+   [Description("The past liturgical dialects of this country.")]
+   public ObservableRangeCollection<Language> PastLiturgicalDialects { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("past_court_dialects")]
+   [DefaultValue(null)]
+   [Description("The past court dialects of this country.")]
+   public ObservableRangeCollection<Language> PastCourtDialects { get; set; } = [];
+
+   [SaveAs]
    [ParseAs("country_rank")]
    [DefaultValue(null)]
    [Description("The rank of this country.")]
@@ -125,6 +141,12 @@ public partial class Country : IEu5Object<Country>, IMapInferable
    [DefaultValue("")]
    [Description("The key for the name of this country.")]
    public string CountryName { get; set; } = string.Empty;
+
+   [SaveAs]
+   [ParseAs("rebellion_demand")]
+   [DefaultValue("")]
+   [Description("The key for the rebellion demand of this country.")]
+   public string RebellionDemand { get; set; } = string.Empty;
 
    [SaveAs(SavingValueType.Identifier, saveEmbeddedAsIdentifier: false, mustNotBeWritten: "BuildingBasedCountryLimit")]
    [AgsCollectionFormat(ItemsPerRow = 10)]
@@ -222,6 +244,12 @@ public partial class Country : IEu5Object<Country>, IMapInferable
    [DefaultValue(null)]
    [Description("A list of tolerated cultures for this country.")]
    public ObservableRangeCollection<Culture> ToleratedCultures { get; set; } = [];
+
+   [SaveAs(SavingValueType.Identifier)]
+   [ParseAs("culture")]
+   [DefaultValue(null)]
+   [Description("A list of cultures for this country.")]
+   public Culture Culture { get; set; } = Culture.Empty;
 
    [SaveAs]
    [ParseAs("currency_data", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]

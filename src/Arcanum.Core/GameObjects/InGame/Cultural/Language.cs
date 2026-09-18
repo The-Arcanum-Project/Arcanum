@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -16,7 +18,22 @@ using Arcanum.Core.GameObjects.InGame.Map;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Nexus.Core.Attributes;
 
+#endregion
+
 namespace Arcanum.Core.GameObjects.InGame.Cultural;
+
+public enum NameConfigType
+{
+   [EnumAgsData("none", true)]
+   None,
+
+   [EnumAgsData("primary")]
+   Primary,
+
+   [EnumAgsData("secondary")]
+   Secondary,
+}
+
 
 [NexusConfig]
 [ObjectSaveAs]
@@ -24,6 +41,24 @@ public partial class Language : IEu5Object<Language>, IMapInferable
 {
    #region Nexus Properties
 
+   [SaveAs]
+   [DefaultValue(NameConfigType.None)]
+   [Description("The format used for first names in this language.")]
+   [ParseAs("first_name_format")]
+   public NameConfigType FirstNameFormat { get; set; } = NameConfigType.None;
+
+   [SaveAs]
+   [DefaultValue(NameConfigType.None)]
+   [Description("The format used for last names in this language.")]
+   [ParseAs("last_name_format")]
+   public NameConfigType LastNameFormat { get; set; } = NameConfigType.None;
+
+   [SaveAs]
+   [DefaultValue(NameConfigType.None)]
+   [Description("The format used for first nick names in this language.")]
+   [ParseAs("nickname_name_format")]
+   public NameConfigType NickNameFormat { get; set; } = NameConfigType.None;
+   
    [SaveAs]
    [DefaultValue(false)]
    [Description("Whether this language requires location names in the genitive case.")]
@@ -35,6 +70,12 @@ public partial class Language : IEu5Object<Language>, IMapInferable
    [Description("Whether this language is the default dialect for its parent language.")]
    [ParseAs("default")]
    public bool IsDefaultDialect { get; set; }
+
+   [SaveAs]
+   [DefaultValue(false)]
+   [Description("Whether this language uses female birth order")]
+   [ParseAs("use_female_birth_order_names")]
+   public bool UseFemaleBirthOrderNames { get; set; }
 
    [SaveAs]
    [DefaultValue("")]
@@ -172,37 +213,32 @@ public partial class Language : IEu5Object<Language>, IMapInferable
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available male names for this language")]
-   [ParseAs("male_names", AstNodeType.BlockNode)]
-   [AgsCollectionFormat(ItemsPerRow = 10)]
-   public ObservableRangeCollection<string> MaleNames { get; set; } = [];
+   [ParseAs("male_names", AstNodeType.BlockNode, isEmbedded: true, isShatteredList: true)]
+   public ObservableRangeCollection<NameCollection> MaleNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available female names for this language")]
-   [ParseAs("female_names", AstNodeType.BlockNode)]
-   [AgsCollectionFormat(ItemsPerRow = 10)]
-   public ObservableRangeCollection<string> FemaleNames { get; set; } = [];
+   [ParseAs("female_names", AstNodeType.BlockNode, isEmbedded: true, isShatteredList: true)]
+   public ObservableRangeCollection<NameCollection> FemaleNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available dynasty names for this language")]
-   [ParseAs("dynasty_names", AstNodeType.BlockNode)]
-   [AgsCollectionFormat(ItemsPerRow = 10)]
-   public ObservableRangeCollection<string> DynastyNames { get; set; } = [];
+   [ParseAs("dynasty_names", AstNodeType.BlockNode, isEmbedded: true, isShatteredList: true)]
+   public ObservableRangeCollection<NameCollection> DynastyNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available lowborn names for this language")]
-   [ParseAs("lowborn", AstNodeType.BlockNode)]
-   [AgsCollectionFormat(ItemsPerRow = 10)]
-   public ObservableRangeCollection<string> LowbornNames { get; set; } = [];
+   [ParseAs("lowborn", AstNodeType.BlockNode, isEmbedded: true, isShatteredList: true)]
+   public ObservableRangeCollection<NameCollection> LowbornNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
    [Description("A list of available ship names for this language")]
-   [ParseAs("ship_names", AstNodeType.BlockNode)]
-   [AgsCollectionFormat(ItemsPerRow = 10)]
-   public ObservableRangeCollection<string> ShipNames { get; set; } = [];
+   [ParseAs("ship_names", AstNodeType.BlockNode, isEmbedded: true, isShatteredList: true)]
+   public ObservableRangeCollection<NameCollection> ShipNames { get; set; } = [];
 
    [SaveAs(SavingValueType.Identifier)]
    [DefaultValue(false)]
@@ -254,7 +290,7 @@ public partial class Language : IEu5Object<Language>, IMapInferable
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);
    public ISearchResult VisualRepresentation => new SearchResultItem(null, UniqueId, GetNamespace.Replace('.', '>'));
    public Enum SearchCategory => IQueastorSearchSettings.DefaultCategories.GameObjects;
-   public bool IsReadonly => false;
+   public bool IsReadonly => true;
    public NUISetting NUISettings => Config.Settings.NUIObjectSettings.LanguageNuiSettings;
    public INUINavigation[] Navigations => [];
    public AgsSettings AgsSettings => Config.Settings.AgsSettings.Language;

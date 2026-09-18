@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
@@ -16,6 +18,8 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Nexus.Core.Attributes;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Map;
 
@@ -41,6 +45,42 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
    }
 
    #endregion
+
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
+   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Climate;
+   public string SavingKey => UniqueId;
+
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Climate;
+
+   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
+   {
+      HashSet<IEu5Object> climates = [];
+      foreach (var loc in sLocs)
+      {
+         if (loc.TemplateData == LocationTemplateData.Empty && loc.TemplateData.Climate != Empty)
+            continue;
+
+         climates.Add(loc.TemplateData.Climate);
+      }
+
+      return climates.ToList();
+   }
+
+   public List<Location> GetRelevantLocations(IEu5Object[] items)
+   {
+      Debug.Assert(items.All(x => x is Climate));
+      var objs = items.Cast<Climate>().ToArray();
+
+      List<Location> locations = [];
+
+      foreach (var loc in Globals.Locations.Values)
+         if (objs.Contains(loc.TemplateData.Climate) &&
+             loc.TemplateData != LocationTemplateData.Empty &&
+             loc.TemplateData.Climate != Empty)
+            locations.Add(loc);
+
+      return locations;
+   }
 
 #pragma warning disable AGS004
    [Description("Unique key of this object. Must be unique among all objects of this type.")]
@@ -83,6 +123,17 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
    public bool AlwaysWinter { get; set; }
 
    [SaveAs]
+   [DefaultValue(0f)]
+   [ParseAs("colonial_migration_size_modifier")]
+   [Description("The modifier for colonial migration size associated with this climate type.")]
+   public float ColonialMigrationSizeModifier { get; set; }
+
+   [SaveAs]
+   [DefaultValue(1.0f)]
+   [ParseAs("proximity")]
+   [Description("The proximity factor for this climate type.")]
+   public float Proximity { get; set; } = 1.0f;
+   [SaveAs]
    [DefaultValue(null)]
    [ParseAs("unit_modifier", itemNodeType: AstNodeType.ContentNode)]
    [Description("The unit modifier applied to units in provinces with this climate.")]
@@ -94,7 +145,8 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
    [Description("The location modifier applied to provinces with this climate.")]
    public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
 
-   [SaveAs, AgsCollectionFormat(ItemsPerRow = 1)]
+   [SaveAs]
+   [AgsCollectionFormat(ItemsPerRow = 1)]
    [DefaultValue(null)]
    [ParseAs("audio_tags", itemNodeType: AstNodeType.ContentNode)]
    [Description("The audio tags associated with this climate.")]
@@ -128,40 +180,4 @@ public partial class Climate : IEu5Object<Climate>, IMapInferable
                                  IQueastorSearchSettings.DefaultCategories.GameObjects;
 
    #endregion
-
-   public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public AgsSettings AgsSettings => Config.Settings.AgsSettings.Climate;
-   public string SavingKey => UniqueId;
-
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Climate;
-
-   public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs)
-   {
-      HashSet<IEu5Object> climates = [];
-      foreach (var loc in sLocs)
-      {
-         if (loc.TemplateData == LocationTemplateData.Empty && loc.TemplateData.Climate != Empty)
-            continue;
-
-         climates.Add(loc.TemplateData.Climate);
-      }
-
-      return climates.ToList();
-   }
-
-   public List<Location> GetRelevantLocations(IEu5Object[] items)
-   {
-      Debug.Assert(items.All(x => x is Climate));
-      var objs = items.Cast<Climate>().ToArray();
-
-      List<Location> locations = [];
-
-      foreach (var loc in Globals.Locations.Values)
-         if (objs.Contains(loc.TemplateData.Climate) &&
-             loc.TemplateData != LocationTemplateData.Empty &&
-             loc.TemplateData.Climate != Empty)
-            locations.Add(loc);
-
-      return locations;
-   }
 }

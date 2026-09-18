@@ -1,5 +1,9 @@
-﻿using Arcanum.Core.ApplicationContext;
-using Arcanum.UI.AppFeatures;
+﻿#region
+
+using Arcanum.Core.ApplicationContext;
+using Arcanum.UI.Documentation.Implementation;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
 
@@ -9,7 +13,7 @@ public interface IHelpPageViewModelWrapper : IAppContext
    /// Activates the feature tab for the given feature. If the feature is not found, it does nothing.
    /// </summary>
    /// <param name="feature">The feature to focus</param>
-   public void ActivateFeatureTabFor(IAppFeature feature);
+   public void ActivateFeatureTabFor(FeatureDoc feature);
 
    /// <summary>
    /// Shows the next tip in the dashboard view. If there are no tips, it does nothing.

@@ -1,0 +1,129 @@
+﻿<UserControl x:Class = "Arcanum.UI.Components.UserControls.ValueAllocators.LabeledSlider"
+             xmlns = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml" x:Name = "Root">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseTextBoxStyle.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BlueTollgeButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key = "SliderRepeatButtonStyle" TargetType = "RepeatButton">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "IsTabStop" Value = "false" />
+                <Setter Property = "Focusable" Value = "false" />
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "RepeatButton">
+                            <Border Background = "{TemplateBinding Background}" Height = "4" CornerRadius = "2" />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <Style x:Key = "SlimSliderThumbStyle" TargetType = "Thumb">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "Cursor" Value = "Hand" />
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "Thumb">
+                            <Grid Background = "Transparent">
+                                <!-- 
+                                   THE INVISIBLE GRIP (Hit Box):
+                                   We make this wider than the visual thumb (e.g. 24px).
+                                   We use Negative Margins to center it over the 6px root.
+                                   Background="Transparent" captures the mouse clicks.
+                                -->
+                                <Border Width = "24" Height = "24" Margin = "-9,0,-9,0" Background = "Transparent" />
+
+                                <!-- THE VISUAL HANDLE -->
+                                <Border x:Name = "VisualThumb" Background = "#E0E0E0" BorderBrush = "#111"
+                                        BorderThickness = "1" CornerRadius = "3" Width = "6" Height = "14"
+                                        VerticalAlignment = "Center" HorizontalAlignment = "Center" />
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <Trigger Property = "IsMouseOver" Value = "True">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "White" />
+                                </Trigger>
+                                <Trigger Property = "IsDragging" Value = "True">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "White" />
+                                    <Setter TargetName = "VisualThumb" Property = "BorderBrush" Value = "#666" />
+                                </Trigger>
+                                <Trigger Property = "IsEnabled" Value = "False">
+                                    <Setter TargetName = "VisualThumb" Property = "Background" Value = "#555" />
+                                    <Setter TargetName = "VisualThumb" Property = "BorderBrush" Value = "#333" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+
+            <Style x:Key = "SlimColorSliderStyle" TargetType = "Slider">
+                <Setter Property = "OverridesDefaultStyle" Value = "true" />
+                <Setter Property = "Focusable" Value = "False" /> <!-- Prevents dotted focus rect -->
+                <Setter Property = "Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType = "Slider">
+                            <Grid>
+                                <!-- Background Rail (Dark Grey) -->
+                                <Border x:Name = "TrackBackground" Background = "#333333" Height = "4"
+                                        CornerRadius = "2" VerticalAlignment = "Center" />
+
+                                <!-- The Track logic -->
+                                <Track x:Name = "PART_Track">
+
+                                    <!-- Left Side (Filled) -->
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Style = "{StaticResource SliderRepeatButtonStyle}"
+                                                      Background = "{TemplateBinding Foreground}" />
+                                    </Track.DecreaseRepeatButton>
+
+                                    <!-- The Thumb -->
+                                    <Track.Thumb>
+                                        <Thumb Style = "{StaticResource SlimSliderThumbStyle}" />
+                                    </Track.Thumb>
+
+                                    <!-- Right Side (Unfilled) -->
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Style = "{StaticResource SliderRepeatButtonStyle}"
+                                                      Background = "Transparent" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+
+                            <ControlTemplate.Triggers>
+                                <!-- Dim the filled track when disabled/locked -->
+                                <Trigger Property = "IsEnabled" Value = "False">
+                                    <Setter Property = "Foreground" Value = "#555" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Converters -->
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <StackPanel>
+        <Grid Margin = "0,0,0,0">
+            <TextBlock Text = "{Binding Label, ElementName=Root}" FontSize = "9" Opacity = "0.5"
+                       VerticalAlignment = "Bottom" />
+
+            <TextBlock Text = "{Binding Value, ElementName=Root, StringFormat='{}{0:0.##}%'}"
+                       HorizontalAlignment = "Right" FontSize = "10" FontWeight = "Bold" VerticalAlignment = "Bottom" />
+        </Grid>
+
+        <Slider Value = "{Binding Value, ElementName=Root, Mode=TwoWay}" Minimum = "0" Maximum = "100"
+                Style = "{StaticResource SlimColorSliderStyle}"
+                Foreground = "{Binding SliderForeground, ElementName=Root}" />
+    </StackPanel>
+</UserControl>

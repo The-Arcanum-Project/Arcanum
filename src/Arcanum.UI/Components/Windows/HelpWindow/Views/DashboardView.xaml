@@ -22,6 +22,7 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:NullToVisibilityConverter x:Key = "NullToVisibilityConverter" />
             <converters:InvertedNullToVisibilityConverter x:Key = "InvertedNullToVisibilityConverter" />
+            <converters:BoolToVisibilityConverter x:Key = "BoolToVisibilityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -42,53 +43,29 @@
                             Margin = "0,0,0,20">
                         <StackPanel>
                             <TextBlock Text = "CURRENT WORKSPACE" Foreground = "{StaticResource BlueAccentColorBrush}"
-                                       FontSize = "10" FontWeight = "Bold" Margin = "0,0,0,10" />
+                                       FontSize = "12" FontWeight = "Bold" Margin = "0,0,0,5" />
 
                             <Grid
                                 Visibility = "{Binding ActiveFeature, Converter={StaticResource NullToVisibilityConverter}}">
                                 <StackPanel>
-                                    <TextBlock
-                                        Text = "{Binding ActiveFeature.DisplayName, FallbackValue=No-DisplayName}"
-                                        FontSize = "20" FontWeight = "Bold" />
-                                    <TextBlock
-                                        Text = "{Binding ActiveFeature.Description, FallbackValue=No-Description}"
-                                        Margin = "0,5,0,15" TextWrapping = "Wrap" />
+                                    <TextBlock Text = "{Binding ActiveFeature.Title, FallbackValue=No-DisplayName}"
+                                               FontSize = "20" FontWeight = "Bold" />
+                                    <TextBlock Text = "{Binding ActiveFeature.Summary, FallbackValue=No-Description}"
+                                               Margin = "0,5,0,15" TextWrapping = "Wrap" />
                                     <Border Margin = "0, 2" Height = "1" BorderThickness = "0, 1, 0, 0"
                                             SnapsToDevicePixels = "True"
+                                            Visibility = "{Binding HasTipSection, Converter={StaticResource BoolToVisibilityConverter}}"
                                             BorderBrush = "{StaticResource DefaultBorderColorBrush}" />
-                                    <TextBlock Text = "COMMON SHORTCUTS"
-                                               Foreground = "{StaticResource BlueAccentColorBrush}" FontSize = "10"
-                                               FontWeight = "Bold" Margin = "0,0,0,5" />
-                                    <ItemsControl ItemsSource = "{Binding ContextCommands}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background = "Transparent" Padding = "0, 0, 0, 5">
+                                    <TextBlock Text = "TIPS &amp; TRICKS"
+                                               Foreground = "{StaticResource BlueAccentColorBrush}" FontSize = "12"
+                                               Visibility = "{Binding HasTipSection, Converter={StaticResource BoolToVisibilityConverter}}"
+                                               FontWeight = "Bold" Margin = "0, 3, 0, -6" />
 
-                                                    <Border BorderThickness = "0, 0, 0, 1" Margin = "0">
-                                                        <baseControls:CommandWithPills AppCommand = "{Binding}"
-                                                                Margin = "0,3,0,1" />
-
-                                                        <Border.Style>
-                                                            <Style TargetType = "Border">
-                                                                <Setter Property = "BorderBrush"
-                                                                        Value = "{StaticResource LightBackColorBrush}" />
-                                                                <Setter Property = "SnapsToDevicePixels" Value = "True" />
-                                                                <Style.Triggers>
-                                                                    <DataTrigger
-                                                                        Binding = "{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Border}}"
-                                                                        Value = "True">
-                                                                        <Setter Property = "BorderBrush"
-                                                                                Value = "{StaticResource SelectedControlBorderColorBrush}" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
-                                                    </Border>
-
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                    <baseControls:ArcMarkdownViewer
+                                        ScrollViewer.VerticalScrollBarVisibility = "Disabled"
+                                        ScrollViewer.HorizontalScrollBarVisibility = "Disabled"
+                                        Visibility = "{Binding HasTipSection, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Markdown = "{Binding TipSectionContent, FallbackValue='#NO DATA'}" />
                                 </StackPanel>
                             </Grid>
 
@@ -110,14 +87,13 @@
                                         <TextBlock DockPanel.Dock = "Right" Text = "{Binding IntroducedIn}"
                                                    Foreground = "{StaticResource LightContrastForeColorBrush}"
                                                    VerticalAlignment = "Center" />
-                                        <styleClasses:CommandTextBlock Text = "{Binding DisplayName}"
-                                                                       FontWeight = "Bold" FontSize = "14"
-                                                                       VerticalAlignment = "Center" Cursor = "Hand"
-                                                                       HorizontalAlignment = "Left"
+                                        <styleClasses:CommandTextBlock Text = "{Binding Title}" FontWeight = "Bold"
+                                                                       FontSize = "14" VerticalAlignment = "Center"
+                                                                       Cursor = "Hand" HorizontalAlignment = "Left"
                                                                        Command = "{Binding DataContext.OpenFeatureCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                                        CommandParameter = "{Binding}"
                                                                        Background = "Transparent"
-                                                                       ToolTip = "{Binding Description}" />
+                                                                       ToolTip = "{Binding Summary}" />
                                     </DockPanel>
 
                                     <Border.Style>

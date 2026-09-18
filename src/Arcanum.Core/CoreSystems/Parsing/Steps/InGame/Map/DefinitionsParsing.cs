@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -11,6 +13,8 @@ using Continent = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Contin
 using Province = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Province;
 using Region = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Region;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
 [ParserFor(typeof(Continent))]
@@ -22,7 +26,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
    public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
    {
       Globals.Continents.Clear();
-      Globals.SuperRegions.Clear();
+      Globals.SubContinents.Clear();
       Globals.Regions.Clear();
       Globals.Areas.Clear();
       Globals.Provinces.Clear();
@@ -52,7 +56,7 @@ public partial class DefinitionsParsing(IEnumerable<IDependencyNode<string>> dep
          region.Index = i;
       }
 
-      var superRegions = Globals.SuperRegions.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
+      var superRegions = Globals.SubContinents.Values.OrderBy(x => x.FileLocation.CharPos).ToList();
       for (var i = 0; i < superRegions.Count; i++)
       {
          var superRegion = superRegions[i];

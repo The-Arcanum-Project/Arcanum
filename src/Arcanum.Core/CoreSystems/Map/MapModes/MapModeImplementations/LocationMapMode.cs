@@ -1,10 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region
+
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class LocationMapMode : LocationBasedMapMode
+public sealed class LocationMapMode : LocationBasedMapMode
 {
    private const string FIRST_STR = "Create a land adjacency between the previously set location and the currently selected location.";
    private Vector2 _fristAdjCoords = Vector2.Zero;
@@ -81,6 +85,8 @@ public class LocationMapMode : LocationBasedMapMode
 
    private string ExportAdj(bool isLand, Vector2 position2)
    {
+      if (Selection.Selection.SelectedLocationCount < 1)
+         return "Invalid selection";
       var location2 = Selection.Selection.GetSelectedLocations[0];
       var typeStr = isLand ? "land" : "sea";
       return
@@ -134,6 +140,7 @@ public class LocationMapMode : LocationBasedMapMode
       if (!HasValidSelectionForContextMenu(out var land1, out var land2))
          return;
 
-      System.Windows.Forms.Clipboard.SetText($"{land2.UniqueId};{land1.UniqueId};{position.X:#};{position.Y:#};x");
+      // Set text to clipboard
+      System.Windows.Clipboard.SetText($"{land2.UniqueId};{land1.UniqueId};{position.X:#};{position.Y:#};x");
    }
 }

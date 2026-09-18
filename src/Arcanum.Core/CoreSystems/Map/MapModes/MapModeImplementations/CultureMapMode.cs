@@ -1,9 +1,13 @@
-﻿using Culture = Arcanum.Core.GameObjects.InGame.Cultural.Culture;
+﻿#region
+
+using Culture = Arcanum.Core.GameObjects.InGame.Cultural.Culture;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class CultureMapMode : LocationBasedMapMode
+public sealed class CultureMapMode : LocationBasedMapMode
 {
    public override string Name => "Culture";
    public override Type[] DisplayTypes => [typeof(Culture)];

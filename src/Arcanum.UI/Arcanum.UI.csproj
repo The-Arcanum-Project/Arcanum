@@ -31,6 +31,7 @@
     <ItemGroup>
         <Resource Include="Assets\**\*.png"/>
         <Resource Include="Assets\**\*.ico"/>
+        <Resource Include="Documentation\DocuPages\Images\*.png"/>
         <EmbeddedResource Include="DirectX\Shaders\ExampleTriangle.hlsl"/>
         <EmbeddedResource Include="DirectX\Shaders\Triangle.hlsl"/>
         <EmbeddedResource Include="DirectX\Shaders\Overlay.hlsl"/>
@@ -57,9 +58,15 @@
             <XamlRuntime>Wpf</XamlRuntime>
             <SubType>Designer</SubType>
         </Page>
+        <Page Update="Components\Windows\MinorWindows\LocationColorPicker\LocationColorPicker.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <XamlRuntime>Wpf</XamlRuntime>
+            <SubType>Designer</SubType>
+        </Page>
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Documentation\DocuPages\Icons\"/>
         <Folder Include="Components\Windows\AprilFools\"/>
         <Folder Include="Documentation\DocuPages\Images\"/>
     </ItemGroup>

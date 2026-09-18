@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
@@ -11,6 +13,8 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 
@@ -67,6 +71,12 @@ public partial class LocationRank : IEu5Object<LocationRank>
    [ParseAs("rank_modifier", itemNodeType: AstNodeType.ContentNode)]
    [Description("Modifiers applied to locations of this rank.")]
    public ObservableRangeCollection<ModValInstance> RankModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("capital_country_modifier", itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers applied to capitals of this rank.")]
+   public ObservableRangeCollection<ModValInstance> CapitalCountryModifiers { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]

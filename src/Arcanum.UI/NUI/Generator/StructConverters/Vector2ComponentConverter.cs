@@ -1,11 +1,15 @@
-﻿using System.Globalization;
+﻿#region
+
+using System.Globalization;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Data;
 
+#endregion
+
 namespace Arcanum.UI.NUI.Generator.StructConverters;
 
-internal class Vector2ComponentConverter(string component) : IValueConverter
+internal sealed class Vector2ComponentConverter(string component) : IValueConverter
 {
    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
    {

@@ -5,10 +5,8 @@
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
                          xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
                          xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
-                         mc:Ignorable = "d"
-                         Title = "ColorPickerWindow"
-                         Height = "450"
-                         Width = "800">
+                         mc:Ignorable = "d" Title = "ColorPickerWindow" Height = "450" Width = "800"
+                         WindowCornerRadius = "0">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height = "*" />
@@ -18,6 +16,6 @@
             <ColumnDefinition Width = "*" />
         </Grid.ColumnDefinitions>
 
-        <baseControls:ColorPicker> </baseControls:ColorPicker>
+        <baseControls:ColorPicker />
     </Grid>
 </styleClasses:BaseWindow>

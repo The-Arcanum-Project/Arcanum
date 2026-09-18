@@ -1,8 +1,12 @@
-﻿using System.Globalization;
+﻿#region
+
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+
+#endregion
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
@@ -113,7 +117,7 @@ public partial class DecimalBaseNumericUpDown
 
       var newText = newValue.HasValue
                        ? Math.Clamp(newValue.Value, control.MinValue, control.MaxValue)
-                             .ToString("0.##########", CultureInfo.InvariantCulture)
+                             .ToString("0.##", CultureInfo.InvariantCulture)
                        : INTERMEDIATE_STATE_STRING;
 
       if (control.NudTextBox.Text != newText)

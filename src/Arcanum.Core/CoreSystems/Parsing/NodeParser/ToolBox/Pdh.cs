@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿#region
+
+using System.Diagnostics;
 using Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.NUI;
@@ -6,6 +8,8 @@ using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Nexus.Core;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
@@ -218,7 +222,7 @@ public static class Pdh
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.InvalidNodeType,
                                         sn.GetType().Name,
-                                        "ContentNode or BlockNode or is node type is correct no parse in the dictionaries was found.",
+                                        "ContentNode or BlockNode or correct but no parser in the dictionaries was found.",
                                         pc.SliceString(sn));
       }
    }

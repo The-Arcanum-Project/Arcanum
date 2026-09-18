@@ -1,7 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Arcanum.UI.AppFeatures;
+using Arcanum.UI.Documentation.Implementation;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
 
@@ -65,7 +69,7 @@ public class HelpWindowViewModel : INotifyPropertyChanged, IHelpPageViewModelWra
 
    protected void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new(name));
 
-   public void ActivateFeatureTabFor(IAppFeature feature)
+   public void ActivateFeatureTabFor(FeatureDoc feature)
    {
       // Navigate to the explorer page and activate the tab for the given feature
       Navigate(MenuItems.First(m => m.ViewModel == Explorer));

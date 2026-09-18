@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region
+
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Windows;
 using Arcanum.Core.CoreSystems.Common;
@@ -10,10 +12,14 @@ using Common.UI;
 using Common.UI.MBox;
 using ModifierDefinition = Arcanum.Core.GameObjects.InGame.Common.ModifierDefinition;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Jomini.Modifiers;
 
 public static class ModifierManager
 {
+   private static readonly ModifierDefinition pureTTEntry = new() { UniqueId = "pure_tooltip_entry" };
+
    /// <summary>
    /// If the key exists in the global modifier definitions, the inferred type is determined and
    /// the value is validated against that type, and instance is created and returned. <br/>
@@ -28,6 +34,14 @@ public static class ModifierManager
       instance = null;
       if (!Globals.ModifierDefinitions.TryGetValue(key, out var definition))
       {
+         if (key == "pure_tooltip_entry")
+         {
+#pragma warning disable CS0618 // Type or member is obsolete
+            instance = new(pureTTEntry, value, ModifierType.ScriptedValue);
+#pragma warning restore CS0618 // Type or member is obsolete
+            return true;
+         }
+
          pc.SetContext(nodeKeyNode);
          DiagnosticException.LogWarning(ref pc,
                                         ParsingError.Instance.UndefinedModifierKey,

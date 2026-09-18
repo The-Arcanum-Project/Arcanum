@@ -1,6 +1,10 @@
-﻿using Arcanum.API.UtilServices;
+﻿#region
+
+using Arcanum.API.UtilServices;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.GameObjects.InGame.Map;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem.BaseErrorTypes;
 
@@ -391,12 +395,13 @@ public class ParsingError : ILazySingleton
    /// <param name="0">The node type that is invalid</param>
    /// <param name="1">The expected node type or types</param>
    /// <param name="2">The actual node or it's name that was found</param>
+   /// 
    public DiagnosticDescriptor InvalidNodeType { get; } = new(DiagnosticCategory.Parsing,
                                                               41,
                                                               "Invalid Node Type",
                                                               DiagnosticSeverity.Error,
                                                               "The node type '{0}' ({2}) is invalid in the current context.",
-                                                              "The node ({2}) of the type '{1}' was expected but the parser encountered a node of the type '{0}' instead.\nBlock Node: `name = {{ 'some content' }}`\nContent Node: `key = value`\nKey Only Node: `name`",
+                                                              "The node ({2}) of the type '{0}' is not expected.\n   Expected:\n  {1}\n\nBlock Node: `name = {{ 'some content' }}`\nContent Node: `key = value`\nKey Only Node: `name`",
                                                               DiagnosticReportSeverity.Silent);
 
    /// <param name="0">The node type that is invalid</param>

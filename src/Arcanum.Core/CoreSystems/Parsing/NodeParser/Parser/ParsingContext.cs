@@ -1,6 +1,10 @@
-﻿using System.Runtime.CompilerServices;
+﻿#region
+
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Arcanum.Core.CoreSystems.Common;
+
+#endregion
 
 // ReSharper disable ConvertIfStatementToReturnStatement
 
@@ -72,6 +76,13 @@ public ref struct ParsingContext
    [MethodImpl(MethodImplOptions.AggressiveInlining)]
    public bool Fail()
    {
+      Validation = false;
+      return false;
+   }
+
+   public readonly bool Fail<T>(ref T value) where T : class?
+   {
+      value = null!;
       Validation = false;
       return false;
    }

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.NUI.Attributes;
@@ -11,6 +13,8 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core.Attributes;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.AbstractMechanics;
 
@@ -43,6 +47,18 @@ public partial class Age : IEu5Object<Age>
    [ParseAs("months_for_exploration_spread")]
    [Description("Months after which an exploration of an area spreads to every other country in the same subcontinent. When the exploration spreads one time in the original subcontinent it spreads again to adjacent subcontinents after that amount of time.")]
    public int MonthsForExplorationSpread { get; set; }
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("known_goods_demand_threshold")]
+   [Description("The threshold of known goods for a country to start demanding them.")]
+   public int KnownGoodsDemandThreshold { get; set; }
+
+   [SaveAs]
+   [DefaultValue(0)]
+   [ParseAs("burgher_max_trade_range")]
+   [Description("The maximum trade range for burghers during this age.")]
+   public int BurgherMaxTradeRange { get; set; }
 
    //TODO: Not exactly true, just must be >0 as there is a division in code
    [PropertyConfig(minValue: 0.001)]
@@ -96,6 +112,18 @@ public partial class Age : IEu5Object<Age>
    [ParseAs("modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
    [Description("Country modifiers applied during this age.")]
    public ObservableRangeCollection<ModValInstance> Modifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("goods_demand", itemNodeType: AstNodeType.ContentNode)]
+   [Description("The goods demand modifiers applied during this age.")]
+   public ObservableRangeCollection<ModValInstance> GoodsDemand { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("unique", itemNodeType: AstNodeType.ContentNode)]
+   [Description(" The unique modifiers applied during this age.")]
+   public ObservableRangeCollection<ModValInstance> UniqueModifiers { get; set; } = [];
 
    [SaveAs]
    [DefaultValue(null)]

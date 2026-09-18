@@ -1,5 +1,9 @@
-﻿using System.Windows.Input;
+﻿#region
+
+using System.Windows.Input;
 using Arcanum.Core.GlobalStates;
+
+#endregion
 
 namespace Arcanum.UI.Components.Views.MainWindow;
 
@@ -231,5 +235,11 @@ public static class MwCommands
    public static readonly RoutedCommand HistoryClipboardCommand = new("HistoryClipboard", typeof(MainWindowView))
    {
       InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenClipboardHistory },
+   };
+
+   // Map Editing
+   public static readonly RoutedCommand OpenLocationColorPickerCommand = new("OpenLocationColorPickerCommand", typeof(MainWindowView))
+   {
+      InputGestures = { Config.Settings.UserKeyBinds.MainWindowKeyBinds.OpenLocationColorPicker },
    };
 }

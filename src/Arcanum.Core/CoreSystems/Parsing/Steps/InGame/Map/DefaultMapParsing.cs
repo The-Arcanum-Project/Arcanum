@@ -1,9 +1,14 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
 using DefaultMapDefinition = Arcanum.Core.GameObjects.InGame.Map.DefaultMapDefinition;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
@@ -18,6 +23,7 @@ public partial class DefaultMapParsing(IEnumerable<IDependencyNode<string>> depe
    {
       foreach (var sn in rn.Statements)
          Dispatch(sn, Globals.DefaultMapDefinition, ref pc);
+      Globals.DefaultMapDefinition.FileLocation = rn.GetFileLocation();
    }
 
    protected override void ParsePropertiesToObject(BlockNode block,

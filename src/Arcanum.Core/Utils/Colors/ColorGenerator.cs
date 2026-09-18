@@ -1,12 +1,18 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Vortice.Mathematics;
 using static System.Windows.Media.Colors;
 using Color = System.Windows.Media.Color;
+
+#endregion
 
 namespace Arcanum.Core.Utils.Colors;
 
 public static class ColorGenerator
 {
+   private const int PRIME = 397;
+
    private static readonly int[] LandHueValues =
    [
       70, 231, 127, 219, 121, 7, 287, 289, 120, 268, 192, 271, 40, 224, 111, 130, 284, 328, 101, 100, 23, 45, 108, 189, 49, 20, 299, 41, 229, 206, 218, 132,
@@ -104,68 +110,9 @@ public static class ColorGenerator
       115, 936, 475, 296, 174, 282, 116, 884, 565, 598, 352, 822, 339, 832, 709, 30, 50, 444, 277, 207, 492, 428,
    ];
 
-   private const int PRIME = 397;
-
    private static readonly Color[] RedGreenGradient100 = GenerateGradient(LawnGreen, DarkRed, 100);
 
-   #region ValueGetterHelpers
-
-   public static int GetHue(bool isLand, int index)
-   {
-      return isLand
-                ? LandHueValues[index * PRIME % LandHueValues.Length]
-                // We need to subtract 360 to keep water hues within the 0-360 range. Why? I have no idea.
-                : WaterHueValues[index * PRIME % WaterHueValues.Length] - 360;
-   }
-
-   public static int GetSaturation(int index)
-   {
-      // _saturationValues range from 1 to 1000, so we need to scale it down to 0-100
-      return SaturationValues[index * PRIME % SaturationValues.Length] / 10;
-   }
-
-   public static int GetValue(int index)
-   {
-      // _valueValues range from 1 to 1000, so we need to scale it down to 0-100
-      return ValueValues[index * PRIME % ValueValues.Length] / 10;
-   }
-
-   // ReSharper disable once UnusedMember.Local
-   private static Color Generate(bool isLand, int index)
-   {
-      var h = GetHue(isLand, index);
-      var s = GetSaturation(index) / 100.0;
-      var v = GetValue(index) / 100.0;
-
-      var c = v * s;
-      var x = c * (1 - Math.Abs(h / 60 % 2 - 1));
-      var m = v - c;
-
-      double r = 0,
-             g = 0,
-             b = 0;
-      (r, g, b) = (h / 60) switch
-      {
-         0 => (c, x, 0),
-         1 => (x, c, 0),
-         2 => (0, c, x),
-         3 => (0, x, c),
-         4 => (x, 0, c),
-         5 => (c, 0, x),
-         _ => (r, g, b),
-      };
-
-      return Color.FromRgb((byte)Math.Round((r + m) * 255),
-                           (byte)Math.Round((g + m) * 255),
-                           (byte)Math.Round((b + m) * 255));
-   }
-
-   #endregion
-
-   public static Color GenerateColor(int index)
-   {
-      return Generate(false, index);
-   }
+   public static Color GenerateColor(int index) => Generate(false, index);
 
    public static Color GetRedGreenGradient(float value)
    {
@@ -220,41 +167,12 @@ public static class ColorGenerator
    }
 
    /// <summary>
-   /// Converts a Color object to its 32-bit ARGB (Alpha, Red, Green, Blue) integer representation.
-   /// This is standard for WPF and GDI.
+   ///    Generates a list of colors that are perceptually close to a given base color.
    /// </summary>
-   public static int AsArgbInt(this Color color)
-   {
-      return (color.A << 24) | (color.R << 16) | (color.G << 8) | color.B;
-   }
-
-   /// <summary>
-   /// Converts a Color object to its 32-bit ABGR (Alpha, Blue, Green, Red) integer representation.
-   /// This is common in graphics APIs like DirectX and OpenGL.
-   /// </summary>
-   public static int AsAbgrInt(this Color color)
-   {
-      // Notice the R and B channels are swapped in their bitwise positions.
-      return (color.A << 24) | (color.B << 16) | (color.G << 8) | color.R;
-   }
-
-   /// <summary>
-   /// A struct to represent a color in the HSL (Hue, Saturation, Lightness) color space.
-   /// </summary>
-   private struct HslColor
-   {
-      public double H; // Hue, from 0 to 360
-      public double S; // Saturation, from 0 to 1
-      public double L; // Lightness, from 0 to 1
-   }
-
-   /// <summary>
-   /// Generates a list of colors that are perceptually close to a given base color.
-   /// </summary>
-   /// <param name="baseColor">The starting color.</param>
-   /// <param name="count">The number of color variations to generate.</param>
-   /// <param name="saturationVariation">The maximum amount Saturation can change (e.g., 0.1 for +/- 10%).</param>
-   /// <param name="lightnessVariation">The maximum amount Lightness can change (e.g., 0.1 for +/- 10%).</param>
+   /// <param name = "baseColor" >The starting color.</param>
+   /// <param name = "count" >The number of color variations to generate.</param>
+   /// <param name = "saturationVariation" >The maximum amount Saturation can change (e.g., 0.1 for +/- 10%).</param>
+   /// <param name = "lightnessVariation" >The maximum amount Lightness can change (e.g., 0.1 for +/- 10%).</param>
    /// <returns>A list of generated Color objects.</returns>
    public static Color[] GenerateVariations(
       Color baseColor,
@@ -293,98 +211,61 @@ public static class ColorGenerator
       return variations;
    }
 
-   #region HSL / RGB Conversion Helpers
-
-   private static HslColor RgbToHsl(Color color)
+   public static Color GenerateUnusedShade(HashSet<int> usedColorInts, Color referenceColor, float minVar, float maxVar)
    {
-      var r = color.R / 255.0;
-      var g = color.G / 255.0;
-      var b = color.B / 255.0;
+      var baseHsl = RgbToHsl(referenceColor);
+      var rng = Random.Shared;
 
-      var max = Math.Max(r, Math.Max(g, b));
-      var min = Math.Min(r, Math.Min(g, b));
-      double h = 0,
-             s,
-             l = (max + min) / 2;
+      // Convert percentages to 0.0-1.0 scale
+      var minD = minVar / 100.0;
+      var maxD = maxVar / 100.0;
 
-      if (Math.Abs(max - min) < 0.001)
+      for (var i = 0; i < 100; i++)
       {
-         h = s = 0; // achromatic (gray)
-      }
-      else
-      {
-         var d = max - min;
-         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+         var newHsl = baseHsl;
 
-         if (AreFloatsEqual(max, r))
-            h = (g - b) / d + (g < b ? 6 : 0);
-         else if (AreFloatsEqual(max, g))
-            h = (b - r) / d + 2;
-         else if (AreFloatsEqual(max, b))
-            h = (r - g) / d + 4;
+         // Pick a random magnitude between Min and Max (e.g., between 0.05 and 0.20)
+         var magnitude = minD + rng.NextDouble() * (maxD - minD);
 
-         h /= 6;
-      }
+         // Decide direction: Darker (-) or Lighter (+)
+         // We also check if we are at the edges of lightness to avoid "dead" rolls
+         var goLighter = rng.Next(2) == 0;
 
-      return new()
-      {
-         H = h * 360,
-         S = s,
-         L = l,
-      };
-   }
+         // Safety: if we are too bright to go lighter, go darker. If too dark, go lighter.
+         switch (baseHsl.L)
+         {
+            case > 0.85:
+               goLighter = false;
+               break;
+            case < 0.15:
+               goLighter = true;
+               break;
+         }
 
-   private static bool AreFloatsEqual(double a, double b, double epsilon = 0.001)
-   {
-      return Math.Abs(a - b) < epsilon;
-   }
+         var offset = goLighter ? magnitude : -magnitude;
 
-   private static Color HslToRgb(HslColor hsl)
-   {
-      double r,
-             g,
-             b;
-      var h = hsl.H / 360.0;
-      var s = hsl.S;
-      var l = hsl.L;
+         newHsl.L += offset;
+         // Add a bit of saturation jitter (1-2%) to make it look more natural
+         newHsl.S += rng.NextDouble() * 0.04 - 0.02;
 
-      if (Math.Abs(s) < 0.001)
-      {
-         r = g = b = l; // achromatic
-      }
-      else
-      {
-         var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-         var p = 2 * l - q;
+         // Clamp values to valid ranges
+         newHsl.L = Math.Clamp(newHsl.L, 0.0, 1.0);
+         newHsl.S = Math.Clamp(newHsl.S, 0.0, 1.0);
 
-         r = HueToRgb(p, q, h + 1.0 / 3.0);
-         g = HueToRgb(p, q, h);
-         b = HueToRgb(p, q, h - 1.0 / 3.0);
+         var candidate = HslToRgb(newHsl);
+
+         // Check if color is unique (Jomini/EU5 uses ABGR)
+         if (!usedColorInts.Contains(candidate.AsAbgrInt()) && candidate != Black && candidate != White)
+            return candidate;
       }
 
-      return Color.FromRgb((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+      // Fallback: If 100 specific shade attempts fail, get any distinct color
+      return GetMostDistinctColor(usedColorInts, 50);
    }
-
-   private static double HueToRgb(double p, double q, double t)
-   {
-      if (t < 0)
-         t += 1;
-      if (t > 1)
-         t -= 1;
-      return t switch
-      {
-         < 1.0 / 6.0 => p + (q - p) * 6 * t,
-         < 1.0 / 2.0 => q,
-         < 2.0 / 3.0 => p + (q - p) * (2.0 / 3.0 - t) * 6,
-         _ => p,
-      };
-   }
-
-   #endregion
 
    /// <summary>
-   /// Generates a perceptually uniform color scale between two colors.
-   /// Uses Oklab color space for interpolation.
+   ///    Generates a perceptually uniform color scale between two colors.
+   ///    Uses Oklab color space for interpolation.
    /// </summary>
    public static Color[] GenerateGradient(Color colorStart, Color colorEnd, int steps)
    {
@@ -418,13 +299,6 @@ public static class ColorGenerator
       }
 
       return results;
-   }
-
-   private struct Oklab(float l, float a, float b)
-   {
-      public readonly float L = l; // Lightness
-      public readonly float A = a; // Green-Red
-      public readonly float B = b; // Blue-Yellow
    }
 
    private static Oklab RgbToOklab(Color c)
@@ -472,16 +346,10 @@ public static class ColorGenerator
    }
 
    // Convert sRGB to Linear RGB
-   private static float InverseGamma(float c)
-   {
-      return c >= 0.04045f ? MathF.Pow((c + 0.055f) / 1.055f, 2.4f) : c / 12.92f;
-   }
+   private static float InverseGamma(float c) => c >= 0.04045f ? MathF.Pow((c + 0.055f) / 1.055f, 2.4f) : c / 12.92f;
 
    // Convert Linear RGB to sRGB
-   private static float ApplyGamma(float c)
-   {
-      return c >= 0.0031308f ? 1.055f * MathF.Pow(c, 1.0f / 2.4f) - 0.055f : 12.92f * c;
-   }
+   private static float ApplyGamma(float c) => c >= 0.0031308f ? 1.055f * MathF.Pow(c, 1.0f / 2.4f) - 0.055f : 12.92f * c;
 
    private static int ClampToByte(float f)
    {
@@ -489,7 +357,7 @@ public static class ColorGenerator
       {
          < 0 => 0,
          > 255 => 255,
-         _ => (int)MathF.Round(f)
+         _ => (int)MathF.Round(f),
       };
    }
 
@@ -503,16 +371,16 @@ public static class ColorGenerator
       // Formula: https://en.wikipedia.org/wiki/Color_difference#Redmean_approximation
       // We omit the Sqrt because we only need to compare relative sizes.
       return (((512 + rmean) * r * r) >> 8) +
-             (4 * g * g) +
+             4 * g * g +
              (((767 - rmean) * b * b) >> 8);
    }
 
    /// <summary>
-   /// Generates a color that maximizes distance from the provided list.
-   /// Thread-Safe.
+   ///    Generates a color that maximizes distance from the provided list.
+   ///    Thread-Safe.
    /// </summary>
-   /// <param name="existingColors">Colors to avoid.</param>
-   /// <param name="attempts">Higher = better quality, slower. 20-50 is usually sufficient.</param>
+   /// <param name = "existingColors" >Colors to avoid.</param>
+   /// <param name = "attempts" >Higher = better quality, slower. 20-50 is usually sufficient.</param>
    public static Color GetMostDistinctColor(IList<JominiColor> existingColors, int attempts = 30)
    {
       if (existingColors.Count == 0)
@@ -562,5 +430,265 @@ public static class ColorGenerator
       return Color.FromArgb(255, (byte)rng.Next(256), (byte)rng.Next(256), (byte)rng.Next(256));
    }
 
-   public static Color4 ToColor4(this Color color) => new(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
+   /// <summary>
+   ///    Generates a color from the internal hue tables and ensures it is not in the used set.
+   /// </summary>
+   public static Color GenerateUnusedColor(HashSet<int> usedColorInts, bool isLand)
+   {
+      var rng = Random.Shared;
+      for (var i = 0; i < 1000; i++)
+      {
+         // Sample from LandHueValues if isLand is true, else sample from WaterHueValues
+         var randomIndex = rng.Next(0, 10000);
+         var candidate = Generate(isLand, randomIndex);
+
+         // JominiColor uses ABGR for its Int representation
+         if (!usedColorInts.Contains(candidate.AsAbgrInt()))
+            return candidate;
+      }
+
+      return GetRandomUnusedColor(usedColorInts);
+   }
+
+   /// <summary>
+   ///    Generates a shade of the reference color that is not yet used.
+   /// </summary>
+   public static Color GenerateUnusedShade(HashSet<int> usedColorInts, Color referenceColor)
+   {
+      // Try to generate a close variation first
+      for (var i = 0; i < 100; i++)
+      {
+         // Use your existing GenerateVariations but for 1 count
+         var candidate = GenerateVariations(referenceColor, 1, 0.15, 0.15)[0];
+
+         if (!usedColorInts.Contains(candidate.AsAbgrInt()))
+            return candidate;
+      }
+
+      // If no close shade is found, broaden the search
+      return GetMostDistinctColor(usedColorInts, 50);
+   }
+
+   /// <summary>
+   ///    Fallback: Pure random unused color
+   /// </summary>
+   public static Color GetRandomUnusedColor(HashSet<int> usedColorInts)
+   {
+      var rng = Random.Shared;
+      while (true)
+      {
+         var c = Color.FromRgb((byte)rng.Next(256), (byte)rng.Next(256), (byte)rng.Next(256));
+         if (!usedColorInts.Contains(c.AsAbgrInt()))
+            return c;
+      }
+   }
+
+   /// <summary>
+   ///    Helper for the MostDistinctColor logic using the int HashSet
+   /// </summary>
+   public static Color GetMostDistinctColor(HashSet<int> usedColorInts, int attempts = 30)
+   {
+      if (usedColorInts.Count == 0)
+         return JominiColor.Empty.ToMediaColor();
+
+      var bestCandidate = GetRandomColor();
+      long maxMinDistance = -1;
+
+      for (var i = 0; i < attempts; i++)
+      {
+         var candidate = GetRandomColor();
+         var candidateInt = candidate.AsAbgrInt();
+         if (usedColorInts.Contains(candidateInt))
+            continue;
+
+         var closestDist = long.MaxValue;
+         foreach (var usedInt in usedColorInts)
+         {
+            // Convert int back to RGB parts for distance calculation
+            // Note: Jomini uses ABGR for AsInt() based on your provided record
+            var r = (byte)(usedInt & 0xFF);
+            var g = (byte)((usedInt >> 8) & 0xFF);
+            var b = (byte)((usedInt >> 16) & 0xFF);
+
+            var dist = GetDistanceSquared(candidate, Color.FromRgb(r, g, b));
+            if (dist < closestDist)
+               closestDist = dist;
+            if (dist < maxMinDistance)
+               break;
+         }
+
+         if (closestDist > maxMinDistance)
+         {
+            maxMinDistance = closestDist;
+            bestCandidate = candidate;
+         }
+      }
+
+      return bestCandidate;
+   }
+
+   extension(Color color)
+   {
+      /// <summary>
+      ///    Converts a Color object to its 32-bit ARGB (Alpha, Red, Green, Blue) integer representation.
+      ///    This is standard for WPF and GDI.
+      /// </summary>
+      public int AsArgbInt() => (color.A << 24) | (color.R << 16) | (color.G << 8) | color.B;
+
+      /// <summary>
+      ///    Converts a Color object to its 32-bit ABGR (Alpha, Blue, Green, Red) integer representation.
+      ///    This is common in graphics APIs like DirectX and OpenGL.
+      /// </summary>
+      public int AsAbgrInt() =>
+         // Notice the R and B channels are swapped in their bitwise positions.
+         (color.A << 24) | (color.B << 16) | (color.G << 8) | color.R;
+
+      public Color4 ToColor4() => new(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
+   }
+
+   /// <summary>
+   ///    A struct to represent a color in the HSL (Hue, Saturation, Lightness) color space.
+   /// </summary>
+   private struct HslColor
+   {
+      public double H; // Hue, from 0 to 360
+      public double S; // Saturation, from 0 to 1
+      public double L; // Lightness, from 0 to 1
+   }
+
+   private struct Oklab(float l, float a, float b)
+   {
+      public readonly float L = l; // Lightness
+      public readonly float A = a; // Green-Red
+      public readonly float B = b; // Blue-Yellow
+   }
+
+   #region ValueGetterHelpers
+
+   public static int GetHue(bool isLand, int index) => isLand
+                                                          ? LandHueValues[index * PRIME % LandHueValues.Length]
+                                                          // We need to subtract 360 to keep water hues within the 0-360 range. Why? I have no idea.
+                                                          : WaterHueValues[index * PRIME % WaterHueValues.Length] - 360;
+
+   public static int GetSaturation(int index) =>
+      // _saturationValues range from 1 to 1000, so we need to scale it down to 0-100
+      SaturationValues[index * PRIME % SaturationValues.Length] / 10;
+
+   public static int GetValue(int index) =>
+      // _valueValues range from 1 to 1000, so we need to scale it down to 0-100
+      ValueValues[index * PRIME % ValueValues.Length] / 10;
+
+   // ReSharper disable once UnusedMember.Local
+   private static Color Generate(bool isLand, int index)
+   {
+      var h = GetHue(isLand, index);
+      var s = GetSaturation(index) / 100.0;
+      var v = GetValue(index) / 100.0;
+
+      var c = v * s;
+      var x = c * (1 - Math.Abs(h / 60 % 2 - 1));
+      var m = v - c;
+
+      double r = 0,
+             g = 0,
+             b = 0;
+      (r, g, b) = (h / 60) switch
+      {
+         0 => (c, x, 0),
+         1 => (x, c, 0),
+         2 => (0, c, x),
+         3 => (0, x, c),
+         4 => (x, 0, c),
+         5 => (c, 0, x),
+         _ => (r, g, b),
+      };
+
+      return Color.FromRgb((byte)Math.Round((r + m) * 255),
+                           (byte)Math.Round((g + m) * 255),
+                           (byte)Math.Round((b + m) * 255));
+   }
+
+   #endregion
+
+   #region HSL / RGB Conversion Helpers
+
+   private static HslColor RgbToHsl(Color color)
+   {
+      var r = color.R / 255.0;
+      var g = color.G / 255.0;
+      var b = color.B / 255.0;
+
+      var max = Math.Max(r, Math.Max(g, b));
+      var min = Math.Min(r, Math.Min(g, b));
+      double h = 0,
+             s,
+             l = (max + min) / 2;
+
+      if (Math.Abs(max - min) < 0.001)
+         h = s = 0; // achromatic (gray)
+      else
+      {
+         var d = max - min;
+         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+         if (AreFloatsEqual(max, r))
+            h = (g - b) / d + (g < b ? 6 : 0);
+         else if (AreFloatsEqual(max, g))
+            h = (b - r) / d + 2;
+         else if (AreFloatsEqual(max, b))
+            h = (r - g) / d + 4;
+
+         h /= 6;
+      }
+
+      return new()
+      {
+         H = h * 360,
+         S = s,
+         L = l,
+      };
+   }
+
+   private static bool AreFloatsEqual(double a, double b, double epsilon = 0.001) => Math.Abs(a - b) < epsilon;
+
+   private static Color HslToRgb(HslColor hsl)
+   {
+      double r,
+             g,
+             b;
+      var h = hsl.H / 360.0;
+      var s = hsl.S;
+      var l = hsl.L;
+
+      if (Math.Abs(s) < 0.001)
+         r = g = b = l; // achromatic
+      else
+      {
+         var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+         var p = 2 * l - q;
+
+         r = HueToRgb(p, q, h + 1.0 / 3.0);
+         g = HueToRgb(p, q, h);
+         b = HueToRgb(p, q, h - 1.0 / 3.0);
+      }
+
+      return Color.FromRgb((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+   }
+
+   private static double HueToRgb(double p, double q, double t)
+   {
+      if (t < 0)
+         t += 1;
+      if (t > 1)
+         t -= 1;
+      return t switch
+      {
+         < 1.0 / 6.0 => p + (q - p) * 6 * t,
+         < 1.0 / 2.0 => q,
+         < 2.0 / 3.0 => p + (q - p) * (2.0 / 3.0 - t) * 6,
+         _ => p,
+      };
+   }
+
+   #endregion
 }

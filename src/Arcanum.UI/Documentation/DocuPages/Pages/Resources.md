@@ -1,0 +1,1 @@
+Here you will find links to this documentation on [GitHubIO](https://the-arcanum-project.github.io/Arcanum/user/main-menu) and the [EUV Wiki](https://eu5.paradoxwikis.com/Arcanum)

@@ -1,10 +1,14 @@
-﻿using System.Text;
+﻿#region
+
+using System.Text;
 using System.Windows.Input;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem;
 using Common;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.ErrorSystem;
 
@@ -39,9 +43,7 @@ public static class ErrorManager
    public static void PrintDiagnosticsToConsole(bool clean)
    {
       var sb = new StringBuilder();
-      if (clean)
-         Console.Clear();
-      else
+      if (!clean)
       {
          sb.AppendLine("");
          sb.AppendLine("");

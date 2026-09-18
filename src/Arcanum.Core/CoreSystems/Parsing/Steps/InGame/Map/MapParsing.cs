@@ -1,4 +1,8 @@
-﻿using Arcanum.Core.CoreSystems.Map;
+﻿#region
+
+using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
+using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Geometry;
 using Arcanum.Core.CoreSystems.Parsing.MapParsing.Tracing;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
@@ -8,23 +12,25 @@ using Arcanum.Core.Utils.Scheduling;
 using Arcanum.Core.Utils.Sorting;
 using Common.UI;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 
-public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
+public sealed class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencies) : FileLoadingService(dependencies)
 {
    public override List<Type> ParsedObjects { get; } = [];
-   private List<PolygonParsing> _parsingPolygons = [];
-   public Polygon[]? Polygons;
+
+   // ReSharper disable MemberCanBePrivate.Global
    public int TotalPolygonsCount;
+
    public bool FinishedTesselation;
-   public (int, int) MapSize;
+   // ReSharper restore MemberCanBePrivate.Global
+
+   private MapParsingData? _data;
    public override bool IsHeavyStep => true;
    public override bool HasPriority { get; set; } = true;
 
-   public override string GetFileDataDebugInfo()
-   {
-      return $"Number of polygons: {_parsingPolygons.Count}";
-   }
+   public override string GetFileDataDebugInfo() => $"Number of polygons: {TotalPolygonsCount}";
 
    public override void ReloadSingleFile(Eu5FileObj fileObj,
                                          object? lockObject)
@@ -39,84 +45,80 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          return true;
       }
 
-      using (var bitmap = new Bitmap(fileObj.Path.FullPath))
+#if DEBUG
+      if (DebugConfig.Settings.SkipMapLoading)
       {
+         ArcLog.WriteLine("MPS", LogLevel.INF, "Skipping map processing due to debug settings.");
+         return true;
+      }
+#endif
+      (int, int) mapSize;
+      List<PolygonParsing> parsingPolygons;
+      using (var bitmap = new Bitmap(fileObj.Path.FullPath))
          using (MapTracing tracing = new(bitmap))
          {
-            _parsingPolygons = tracing.Trace();
-            Polygons = new Polygon[_parsingPolygons.Count];
-            MapSize = (bitmap.Width, bitmap.Height);
+            parsingPolygons = tracing.Trace().SelectMany(kvp => kvp.Value).ToList();
+            mapSize = new(bitmap.Width, bitmap.Height);
          }
-      }
 
-      TotalPolygonsCount = _parsingPolygons.Count;
+      ArcLog.WritePure(MapTracingValidator.GenerateFingerprint(parsingPolygons));
 
-      _ = Tessellate();
+      TotalPolygonsCount = parsingPolygons.Count;
+
+      _ = Tessellate(parsingPolygons, mapSize);
 
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished loading and parsing map polygons.");
 
       return true;
    }
 
-   private async Task Tessellate()
+   private async Task Tessellate(List<PolygonParsing> parsingPolygons, (int, int) mapSize)
    {
+      var polygons = new Polygon[parsingPolygons.Count];
       if (AppData.IsHeadless)
       {
          // In headless mode, we do not need to tessellate the polygons
          lock (this)
-         {
             FinishedTesselation = true;
-            _parsingPolygons = null!;
-            UIHandle.Instance.MapHandle.NotifyMapLoaded();
-         }
-
+         //UIHandle.Instance.MapHandle.NotifyMapLoaded();
          return;
       }
 
-
       if (Config.Settings.MapSettings.UseFastBorderSmoothing)
       {
-         await Scheduler.QueueWorkInForParallel(_parsingPolygons.Count,
-            i =>
-            {
-               foreach (var segment in _parsingPolygons[i].Segments)
-                  if (segment is BorderSegmentDirectional directionalSegment)
-                     directionalSegment.SmoothBorders();
-            },
-            Scheduler.AvailableHeavyWorkers - 2);
+         await Scheduler.QueueWorkInForParallel(parsingPolygons.Count,
+                                                i =>
+                                                {
+                                                   foreach (var segment in parsingPolygons[i].Segments)
+                                                      if (segment is BorderSegmentDirectional directionalSegment)
+                                                         directionalSegment.SmoothBorders();
+                                                },
+                                                Scheduler.AvailableHeavyWorkers - 2);
 
          ArcLog.WriteLine("MPS", LogLevel.INF, "Finished smoothing of map polygons.");
       }
 
-      await Scheduler.QueueWorkInForParallel(_parsingPolygons.Count,
-                                             i => Polygons![i] = _parsingPolygons[i].Tessellate(),
+      await Scheduler.QueueWorkInForParallel(parsingPolygons.Count,
+                                             i => polygons[i] = parsingPolygons[i].Tessellate(),
                                              Scheduler.AvailableHeavyWorkers - 2);
 
       ArcLog.WriteLine("MPS", LogLevel.INF, "Finished tesselation of map polygons.");
 
-      // TODO @MelCo: Make this right
-
-      var tempDict = new Dictionary<int, List<Polygon>>();
-      for (var index = 0; index < Polygons!.Length; index++)
+      // I tried to optimize this, but it really did not change the performance
+      // TODO @MelCo: Extract Function
+      var colorMap = new Dictionary<int, List<Polygon>>();
+      for (var index = 0; index < polygons.Length; index++)
       {
-         var p = Polygons![index];
-         var color = _parsingPolygons[index].Color;
-         try
-         {
-            if (!tempDict.TryGetValue(color, out var list))
-               tempDict[color] = list = [];
-            list.Add(p);
-         }
-         catch (Exception e)
-         {
-            ArcLog.WriteLine("MPP", LogLevel.CRT, e.ToString());
-            throw;
-         }
+         var p = polygons[index];
+         var color = parsingPolygons[index].Color;
+         if (!colorMap.TryGetValue(color, out var list))
+            colorMap[color] = list = [];
+         list.Add(p);
       }
 
       foreach (var loc in Globals.Locations.Values)
       {
-         loc.Polygons = tempDict.TryGetValue(loc.Color.AsInt(), out var polygonList) ? polygonList.ToArray() : [];
+         loc.Polygons = colorMap.TryGetValue(loc.Color.AsInt(), out var polygonList) ? polygonList.ToArray() : [];
          if (polygonList == null)
             continue;
 
@@ -126,22 +128,44 @@ public class LocationMapTracing(IEnumerable<IDependencyNode<string>> dependencie
          loc.Bounds = GeoRect.CalculateBounds(loc.Polygons);
       }
 
+      var data = new MapParsingData(mapSize, polygons);
+
       lock (this)
       {
          FinishedTesselation = true;
-         _parsingPolygons = null!;
-         UIHandle.Instance.MapHandle.NotifyMapLoaded();
+         _data = data;
       }
 
-      // End todo
+      UIHandle.Instance.MapHandle.NotifyMapLoaded();
    }
 
-   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject)
+   /// <summary>
+   /// Tries to get the map parsing data. This will only succeed if the tesselation is finished, otherwise it will return false and set data to null.
+   /// If data has been disposed after UI init, this will also return false and set data to null.
+   /// </summary>
+   /// <param name="data"></param>
+   /// <returns></returns>
+   public bool TryGetMapData([MaybeNullWhen(false)] out MapParsingData data)
    {
+      if (FinishedTesselation && _data != null)
+      {
+         data = _data;
+         return true;
+      }
+
+      data = null;
+      return false;
+   }
+
+   public void DisposeMapData()
+   {
+      _data = null;
+   }
+
+   public override bool UnloadSingleFileContent(Eu5FileObj fileObj, FileDescriptor descriptor, object? lockObject) =>
       // We do not really unload map data
       // TODO: @MelCo: Implement unloading of map data if necessary
-      return true;
-   }
+      true;
 
    public override bool CanBeReloaded => false;
 }

@@ -1,10 +1,12 @@
-﻿using System.Windows;
+﻿#region
+
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Threading;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow.Views;
 
@@ -20,36 +22,14 @@ public partial class FeatureExplorerView
 
    private void FeatureExplorerView_Loaded(object sender, RoutedEventArgs e)
    {
-      if (DataContext is FeatureExplorerViewModel vm)
-      {
-         vm.RequestSelectionUpdate += OnSelectionUpdateRequested;
-
-         if (vm.SelectedItem != null)
-            OnSelectionUpdateRequested(vm.SelectedItem);
-         else if (vm.FeatureTree.Count > 0)
-            vm.SelectedItem = vm.FeatureTree[0];
-      }
-   }
-
-   private void OnSelectionUpdateRequested(FeatureTreeItem? item)
-   {
-      if (item == null)
-         return;
-
-      Dispatcher.BeginInvoke(DispatcherPriority.Input,
-                             () =>
-                             {
-                                var container = FindTreeViewItem(FeatureTreeView, item);
-                                container?.BringIntoView();
-                                container?.Focus();
-                             });
+      if (DataContext is FeatureExplorerViewModel { Features.Count: > 0 } vm)
+         vm.SelectedItem = vm.Features[0];
    }
 
    private void FeatureExplorerView_Unloaded(object sender, RoutedEventArgs e)
    {
-      // Cleanup to prevent memory leaks
-      if (DataContext is FeatureExplorerViewModel vm)
-         vm.RequestSelectionUpdate -= OnSelectionUpdateRequested;
+      Loaded -= FeatureExplorerView_Loaded;
+      Unloaded -= FeatureExplorerView_Unloaded;
    }
 
    private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -66,28 +46,79 @@ public partial class FeatureExplorerView
       e.Handled = true;
    }
 
-   private void TreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+   private void ListView_OnSelectedItemChanged(object sender, RoutedEventArgs e)
    {
-      if (e.NewValue is FeatureTreeItem item && DataContext is FeatureExplorerViewModel vm)
-         vm.SelectedItem = item;
+      if (sender is not ListView listView)
+         return;
+
+      if (listView.SelectedItem is FeatureItem selectedItem)
+         (DataContext as FeatureExplorerViewModel)?.SelectedItem = selectedItem;
    }
 
-   private static TreeViewItem? FindTreeViewItem(ItemsControl parent, object dataItem)
+   private void SearchBox_PreviewKeyDown(object sender, KeyEventArgs e)
    {
-      if (parent.ItemContainerGenerator.Status != GeneratorStatus.ContainersGenerated)
-         return null!;
+      var vm = DataContext as FeatureExplorerViewModel;
+      if (vm == null || !vm.IsSuggesting)
+         return;
 
-      if (parent.ItemContainerGenerator.ContainerFromItem(dataItem) is TreeViewItem container)
-         return container;
-
-      foreach (var childItem in parent.Items)
-         if (parent.ItemContainerGenerator.ContainerFromItem(childItem) is TreeViewItem childContainer)
+      if (e.Key == Key.Down)
+      {
+         vm.SuggestionIndex = (vm.SuggestionIndex + 1) % vm.SearchSuggestions.Count;
+         e.Handled = true;
+      }
+      else if (e.Key == Key.Up)
+      {
+         vm.SuggestionIndex = vm.SuggestionIndex <= 0 ? vm.SearchSuggestions.Count - 1 : vm.SuggestionIndex - 1;
+         e.Handled = true;
+      }
+      else if (e.Key is Key.Enter or Key.Tab)
+      {
+         // TAB and ENTER now both trigger completion
+         if (vm.SuggestionIndex >= 0 && vm.SuggestionIndex < vm.SearchSuggestions.Count)
          {
-            var found = FindTreeViewItem(childContainer, dataItem);
-            if (found != null!)
-               return found;
+            ApplySuggestion(vm.SearchSuggestions[vm.SuggestionIndex]);
+            e.Handled = true; // This prevents Tab from moving focus
          }
+         else if (e.Key == Key.Tab && vm.SearchSuggestions.Count > 0)
+         {
+            // If nothing is highlighted but Tab is pressed, take the first one
+            ApplySuggestion(vm.SearchSuggestions[0]);
+            e.Handled = true;
+         }
+      }
+      else if (e.Key == Key.Escape)
+      {
+         vm.IsSuggesting = false;
+         e.Handled = true;
+      }
+   }
 
-      return null;
+   private void ApplySuggestion(string suggestion)
+   {
+      if (DataContext is FeatureExplorerViewModel vm)
+      {
+         vm.CompleteSearch(suggestion);
+
+         SearchBox.Focus();
+         SearchBox.CaretIndex = SearchBox.Text.Length;
+      }
+   }
+
+   private void Suggestion_MouseClick(object sender, MouseButtonEventArgs e)
+   {
+      if (sender is FrameworkElement { DataContext: string suggestion })
+         ApplySuggestion(suggestion);
+   }
+
+   private void FeatureExplorerView_KeyUp(object sender, KeyEventArgs e)
+   {
+      if (DataContext is not FeatureExplorerViewModel vm)
+         return;
+
+      if (e.Key == Key.Escape && vm.IsSuggesting)
+      {
+         vm.IsSuggesting = false;
+         e.Handled = true;
+      }
    }
 }

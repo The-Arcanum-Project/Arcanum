@@ -25,6 +25,20 @@ public static class DispatchDataHandler
       result.Sort((a, b) => a.Properties[0].PropertyMetadata.Keyword.Length.CompareTo(b.Properties[0].PropertyMetadata.Keyword.Length));
       return result;
    }
+
+   public static (List<PropertyData> dataForSwitch, List<PropertyData> keynodeShatteredLists) PrepareDataForSwitch(List<PropertyData> data)
+   {
+      var dataForSwitch = new List<PropertyData>();
+      var keynodeShatteredLists = new List<PropertyData>();
+
+      foreach (var prop in data)
+         if (prop.PropertyMetadata is { AstNodeType: ParserSourceGenerator.NodeType.KeyOnlyNode, IsShatteredList: true, IsCollection: true })
+            keynodeShatteredLists.Add(prop);
+         else
+            dataForSwitch.Add(prop);
+
+      return (dataForSwitch, keynodeShatteredLists);
+   }
 }
 
 public class DispatchData

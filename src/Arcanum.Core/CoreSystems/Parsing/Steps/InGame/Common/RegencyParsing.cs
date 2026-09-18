@@ -1,13 +1,17 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
 using Regency = Arcanum.Core.GameObjects.InGame.Court.Regency;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
-[ParserFor(typeof(Regency), IgnoredBlockKeys = ["start_effect", "allow"])]
+[ParserFor(typeof(Regency), IgnoredBlockKeys = ["start_effect", "end_effect", "allow"])]
 public partial class RegencyParsing(IEnumerable<IDependencyNode<string>> dependencies)
    : ParserValidationLoadingService<Regency>(dependencies)
 {

@@ -1,7 +1,7 @@
 ﻿#region
 
 using Arcanum.Core.GlobalStates;
-using Arcanum.UI.Documentation;
+using Arcanum.UI.Documentation.Implementation;
 using Common.UI.State;
 
 #endregion
@@ -12,10 +12,18 @@ public class StateHandleImpl : IStateHandle
 {
    public void ApplicationLoadResources()
    {
+      DocuRegistry.InitializeRegistry(
 #if DEBUG
-      DocuPathResolver.LoadDocumentation(DebugConfig.Settings.UseExternalDocumentation,
-                                         true,
-                                         DebugConfig.Settings.ExternalDocumentationPath);
+                                      DebugConfig.Settings.UseExternalDocumentation,
+#else
+                                         false,
 #endif
+                                      true,
+#if DEBUG
+                                      DebugConfig.Settings.ExternalDocumentationPath
+#else
+                                         null
+#endif
+                                     );
    }
 }

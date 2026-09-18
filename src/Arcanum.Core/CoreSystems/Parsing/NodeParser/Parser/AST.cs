@@ -5,12 +5,15 @@
 /// </summary>
 public abstract class AstNode(int start, int length)
 {
+   private readonly int _start = start;
+   private readonly int _length = length;
+
    protected AstNode() : this(0, 0)
    {
    }
 
-   public int Start => start;
-   public int Length => length;
+   public int Start => _start;
+   public int Length => _length;
    public int End => Start + Length;
 
    // #MOD# Added properties to store comments for reconstruction
@@ -41,7 +44,7 @@ public abstract class AstNode(int start, int length)
 ///    Represents a standalone comment line (e.g. # TODO: Fix this)
 ///    strictly used for structural comments or file headers.
 /// </summary>
-public class CommentNode : StatementNode
+public sealed class CommentNode : StatementNode
 {
    // Serializer Constructor
    public CommentNode(string text)
@@ -83,7 +86,7 @@ public abstract class KeyNodeBase(int start, int length) : AstNode(start, length
 /// <summary>
 ///    Represents a simple, single-token key (e.g., 'width').
 /// </summary>
-public class SimpleKeyNode(Token keyToken) : KeyNodeBase(keyToken.Start, keyToken.Length)
+public sealed class SimpleKeyNode(Token keyToken) : KeyNodeBase(keyToken.Start, keyToken.Length)
 {
    private readonly string? _syntheticText;
 
@@ -110,7 +113,7 @@ public class SimpleKeyNode(Token keyToken) : KeyNodeBase(keyToken.Start, keyToke
 /// <summary>
 ///    Represents a scoped key (e.g., 'religion:shinto').
 /// </summary>
-public class ScopedKeyNode(List<Token> segments)
+public sealed class ScopedKeyNode(List<Token> segments)
    : KeyNodeBase(segments[0].Start, segments[^1].End - segments[0].Start)
 {
    private readonly string? _syntheticText;
@@ -143,7 +146,7 @@ public class ScopedKeyNode(List<Token> segments)
 /// <summary>
 ///    Root of a file containing a list of top level statements
 /// </summary>
-public class RootNode(int start, int length) : AstNode(start, length)
+public sealed class RootNode(int start, int length) : AstNode(start, length)
 {
    public RootNode() : this(0, 0)
    {
@@ -171,7 +174,7 @@ public abstract class StatementNode(int start, int length) : AstNode(start, leng
 /// <summary>
 ///    Represents a named or array block: `graphics = { ... }` or `{ ... }`
 /// </summary>
-public class BlockNode : StatementNode
+public sealed class BlockNode : StatementNode
 {
    public Token? ClosingToken;
 
@@ -207,7 +210,7 @@ public class BlockNode : StatementNode
 /// <summary>
 ///    Represents a key-value pair: `width = 1280`
 /// </summary>
-public class ContentNode : StatementNode
+public sealed class ContentNode : StatementNode
 {
    /// <summary>
    ///    Represents a key-value pair: `width = 1280`
@@ -248,7 +251,7 @@ public abstract class ValueNode(int start, int length) : AstNode(start, length)
 ///    A simple literal value: a number, a string, 'yes', 'no', or an identifier like 'high'
 /// </summary>
 /// <param name = "value" ></param>
-public class LiteralValueNode(Token value) : ValueNode(value.Start, value.Length)
+public sealed class LiteralValueNode(Token value) : ValueNode(value.Start, value.Length)
 {
    private readonly string? _syntheticValue;
 
@@ -273,7 +276,7 @@ public class LiteralValueNode(Token value) : ValueNode(value.Start, value.Length
 /// <summary>
 ///    Represents a scoped identifier when used as a value, e.g. societal_value:centralization_vs_decentralization
 /// </summary>
-public class ScopedIdentifierNode(List<Token> segments)
+public sealed class ScopedIdentifierNode(List<Token> segments)
    : ValueNode(segments[0].Start, segments[^1].End - segments[0].Start)
 {
    private readonly string? _syntheticText;
@@ -300,7 +303,7 @@ public class ScopedIdentifierNode(List<Token> segments)
 /// <summary>
 ///    An inline math expression: `@[ 2 * 3 + 1 ]`
 /// </summary>
-public class MathExpressionNode : ValueNode
+public sealed class MathExpressionNode : ValueNode
 {
    /// <summary>
    ///    An inline math expression: `@[ 2 * 3 + 1 ]`
@@ -326,7 +329,7 @@ public class MathExpressionNode : ValueNode
 ///    A function call: `rgb { 255 0 0 }`
 /// </summary>
 /// <param name = "functionName" ></param>
-public class FunctionCallNode(Token functionName) : ValueNode(functionName.Start, functionName.Length)
+public sealed class FunctionCallNode(Token functionName) : ValueNode(functionName.Start, functionName.Length)
 {
    public Token FunctionName { get; } = functionName; // e.g., 'rgb' or 'hsv' 'hsv360'
    public List<ValueNode> Arguments { get; } = [];
@@ -338,7 +341,7 @@ public class FunctionCallNode(Token functionName) : ValueNode(functionName.Start
 /// <summary>
 ///    A value that is itself an anonymous block, e.g., in `background = { key = value }`
 /// </summary>
-public class BlockValueNode(int start, int length) : ValueNode(start, length)
+public sealed class BlockValueNode(int start, int length) : ValueNode(start, length)
 {
    public BlockValueNode() : this(0, 0)
    {
@@ -373,7 +376,7 @@ public class BlockValueNode(int start, int length) : ValueNode(start, length)
 /// <summary>
 ///    Represents a scripted statement like `scripted_trigger name = { ... }`
 /// </summary>
-public class ScriptedStatementNode : StatementNode
+public sealed class ScriptedStatementNode : StatementNode
 {
    public Token? ClosingToken;
 
@@ -405,7 +408,7 @@ public class ScriptedStatementNode : StatementNode
 ///    Represents a statement that is just a key with no value, common in lists.
 ///    e.g., the "stockholm" in `own_control_core = { stockholm norrtalje ... }`
 /// </summary>
-public class KeyOnlyNode : StatementNode
+public sealed class KeyOnlyNode : StatementNode
 {
    public KeyOnlyNode(KeyNodeBase keyNode) : base(keyNode.Start, keyNode.Length) => KeyNode = keyNode;
 
@@ -419,7 +422,7 @@ public class KeyOnlyNode : StatementNode
 ///    Represents a unary expression, like a negative number.
 ///    e.g., the "-10" in `offset = -10`
 /// </summary>
-public class UnaryNode(Token op, ValueNode value) : ValueNode(op.Start, value.End - op.Start)
+public sealed class UnaryNode(Token op, ValueNode value) : ValueNode(op.Start, value.End - op.Start)
 {
    public Token Operator { get; } = op; // The operator token (e.g., '-')
    public ValueNode Value { get; } = value; // The value being operated on
@@ -431,7 +434,7 @@ public class UnaryNode(Token op, ValueNode value) : ValueNode(op.Start, value.En
 ///    Represents a statement that is just a unary expression, like a negative number in a list.
 ///    e.g., the "-10" in `movement_assistance = { -10 20 }`
 /// </summary>
-public class UnaryStatementNode : StatementNode
+public sealed class UnaryStatementNode : StatementNode
 {
    public UnaryStatementNode(UnaryNode value) : base(value.Start, value.Length)
    {

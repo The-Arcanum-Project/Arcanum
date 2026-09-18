@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
@@ -15,6 +17,8 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Nexus.Core.Attributes;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Map;
 
@@ -57,6 +61,18 @@ public partial class Topography : IEu5Object<Topography>, IMapInferable
    [ParseAs("vegetation_density")]
    [Description("The density of vegetation in this topography, effects unknown.")]
    public float VegetationDensity { get; set; } = 1f;
+
+   [SaveAs]
+   [DefaultValue(0f)]
+   [ParseAs("colonial_migration_size_modifier")]
+   [Description("The modifier for colonial migration size associated with this climate type.")]
+   public float ColonialMigrationSizeModifier { get; set; }
+
+   [SaveAs]
+   [DefaultValue(1.0f)]
+   [ParseAs("proximity")]
+   [Description("The proximity factor for this climate type.")]
+   public float Proximity { get; set; } = 1.0f;
 
    [SaveAs]
    [DefaultValue(0f)]

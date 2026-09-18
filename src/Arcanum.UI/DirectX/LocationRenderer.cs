@@ -1,4 +1,6 @@
-﻿using System.Numerics;
+﻿#region
+
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -9,6 +11,8 @@ using Vortice.Direct3D11;
 using Vortice.DXGI;
 using Vortice.Mathematics;
 using Color = System.Windows.Media.Color;
+
+#endregion
 
 namespace Arcanum.UI.DirectX;
 
@@ -169,7 +173,7 @@ public class LocationRenderer(VertexPositionId2D[] vertices, Color4[] initColors
 
       InputElementDescription[] inputElementDescs =
       [
-         new("POSITION", 0, Format.R32G32_Float, 0, 0), new("CENTER", 0, Format.R32G32_Float, 8, 0), new("POLYGON_ID", 0, Format.R32_UInt, 16, 0)
+         new("POSITION", 0, Format.R32G32_Float, 0, 0), new("CENTER", 0, Format.R32G32_Float, 8, 0), new("POLYGON_ID", 0, Format.R32_UInt, 16, 0),
       ];
 
       var vertexShaderByteCode = ID3DRenderer.CompileBytecode("Triangle.hlsl", "VSMain", "vs_5_0");

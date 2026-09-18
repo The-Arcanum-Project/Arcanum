@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Date;
@@ -15,10 +17,13 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Cultural;
 using Arcanum.Core.GameObjects.InGame.Cultural.SubObjects;
+using Arcanum.Core.GameObjects.InGame.Economy;
 using Arcanum.Core.GameObjects.InGame.Map;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Arcanum.Core.GameObjects.InGame.Religious.SubObjects;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Religious;
 
@@ -155,6 +160,12 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
    [Description("Indicates whether this Religion has yanantin.")]
    public bool HasYanantin { get; set; }
 
+   [ParseAs("has_omens")]
+   [DefaultValue(false)]
+   [SaveAs]
+   [Description("Indicates whether this Religion has omens.")]
+   public bool HasOmens { get; set; }
+
    [ParseAs("culture_locked")]
    [DefaultValue(false)]
    [SaveAs]
@@ -184,6 +195,12 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
    [SaveAs]
    [Description("The tithe percentage for this Religion. (2% is 20% of the tenth)")]
    public float Tithe { get; set; }
+
+   [ParseAs("saints_concept")]
+   [DefaultValue("")]
+   [SaveAs]
+   [Description("The concept of saints associated with this Religion.")]
+   public string SaintsConcept { get; set; } = string.Empty;
 
    [SaveAs]
    [DefaultValue(null)]
@@ -232,6 +249,18 @@ public partial class Religion : IEu5Object<Religion>, IMapInferable
    [ParseAs("religious_focuses", itemNodeType: AstNodeType.KeyOnlyNode)]
    [Description("Religious focuses associated with this Religion.")]
    public ObservableRangeCollection<ReligiousFocus> ReligiousFocuses { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("clergy_goods_demand_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers affecting the demand for goods by clergy of this religion.")]
+   public ObservableRangeCollection<GoodsDemand> ClergyGoodsDemandModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("goods_demand_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers affecting the demand for goods of this religion.")]
+   public ObservableRangeCollection<GoodsDemand> GoodsDemandModifiers { get; set; } = [];
 
    #endregion
 

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 using Arcanum.Core.AgsRegistry;
@@ -9,12 +10,15 @@ using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
+using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.NodeHelpers;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.Parser;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Cultural;
+using Arcanum.Core.GameObjects.InGame.Economy;
 using Arcanum.Core.GameObjects.InGame.Economy.SubClasses;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Age = Arcanum.Core.GameObjects.InGame.AbstractMechanics.Age;
@@ -60,6 +64,8 @@ using StaticModifier = Arcanum.Core.GameObjects.InGame.Common.StaticModifier;
 using Topography = Arcanum.Core.GameObjects.InGame.Map.Topography;
 using Trait = Arcanum.Core.GameObjects.InGame.Court.Trait;
 using Vegetation = Arcanum.Core.GameObjects.InGame.Map.Vegetation;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
 
@@ -703,21 +709,84 @@ public static class ParsingToolBox
                                           [MaybeNullWhen(false)] out Country value)
    {
       using var scope = pc.PushScope();
+      return TryParseFromRegistry(node, ref pc, Globals.Countries, out value);
+   }
+
+   public static bool ArcTryParse_SubContinent(ContentNode node,
+                                               ref ParsingContext pc,
+                                               [MaybeNullWhen(false)] out SubContinent value)
+   {
+      using var scope = pc.PushScope();
+      return TryParseFromRegistry(node, ref pc, Globals.SubContinents, out value);
+   }
+
+   public static bool ArcTryParse_Continent(ContentNode node,
+                                            ref ParsingContext pc,
+                                            [MaybeNullWhen(false)] out Continent value)
+   {
+      using var scope = pc.PushScope();
+      return TryParseFromRegistry(node, ref pc, Globals.Continents, out value);
+   }
+
+   public static bool ArcTryParse_Region(ContentNode node,
+                                         ref ParsingContext pc,
+                                         [MaybeNullWhen(false)] out Region value)
+   {
+      using var scope = pc.PushScope();
+      return TryParseFromRegistry(node, ref pc, Globals.Regions, out value);
+   }
+
+   public static bool ArcTryParse_Language(KeyOnlyNode node,
+                                           ref ParsingContext pc,
+                                           [MaybeNullWhen(false)] out Language value)
+   {
+      using var scope = pc.PushScope();
+      return TryParseFromRegistry(node, ref pc, Globals.Languages, out value);
+   }
+
+   public static bool TryParseFromRegistry<T>(KeyOnlyNode node, ref ParsingContext pc, Dictionary<string, T> globals, [MaybeNullWhen(false)] out T value)
+      where T : class
+   {
+      using var scope = pc.PushScope();
+      value = null;
+
+      if (!globals.TryGetValue(pc.SliceString(node.KeyNode), out value))
+      {
+         pc.SetContext(node.KeyNode);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.UnknownObjectKey,
+                                        pc.SliceString(node.KeyNode),
+                                        nameof(T));
+         return pc.Fail(ref value);
+      }
+
+      return true;
+   }
+
+   public static bool TryParseFromRegistry<T>(ContentNode node, ref ParsingContext pc, Dictionary<string, T> globals, [MaybeNullWhen(false)] out T value)
+      where T : class
+   {
+      using var scope = pc.PushScope();
+      value = null;
       if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
                                              TokenType.Equals,
                                              ref pc))
-      {
-         value = null;
-         return pc.Fail();
-      }
+         pc.Fail();
 
       if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
-      {
-         value = null;
          return pc.Fail();
+
+      if (!globals.TryGetValue(pc.SliceString(lvn), out value))
+      {
+         pc.SetContext(lvn);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.UnknownObjectKey,
+                                        pc.SliceString(lvn),
+                                        nameof(T));
+         return pc.Fail(ref value);
       }
 
-      return lvn.TryParseCountry(ref pc, out value);
+      return true;
    }
 
    public static bool ArcTryParse_Language(ContentNode node,
@@ -1851,6 +1920,129 @@ public static class ParsingToolBox
       }
 
       value = template;
+      return true;
+   }
+
+   public static bool ArcTryParse_GoodsDemand(ContentNode node,
+                                              ref ParsingContext pc,
+                                              [MaybeNullWhen(false)] out GoodsDemand value)
+      => ArcTryParse_Demand<RawMaterial, GoodsDemand>(node, ref pc, out value);
+
+   public static bool ArcTryParse_TopographyGoodsDemand(ContentNode node,
+                                                        ref ParsingContext pc,
+                                                        [MaybeNullWhen(false)] out TopographyGoodsDemand value)
+      => ArcTryParse_Demand<Topography, TopographyGoodsDemand>(node, ref pc, out value);
+
+   public static bool ArcTryParse_ClimateDemand(ContentNode node,
+                                                ref ParsingContext pc,
+                                                [MaybeNullWhen(false)] out ClimateDemand value)
+      => ArcTryParse_Demand<Climate, ClimateDemand>(node, ref pc, out value);
+
+   public static bool ArcTryParse_ContinentDemand(ContentNode node,
+                                                  ref ParsingContext pc,
+                                                  [MaybeNullWhen(false)] out ContinentDemand value)
+      => ArcTryParse_Demand<Continent, ContinentDemand>(node, ref pc, out value);
+
+   public static bool ArcTryParse_SubContinentGoodsDemand(ContentNode node,
+                                                          ref ParsingContext pc,
+                                                          [MaybeNullWhen(false)] out SubContinentGoodsDemand value)
+      => ArcTryParse_Demand<SubContinent, SubContinentGoodsDemand>(node, ref pc, out value);
+
+   public static bool ArcTryParse_RegionGoodsDemand(ContentNode node,
+                                                    ref ParsingContext pc,
+                                                    [MaybeNullWhen(false)] out RegionGoodsDemand value)
+      => ArcTryParse_Demand<Region, RegionGoodsDemand>(node, ref pc, out value);
+
+   public static bool ArcTryParse_WinterGoodsDemand(ContentNode node,
+                                                    ref ParsingContext pc,
+                                                    [MaybeNullWhen(false)] out WinterGoodsDemand value)
+      => ArcTryParse_EnumDemand<Climate.WinterType, WinterGoodsDemand>(node, ref pc, out value);
+
+   private static bool ArcTryParse_EnumDemand<TEnum, TDemand>(ContentNode node,
+                                                              ref ParsingContext pc,
+                                                              [MaybeNullWhen(false)] out TDemand value)
+      where TEnum : struct, Enum where TDemand : IEnumDemand<TDemand, TEnum>, new()
+   {
+      using var scope = pc.PushScope();
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ref pc))
+      {
+         value = default;
+         return pc.Fail();
+      }
+
+      var lexeme = pc.SliceString(node);
+      if (!EnumAgsRegistry.TryParse(lexeme, out TEnum enumValue))
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.InvalidEnumValue,
+                                        lexeme,
+                                        typeof(TEnum).Name,
+                                        Enum.GetNames<TEnum>());
+         value = default;
+         pc.Fail();
+         return false;
+      }
+
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
+      {
+         value = default;
+         return pc.Fail();
+      }
+
+      if (!lvn.TryParseFloat(ref pc, out var demand))
+      {
+         value = default;
+         return pc.Fail();
+      }
+
+      value = Eu5Activator.CreateAnonymusInstance<TDemand>(node);
+      value.SetData(enumValue, demand);
+      return true;
+   }
+
+   public static bool ArcTryParse_Demand<TObj, TDemand>(ContentNode node,
+                                                        ref ParsingContext pc,
+                                                        [MaybeNullWhen(false)] out TDemand amount)
+      where TObj : IEu5Object<TObj>, IEu5ObjectProvider<TObj>, new() where TDemand : IIEu5ObjectDemand<TDemand, TObj>, new()
+   {
+      using var scope = pc.PushScope();
+      if (!SeparatorHelper.IsSeparatorOfType(node.Separator,
+                                             TokenType.Equals,
+                                             ref pc))
+      {
+         amount = default;
+         return pc.Fail();
+      }
+
+      if (!node.Value.IsLiteralValueNode(ref pc, out var lvn))
+      {
+         amount = default;
+         return pc.Fail();
+      }
+
+      var key = pc.SliceString(node);
+      if (!TObj.GetGlobalItems().TryGetValue(key, out var rawMaterial))
+      {
+         pc.SetContext(node);
+         DiagnosticException.LogWarning(ref pc,
+                                        ParsingError.Instance.UnknownKey,
+                                        key,
+                                        nameof(TObj));
+         amount = default;
+         return pc.Fail();
+      }
+
+      if (!lvn.TryParseFloat(ref pc, out var demand))
+      {
+         amount = default;
+         return pc.Fail();
+      }
+
+      amount = Eu5Activator.CreateAnonymusInstance<TDemand>(node);
+      amount.SetData(rawMaterial, demand);
       return true;
    }
 }

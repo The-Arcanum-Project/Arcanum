@@ -1,9 +1,13 @@
-﻿using System.Diagnostics;
+﻿#region
+
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using Common.UI;
 using Common.UI.MBox;
 using Microsoft.Win32;
+
+#endregion
 
 namespace Common;
 
@@ -214,6 +218,31 @@ public static class ProcessHelper
          UIHandle.Instance.PopUpHandle
                  .ShowMBox($"Failed to open the file explorer: {ex.Message}{Environment.NewLine}Please open the file manually {path}");
       }
+   }
+
+   public static string OpenFileCreationDialog(string defaultPath, string fileEnding = "*.txt")
+   {
+      var dialog = new SaveFileDialog();
+
+      try
+      {
+         if (!string.IsNullOrEmpty(defaultPath))
+         {
+            var sanitizedPath = Path.GetFullPath(defaultPath.Trim());
+
+            if (Directory.Exists(sanitizedPath))
+               dialog.InitialDirectory = sanitizedPath;
+         }
+      }
+      catch
+      {
+         // ignored
+      }
+
+      var cleanEnding = fileEnding.Replace("*", "").Replace(".", "");
+      dialog.Filter = $"{cleanEnding} files (*.{cleanEnding})|*.{cleanEnding}|All files (*.*)|*.*";
+
+      return dialog.ShowDialog() == true ? dialog.FileName : string.Empty;
    }
 
    public static bool IsIntelliJInstalled()

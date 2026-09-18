@@ -3,31 +3,201 @@
                          xmlns:x = "http://schemas.microsoft.com/winfx/2006/xaml"
                          xmlns:mc = "http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d = "http://schemas.microsoft.com/expression/blend/2008"
-                         xmlns:md = "clr-namespace:Markdig.Wpf;assembly=Markdig.Wpf"
                          WindowStartupLocation = "CenterScreen"
-                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses" mc:Ignorable = "d"
-                         Title = "DocuPageTest" Height = "800" Width = "1200">
+                         xmlns:styleClasses = "clr-namespace:Arcanum.UI.Components.StyleClasses"
+                         xmlns:baseControls = "clr-namespace:Arcanum.UI.Components.UserControls.BaseControls"
+                         xmlns:commands = "clr-namespace:Arcanum.UI.Commands"
+                         xmlns:appFeatures = "clr-namespace:Arcanum.UI.AppFeatures"
+                         xmlns:implementation = "clr-namespace:Arcanum.UI.Documentation.Implementation"
+                         mc:Ignorable = "d" Title = "DocuPageTest" Height = "1000" Width = "1500">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultPalette.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Assets/ArcanumShared/DefaultFonts.xaml" />
+                <ResourceDictionary Source = "/Arcanum_UI;component/Components/Styles/Base/BaseButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style TargetType = "styleClasses:BaseButton" x:Key = "ThinBaseButton"
+                   BasedOn = "{StaticResource {x:Type styleClasses:BaseButton}}">
+                <Setter Property = "Padding" Value = "0" />
+                <Setter Property = "MinHeight" Value = "0" />
+                <Setter Property = "Height" Value = "18" />
+                <Setter Property = "FontSize" Value = "9" />
+                <Setter Property = "Margin" Value = "0, 1" />
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width = "200" />
-            <ColumnDefinition Width = "*" />
+            <ColumnDefinition Width = "200" /> <!-- Navigation -->
+            <ColumnDefinition Width = "3*" MinWidth = "250" />   <!-- Content -->
+            <ColumnDefinition Width = "6" />   <!-- Splitter -->
+            <ColumnDefinition Width = "2*" MinWidth = "150" /> <!-- Dev Panel -->
         </Grid.ColumnDefinitions>
 
-        <!-- ListView for documentation pages -->
-        <ListView Grid.Column = "0" Margin = "5"
-                  ItemsSource = "{Binding DocuPages, RelativeSource={RelativeSource AncestorType=Window}}"
+        <!-- Navigation -->
+        <ListView x:Name = "DocuPageListView" Grid.Column = "0" Margin = "5"
+                  ItemsSource = "{Binding DocuPages, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                  SelectedItem = "{Binding SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
                   SelectionChanged = "DocuPageListView_SelectionChanged">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text = "{Binding Title}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
         </ListView>
 
         <!-- Content area for selected documentation page -->
-        <md:MarkdownViewer Grid.Column = "1" x:Name = "Viewer" Margin = "0" TextOptions.TextFormattingMode = "Display"
-                           TextOptions.TextRenderingMode = "ClearType" ScrollViewer.IsDeferredScrollingEnabled = "True">
-            <FrameworkElement.CommandBindings>
-                <CommandBinding Command = "{x:Static md:Commands.Hyperlink}" Executed = "OpenHyperlink" />
-                <!-- <CommandBinding Command="{x:Static md:Commands.Image}" Executed="ClickOnImage" /> -->
-            </FrameworkElement.CommandBindings>
-        </md:MarkdownViewer>
+        <baseControls:ArcMarkdownViewer Grid.Column = "1" x:Name = "Viewer"
+                                        Markdown = "{Binding SelectedPage.Content, RelativeSource={RelativeSource AncestorType=Window}}" />
+
+        <GridSplitter Grid.Column = "2" Margin = "1, 2" Width = "4" HorizontalAlignment = "Stretch"
+                      VerticalAlignment = "Stretch" />
+
+        <!-- Dev Panel -->
+        <Border Grid.Column = "3" BorderThickness = "1,0,0,0">
+            <ScrollViewer HorizontalScrollBarVisibility = "Disabled" VerticalScrollBarVisibility = "Auto">
+                <StackPanel Margin = "5" HorizontalAlignment = "Stretch">
+                    <TextBlock Text = "Dev Tools" FontWeight = "Bold" Margin = "0,0,0,5"
+                               Foreground = "{StaticResource BlueAccentColorBrush}" />
+
+                    <StackPanel Orientation = "Horizontal" Margin = "0, 0, 0, 5">
+                        <styleClasses:BaseButton Content = "New Page" Click = "OnNewPage" Margin = "0,0,5,0" />
+                        <styleClasses:BaseButton Content = "New Snippet" Click = "OnNewSnippet" Margin = "0,0,5,0" />
+                        <styleClasses:BaseButton Content = "Open Folder" Click = "OnOpenFolder" Margin = "0,0,5,0" />
+                    </StackPanel>
+
+                    <Expander Header = "Edit Metadata" IsExpanded = "True">
+                        <StackPanel Orientation = "Vertical">
+                            <implementation:FeatureDocEditorView x:Name = "EditorControl"
+                                                                 SelectedFeature = "{Binding SelectedPage, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}" />
+                            <styleClasses:BaseButton Content = "Write to File" Click = "OnSaveDoc" Margin = "10, 4" />
+                        </StackPanel>
+                    </Expander>
+
+
+                    <Expander Header = "Snippet Picker" IsExpanded = "True" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllSnippetIds, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}" Margin = "0,2"
+                                                             Command = "{Binding CopySnippetCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                             CommandParameter = "{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Visual Debug" IsExpanded = "False" Margin = "0,0,0,5">
+                        <StackPanel Margin = "4">
+                            <styleClasses:BaseButton Content = "Force Reload All" Click = "OnForceReload"
+                                                     Margin = "0,1" />
+                            <styleClasses:BaseButton Content = "Open in VS Code" Click = "OnOpenInEditor"
+                                                     Margin = "0,1" />
+                        </StackPanel>
+                    </Expander>
+
+                    <Expander Header = "All FeatureIds" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding Source={x:Static appFeatures:FeatureIds.All}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "CopyFeatureId_OnClick" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Scopes" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding Source={x:Static commands:CommandScopes.AllScopes}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableScopes_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Status" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllStatus, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableStatus_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Levels" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllFeatureLevel, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableLevels_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Categories" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllFeatureCategory, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableCategory_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Locations" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllFeatureLocation, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableLocations_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+
+                    <Expander Header = "Available Scales" IsExpanded = "False" Margin = "0,0,0,5">
+                        <ItemsControl Margin = "4"
+                                      ItemsSource = "{Binding AllFeatureScale, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <styleClasses:BaseButton Content = "{Binding}"
+                                                             Style = "{StaticResource ThinBaseButton}"
+                                                             Click = "AvailableScale_OnClick"
+                                                             ToolTip = "Hold Shift while pressing to build a string in the Clipboard of all pressed buttons." />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Expander>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
     </Grid>
 </styleClasses:BaseWindow>

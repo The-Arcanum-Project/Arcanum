@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Date;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -17,6 +19,8 @@ using Arcanum.Core.GameObjects.InGame.Religious;
 using Arcanum.Core.Utils.Sorting;
 using Estate = Arcanum.Core.GameObjects.InGame.Cultural.Estate;
 using ArtistType = Arcanum.Core.GameObjects.InGame.Cultural.ArtistType;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Court;
 
@@ -162,6 +166,12 @@ public partial class Character : IEu5Object<Character>, IDependencyNode<string>
    [ParseAs("child_trait", isShatteredList: true)]
    [Description("The traits of this child character.")]
    public ObservableRangeCollection<Trait> ChildTraits { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("health_trait")]
+   [Description("The health trait of this character.")]
+   public Trait HealthTrait { get; set; } = Trait.Empty;
 
    [SaveAs(isShattered: true)]
    [DefaultValue(null)]

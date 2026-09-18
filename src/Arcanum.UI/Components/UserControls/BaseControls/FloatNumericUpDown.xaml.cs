@@ -1,8 +1,12 @@
-﻿using System.Globalization;
+﻿#region
+
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+
+#endregion
 
 namespace Arcanum.UI.Components.UserControls.BaseControls;
 
@@ -240,10 +244,16 @@ public partial class FloatNumericUpDown
       if (!NudTextBox.IsFocused)
          NudTextBox.Focus();
 
+      var multiplier = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)
+                          ? 10
+                          : Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)
+                             ? 100
+                             : 1;
+
       if (e.Delta > 0)
-         ChangeValue(StepSize);
+         ChangeValue(StepSize * multiplier);
       else
-         ChangeValue(-StepSize);
+         ChangeValue(-StepSize * multiplier);
    }
 
    private void NudTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)

@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.GameObjects.InGame.AbstractMechanics;
 using Arcanum.Core.GameObjects.InGame.gfx.map;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
@@ -45,6 +47,8 @@ using StaticModifier = Arcanum.Core.GameObjects.InGame.Common.StaticModifier;
 using Topography = Arcanum.Core.GameObjects.InGame.Map.Topography;
 using Trait = Arcanum.Core.GameObjects.InGame.Court.Trait;
 using Vegetation = Arcanum.Core.GameObjects.InGame.Map.Vegetation;
+
+#endregion
 
 namespace Arcanum.Core.GlobalStates;
 
@@ -105,7 +109,7 @@ public static class Globals
    public static Dictionary<string, Province> Provinces { get; } = [];
    public static Dictionary<string, Area> Areas { get; } = [];
    public static Dictionary<string, Region> Regions { get; } = [];
-   public static Dictionary<string, SubContinent> SuperRegions { get; } = [];
+   public static Dictionary<string, SubContinent> SubContinents { get; } = [];
    public static Dictionary<string, Continent> Continents { get; } = [];
    public static Dictionary<string, Adjacency> Adjacencies { get; } = [];
 

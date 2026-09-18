@@ -1,10 +1,14 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Language = Arcanum.Core.GameObjects.InGame.Cultural.Language;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class LanguageMapMode : LocationBasedMapMode
+public sealed class LanguageMapMode : LocationBasedMapMode
 {
    public override string Name => "Language";
    public override Type[] DisplayTypes => [typeof(Language)];

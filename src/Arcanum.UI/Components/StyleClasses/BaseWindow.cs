@@ -1,4 +1,7 @@
-﻿using System.Runtime.InteropServices;
+﻿#region
+
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,6 +12,8 @@ using System.Windows.Shapes;
 using Arcanum.UI.Helpers;
 using CommunityToolkit.Mvvm.Input;
 using Image = System.Windows.Controls.Image;
+
+#endregion
 
 namespace Arcanum.UI.Components.StyleClasses;
 
@@ -32,7 +37,7 @@ public class BaseWindow : Window
       MaximizeRestoreCommand = new RelayCommand(MaximizeRestore);
       SourceInitialized += OnSourceInitialized;
    }
-
+   
    public override void OnApplyTemplate()
    {
       base.OnApplyTemplate();
@@ -47,6 +52,9 @@ public class BaseWindow : Window
 
       if (e.Property == HeaderContentProperty)
          UpdateHeaderSeparator();
+
+      if (e.Property == TopmostProperty)
+         Debug.WriteLine($"Topmost is now: {Topmost}");
    }
 
    private void UpdateHeaderSeparator()

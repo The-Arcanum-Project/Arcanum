@@ -1,4 +1,6 @@
-﻿using Arcanum.API;
+﻿#region
+
+using Arcanum.API;
 using Arcanum.API.Console;
 using Arcanum.API.Core.IO;
 using Arcanum.Core.CoreSystems.ConsoleServices;
@@ -10,6 +12,8 @@ using Arcanum.Core.GlobalStates.BackingClasses;
 using Arcanum.Core.PluginServices;
 using Arcanum.Core.Settings;
 using Common.UI;
+
+#endregion
 
 namespace Arcanum.Core.FlowControlServices;
 
@@ -41,7 +45,7 @@ public class LifecycleManager
 #if DEBUG
       // Step 0: Initialize debug elements
       LoadDebugElements();
-      if (DebugConfig.Settings.EnableDebugLogging)
+      if (DebugConfig.Settings.EnableDebugLogging && !AppData.IsHeadless)
          UIHandle.Instance.LogWindowHandle.ShowWindow();
 #endif
    }

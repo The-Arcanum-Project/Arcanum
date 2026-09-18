@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -9,25 +11,75 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core.Attributes;
 
+#endregion
+
 namespace Arcanum.Core.GameObjects.InGame.Common;
 
-[NexusConfig(generateEquality: false)]
+[NexusConfig(false)]
 [ObjectSaveAs]
 public partial class ModifierGameData
    : IEmbeddedEu5Object<ModifierGameData>
 {
+   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.ModifierGameData;
+   public string UniqueId
+   {
+      get => "";
+      set { }
+   }
+   public InjRepType InjRepType { get; set; } = InjRepType.None;
+   public Eu5FileObj Source { get; set; } = Eu5FileObj.Embedded;
+   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
+   public string SavingKey => "game_data";
+
+   public override string ToString() => Category.ToString();
+
+   protected bool Equals(ModifierGameData other) => Min == other.Min &&
+                                                    Max == other.Max &&
+                                                    Category == other.Category &&
+                                                    Ai == other.Ai &&
+                                                    ShouldShowInModifierTab == other.ShouldShowInModifierTab &&
+                                                    ScaleWithPop == other.ScaleWithPop &&
+                                                    CapZeroToOne == other.CapZeroToOne &&
+                                                    Format == other.Format;
+
+   [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
+   public override int GetHashCode() => HashCode.Combine(Min,
+                                                         Max,
+                                                         (int)Category,
+                                                         Ai,
+                                                         ShouldShowInModifierTab,
+                                                         ScaleWithPop,
+                                                         CapZeroToOne,
+                                                         (int)Format);
+
+   public override bool Equals(object? obj)
+   {
+      if (obj is not ModifierGameData other)
+         return false;
+
+      return Min == other.Min &&
+             Max == other.Max &&
+             Category == other.Category &&
+             Ai == other.Ai &&
+             ShouldShowInModifierTab == other.ShouldShowInModifierTab &&
+             ScaleWithPop == other.ScaleWithPop &&
+             CapZeroToOne == other.CapZeroToOne &&
+             Format == other.Format &&
+             Bias == other.Bias;
+   }
+
    #region Nexus Properties
 
    [DefaultValue(0)]
    [ParseAs("min")]
    [Description("The minimum value the modifier can have.")]
    [SaveAs]
-   public int Min { get; set; }
+   public float Min { get; set; }
    [ParseAs("max")]
    [Description("The maximum value the modifier can have.")]
    [SaveAs]
    [DefaultValue(0)]
-   public int Max { get; set; }
+   public float Max { get; set; }
    [ParseAs("category")]
    [Description("The categories this modifier can apply to.")]
    [SaveAs(SavingValueType.FlagsEnum)]
@@ -38,6 +90,12 @@ public partial class ModifierGameData
    [SaveAs]
    [DefaultValue(false)]
    public bool Ai { get; set; }
+
+   [ParseAs("transfer")]
+   [Description("Whether this modifier can be transferred to other entities.")]
+   [SaveAs]
+   [DefaultValue(false)]
+   public bool Transfer { get; set; }
 
    [SaveAs]
    [ParseAs("is_societal_value_change")]
@@ -88,52 +146,4 @@ public partial class ModifierGameData
    public static Dictionary<string, ModifierGameData> GetGlobalItems() => [];
 
    #endregion
-
-   public override string ToString() => Category.ToString();
-
-   protected bool Equals(ModifierGameData other) => Min == other.Min &&
-                                                    Max == other.Max &&
-                                                    Category == other.Category &&
-                                                    Ai == other.Ai &&
-                                                    ShouldShowInModifierTab == other.ShouldShowInModifierTab &&
-                                                    ScaleWithPop == other.ScaleWithPop &&
-                                                    CapZeroToOne == other.CapZeroToOne &&
-                                                    Format == other.Format;
-
-   [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
-   public override int GetHashCode() => HashCode.Combine(Min,
-                                                         Max,
-                                                         (int)Category,
-                                                         Ai,
-                                                         ShouldShowInModifierTab,
-                                                         ScaleWithPop,
-                                                         CapZeroToOne,
-                                                         (int)Format);
-
-   public override bool Equals(object? obj)
-   {
-      if (obj is not ModifierGameData other)
-         return false;
-
-      return Min == other.Min &&
-             Max == other.Max &&
-             Category == other.Category &&
-             Ai == other.Ai &&
-             ShouldShowInModifierTab == other.ShouldShowInModifierTab &&
-             ScaleWithPop == other.ScaleWithPop &&
-             CapZeroToOne == other.CapZeroToOne &&
-             Format == other.Format &&
-             Bias == other.Bias;
-   }
-
-   public AgsSettings AgsSettings { get; } = Config.Settings.AgsSettings.ModifierGameData;
-   public string UniqueId
-   {
-      get => "";
-      set { }
-   }
-   public InjRepType InjRepType { get; set; } = InjRepType.None;
-   public Eu5FileObj Source { get; set; } = Eu5FileObj.Embedded;
-   public Eu5ObjectLocation FileLocation { get; set; } = Eu5ObjectLocation.Empty;
-   public string SavingKey => "game_data";
 }

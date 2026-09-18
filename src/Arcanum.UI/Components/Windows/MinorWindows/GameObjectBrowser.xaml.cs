@@ -1,9 +1,13 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
+using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Windows;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.StyleClasses;
 using Common.UI;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
@@ -29,7 +33,7 @@ public partial class GameObjectBrowser
       {
          var value = propertyInfo.GetValue(null);
          UIHandle.Instance.PopUpHandle.GetPropertyGridOrCollectionView(value).ShowDialog();
-         GC.Collect(); // Force garbage collection to clean up any unused objects
+         // GC.Collect(); // Force garbage collection to clean up any unused objects
       }
    }
 }

@@ -1,40 +1,48 @@
-﻿using Arcanum.Core.CoreSystems.EventDistribution;
+﻿#region
+
+using Arcanum.Core.CoreSystems.EventDistribution;
 using Arcanum.Core.CoreSystems.SavingSystem.AGS;
 using Arcanum.Core.GameObjects.BaseTypes;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.History.Commands;
 
-public class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlobals)
+public sealed class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlobals)
    : Eu5ObjectCommand([eu5Object], null)
 {
+   private readonly IEu5Object _eu5Object = eu5Object;
+   private readonly bool _addToGlobals = addToGlobals;
+   private readonly bool _isAdd = isAdd;
+
    public override void Execute()
    {
       // base.Execute();
-      if (addToGlobals)
+      if (_addToGlobals)
       {
-         var globals = eu5Object.GetGlobalItemsNonGeneric();
-         if (isAdd)
-            globals.Add(eu5Object.UniqueId, eu5Object);
+         var globals = _eu5Object.GetGlobalItemsNonGeneric();
+         if (_isAdd)
+            globals.Add(_eu5Object.UniqueId, _eu5Object);
          else
-            globals.Remove(eu5Object.UniqueId);
+            globals.Remove(_eu5Object.UniqueId);
       }
 
-      SaveMaster.AddNewObject(eu5Object);
+      SaveMaster.AddNewObject(_eu5Object);
    }
 
    public override void Undo()
    {
       base.Undo();
-      if (addToGlobals)
+      if (_addToGlobals)
       {
-         var globals = eu5Object.GetGlobalItemsNonGeneric();
-         if (isAdd)
-            globals.Remove(eu5Object.UniqueId);
+         var globals = _eu5Object.GetGlobalItemsNonGeneric();
+         if (_isAdd)
+            globals.Remove(_eu5Object.UniqueId);
          else
-            globals.Add(eu5Object.UniqueId, eu5Object);
+            globals.Add(_eu5Object.UniqueId, _eu5Object);
       }
 
-      SaveMaster.RemoveNewObject(eu5Object);
+      SaveMaster.RemoveNewObject(_eu5Object);
       EventDistributor.UpdateNUI?.Invoke();
    }
 
@@ -44,6 +52,6 @@ public class CreateObjectCommand(IEu5Object eu5Object, bool isAdd, bool addToGlo
       EventDistributor.UpdateNUI?.Invoke();
    }
 
-   public override string GetDescription => isAdd ? "Create Object" : "Delete Object" + $": {eu5Object.UniqueId} ({eu5Object.GetType().Name})";
-   public override IEu5Object[] GetTargets() => [eu5Object];
+   public override string GetDescription => _isAdd ? "Create Object" : "Delete Object" + $": {_eu5Object.UniqueId} ({_eu5Object.GetType().Name})";
+   public override IEu5Object[] GetTargets() => [_eu5Object];
 }

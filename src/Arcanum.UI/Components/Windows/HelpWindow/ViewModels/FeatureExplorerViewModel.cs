@@ -1,24 +1,39 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Commands;
-using Arcanum.UI.Components.Windows.DebugWindows;
+using Arcanum.UI.Documentation.Implementation;
+using CommunityToolkit.Mvvm.Input;
+using RelayCommand = Arcanum.UI.Components.Windows.DebugWindows.RelayCommand;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
 
 public class FeatureExplorerViewModel : HelpPageViewModelBase
 {
+   private readonly Dictionary<string, Type> _filterTypes = new()
+   {
+      { "Status", typeof(FeatureStatus) },
+      { "Category", typeof(FeatureCategory) },
+      { "Level", typeof(FeatureLevel) },
+      { "Scale", typeof(FeatureScale) },
+      { "Location", typeof(FeatureLocation) },
+   };
+
    public FeatureExplorerViewModel()
    {
-      BuildTree();
+      SetFeatures();
       SpotlightCommand = new RelayCommand(_ => ExecuteSpotlight());
+      CompleteSearchCommand = new RelayCommand<string>(CompleteSearch);
       UpdateLocationGrid(FeatureLocation.Center, FeatureScale.Standard); // Default
    }
 
    public override string Title => "Feature Explorer";
 
-   public ObservableCollection<FeatureTreeItem> FeatureTree { get; } = [];
-   public event Action<FeatureTreeItem?>? RequestSelectionUpdate;
+   public ObservableCollection<FeatureItem> Features { get; } = [];
 
    public string SearchQuery
    {
@@ -31,7 +46,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       }
    } = "";
 
-   public FeatureTreeItem? SelectedItem
+   public FeatureItem? SelectedItem
    {
       get;
       set
@@ -43,7 +58,17 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       }
    }
 
-   public IAppFeature? SelectedFeature => SelectedItem?.Feature;
+   public int SuggestionIndex
+   {
+      get;
+      set
+      {
+         field = value;
+         OnPropertyChanged();
+      }
+   } = -1;
+
+   public FeatureDoc? SelectedFeature => SelectedItem?.Documentation;
 
    public List<IAppCommand> AssociatedCommands
    {
@@ -64,29 +89,33 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
          OnPropertyChanged();
       }
    } = [];
-
-   public ICommand SpotlightCommand { get; }
-
-   private void BuildTree()
+   public bool IsSuggesting
    {
-      FeatureTree.Clear();
-      var all = FeatureRegistry.GetAllFeatures().ToList();
-
-      // Find roots (no parent)
-      var roots = all.Where(f => string.IsNullOrEmpty(f.ParentFeatureId?.Value));
-
-      foreach (var rootFeature in roots)
+      get;
+      set
       {
-         var rootItem = new FeatureTreeItem(rootFeature);
-         AddChildrenRecursive(rootItem, all);
-         FeatureTree.Add(rootItem);
+         field = value;
+         OnPropertyChanged();
       }
    }
 
-   public void SelectFeature(IAppFeature feature)
+   public ObservableCollection<string> SearchSuggestions { get; } = [];
+
+   public ICommand SpotlightCommand { get; }
+   public ICommand CompleteSearchCommand { get; }
+   public event Action<FeatureItem?>? RequestSelectionUpdate;
+
+   private void SetFeatures()
    {
-      // Find the corresponding tree item and select it
-      var item = FindTreeItem(FeatureTree, feature);
+      Features.Clear();
+
+      foreach (var feature in DocuRegistry.GetAllDocuPages)
+         Features.Add(new(feature));
+   }
+
+   public void SelectFeature(FeatureDoc feature)
+   {
+      var item = FindFeature(Features, feature);
       if (item != null)
       {
          SelectedItem = item;
@@ -94,33 +123,13 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       }
    }
 
-   private static FeatureTreeItem? FindTreeItem(ObservableCollection<FeatureTreeItem> featureTree, IAppFeature feature)
+   private static FeatureItem? FindFeature(ObservableCollection<FeatureItem> features, FeatureDoc feature)
    {
-      foreach (var item in featureTree)
-      {
-         if (item.Feature.Id.Value == feature.Id.Value)
+      foreach (var item in features)
+         if (item.Documentation.Id == feature.Id)
             return item;
 
-         var foundInChildren = FindTreeItem(item.Children, feature);
-         if (foundInChildren != null)
-         {
-            item.IsExpanded = true;
-            return foundInChildren;
-         }
-      }
-
       return null;
-   }
-
-   private static void AddChildrenRecursive(FeatureTreeItem parent, List<IAppFeature> all)
-   {
-      var children = all.Where(f => f.ParentFeatureId?.Value == parent.Feature.Id.Value);
-      foreach (var childFeature in children)
-      {
-         var childItem = new FeatureTreeItem(childFeature);
-         AddChildrenRecursive(childItem, all);
-         parent.Children.Add(childItem);
-      }
    }
 
    private void UpdateDetails()
@@ -128,13 +137,13 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       if (SelectedFeature == null)
          return;
 
-      // 1. Find Commands for this feature's scopes
+      // Find Commands for this feature's scopes
       var scopes = SelectedFeature.AssociatedScopes.ToHashSet();
       AssociatedCommands = CommandRegistry.AllCommands
                                           .Where(c => scopes.Contains(c.Scope))
                                           .ToList();
 
-      // 2. Update the Spatial Map
+      // Update the Spatial Map
       UpdateLocationGrid(SelectedFeature.Location, SelectedFeature.Scale);
    }
 
@@ -143,7 +152,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
       var primaries = new HashSet<int>();
       var secondaries = new HashSet<int>();
 
-      // 1. Identify the Core Index
+      // Identify the Core Index
       var core = location switch
       {
          FeatureLocation.TopLeft => 0,
@@ -160,7 +169,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 
       primaries.Add(core);
 
-      // 2. Calculate "Spillover" based on Scale
+      // Calculate "Spillover" based on Scale
       if (scale == FeatureScale.Full)
       {
          for (var i = 0; i < 9; i++)
@@ -205,7 +214,7 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
          }
       // Standard and Compact only occupy the core cell
 
-      // 3. Special visual for "Floating/Contextual"
+      // Special visual for "Floating/Contextual"
       // We can make these look distinct by always making them "Center" but adding 
       // a different secondary pattern.
 
@@ -217,42 +226,123 @@ public class FeatureExplorerViewModel : HelpPageViewModelBase
 
    private void ApplyFilter()
    {
-      // Disable selection updates temporarily if needed for performance
-      foreach (var item in FeatureTree)
-         FilterRecursive(item, SearchQuery);
-   }
+      var query = SearchQuery.Trim();
+      UpdateSuggestions(query);
 
-   private bool FilterRecursive(FeatureTreeItem item, string query)
-   {
-      // Case 1: Empty Query - Show Everything
-      if (string.IsNullOrWhiteSpace(query))
+      if (string.IsNullOrEmpty(query))
       {
-         item.IsVisible = true;
-         foreach (var child in item.Children)
-            FilterRecursive(child, query);
-         return true;
+         foreach (var f in Features)
+            f.IsVisible = true;
+         return;
       }
 
-      // Case 2: Check for matches in this specific node
-      var matches = item.Feature.DisplayName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    item.Feature.Description.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    item.Feature.SearchSynonyms.Any(s => s.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                    item.Feature.Id.Value.Contains(query, StringComparison.OrdinalIgnoreCase);
+      var parts = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+      var tags = parts.Where(p => p.StartsWith("@")).ToArray();
+      var textTerms = parts.Where(p => !p.StartsWith("@")).ToArray();
 
-      // Case 3: Check children recursively
-      var anyChildMatches = false;
-      foreach (var child in item.Children)
-         if (FilterRecursive(child, query))
-            anyChildMatches = true;
+      foreach (var item in Features)
+      {
+         var matchesTags = true;
 
-      // A node is visible if IT matches OR any of its CHILDREN match
-      item.IsVisible = matches || anyChildMatches;
+         foreach (var tag in tags)
+         {
+            // Expected format: @Type:Value
+            var kvp = tag[1..].Split(':');
+            if (kvp.Length < 2)
+               continue; // Ignore incomplete tags for filtering
 
-      // Auto-expand if a child is a match so the user sees the result
-      if (anyChildMatches)
-         item.IsExpanded = true;
+            var type = kvp[0];
+            var val = kvp[1];
 
-      return item.IsVisible;
+            var tagMatch = type.ToLower() switch
+            {
+               "status" => item.Documentation.Status.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               "category" => item.Documentation.Category.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               "level" => item.Documentation.Level.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               "scale" => item.Documentation.Scale.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               "location" => item.Documentation.Location.ToString().Equals(val, StringComparison.OrdinalIgnoreCase),
+               _ => false,
+            };
+
+            if (!tagMatch)
+            {
+               matchesTags = false;
+               break;
+            }
+         }
+
+         var matchesText = textTerms.Length == 0 ||
+                           textTerms.Any(t =>
+                                            item.Documentation.Title.Contains(t, StringComparison.OrdinalIgnoreCase) ||
+                                            item.Documentation.Summary.Contains(t, StringComparison.OrdinalIgnoreCase));
+
+         item.IsVisible = matchesTags && matchesText;
+      }
+   }
+
+   private void UpdateSuggestions(string query)
+   {
+      var currentToken = query.Split(' ').LastOrDefault(s => s.StartsWith("@"));
+      if (currentToken == null)
+      {
+         IsSuggesting = false;
+         return;
+      }
+
+      SearchSuggestions.Clear();
+
+      if (!currentToken.Contains(":"))
+      {
+         // Suggesting the Type
+         var inputType = currentToken[1..].ToLower();
+         foreach (var type in _filterTypes.Keys)
+            if (type.ToLower().Contains(inputType))
+               SearchSuggestions.Add($"@{type}:");
+      }
+      else
+      {
+         // Suggesting the Value
+         var parts = currentToken[1..].Split(':');
+         var typeKey = _filterTypes.Keys.FirstOrDefault(k => k.Equals(parts[0], StringComparison.OrdinalIgnoreCase));
+
+         if (typeKey != null)
+         {
+            var inputValue = parts[1].ToLower();
+            var enumValues = Enum.GetNames(_filterTypes[typeKey]);
+            foreach (var val in enumValues)
+               if (val.ToLower().Contains(inputValue))
+                  SearchSuggestions.Add($"@{typeKey}:{val}");
+         }
+      }
+
+      if (SearchSuggestions.Count > 0)
+      {
+         if (SuggestionIndex == -1)
+            SuggestionIndex = 0;
+      }
+      else
+         SuggestionIndex = -1;
+
+      IsSuggesting = SearchSuggestions.Count > 0;
+   }
+
+   public void CompleteSearch(string suggestion)
+   {
+      if (string.IsNullOrEmpty(suggestion))
+         return;
+
+      var parts = SearchQuery.Split(' ').ToList();
+      if (parts.Count > 0)
+         parts.RemoveAt(parts.Count - 1); // Remove the partial token (e.g., "@Stat")
+
+      parts.Add(suggestion);
+
+      // Add a space if we finished a full tag, keep it tight if we just added the colon
+      var separator = suggestion.EndsWith(":") ? "" : " ";
+      SearchQuery = string.Join(" ", parts) + separator;
+
+      IsSuggesting = suggestion.EndsWith(":");
+      SuggestionIndex = -1;
    }
 
    private void ExecuteSpotlight()

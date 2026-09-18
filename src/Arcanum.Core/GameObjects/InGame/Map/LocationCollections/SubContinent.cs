@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
@@ -16,6 +18,8 @@ using Arcanum.Core.Utils.DataStructures;
 using Nexus.Core;
 using Nexus.Core.Attributes;
 
+#endregion
+
 namespace Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 
 [NexusConfig]
@@ -31,7 +35,7 @@ public partial class SubContinent
    public bool IsReadonly { get; } = false;
    public NUISetting NUISettings { get; } = Config.Settings.NUIObjectSettings.SuperRegionSettings;
    public INUINavigation[] Navigations { get; } = [];
-   public static Dictionary<string, SubContinent> GetGlobalItems() => Globals.SuperRegions;
+   public static Dictionary<string, SubContinent> GetGlobalItems() => Globals.SubContinents;
 
    public List<IEu5Object> GetInferredList(IEnumerable<Location> sLocs) => sLocs
                                                                           .Select(IEu5Object (loc) => loc
@@ -40,7 +44,7 @@ public partial class SubContinent
                                                                           .Distinct()
                                                                           .ToList();
 
-   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.SuperRegions;
+   public MapModeManager.MapModeType GetMapMode => MapModeManager.MapModeType.Subcontinent;
    public string GetNamespace => "Map.Superregion";
 
    public void OnSearchSelected() => SelectionManager.Eu5ObjectSelectedInSearch(this);

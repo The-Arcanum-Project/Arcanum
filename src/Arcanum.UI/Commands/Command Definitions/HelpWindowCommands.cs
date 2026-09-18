@@ -1,7 +1,11 @@
-﻿using System.Windows.Input;
+﻿#region
+
+using System.Windows.Input;
 using Arcanum.Core.ApplicationContext;
-using Arcanum.UI.AppFeatures;
 using Arcanum.UI.Components.Windows.HelpWindow.ViewModels;
+using Arcanum.UI.Documentation.Implementation;
+
+#endregion
 
 namespace Arcanum.UI.Commands.Command_Definitions;
 
@@ -15,7 +19,7 @@ public static class HelpWindowCommands
                          CommandScopes.HELP_DASHBOARD,
                          param =>
                          {
-                            if (param is IAppFeature feature)
+                            if (param is FeatureDoc feature)
                                ArcAppContext.Get<IHelpPageViewModelWrapper>()?.ActivateFeatureTabFor(feature);
                          },
                          canExecute: _ => ArcAppContext.Has<IHelpPageViewModelWrapper>()).WithDefaultGestures([]);

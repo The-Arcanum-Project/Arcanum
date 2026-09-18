@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
@@ -13,9 +15,12 @@ using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Cultural.SubObjects;
+using Arcanum.Core.GameObjects.InGame.Economy;
 using Arcanum.Core.GameObjects.InGame.Map;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Cultural;
 
@@ -68,6 +73,12 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
    public bool UsePatronym { get; set; }
 
    [SaveAs]
+   [DefaultValue(true)]
+   [ParseAs("active")]
+   [Description("Indicates whether this culture is active in the game.")]
+   public bool IsActive { get; set; }
+
+   [SaveAs]
    [DefaultValue(null)]
    [ParseAs("opinions", itemNodeType: AstNodeType.ContentNode)]
    [Description("Opinions towards other cultures.")]
@@ -114,6 +125,12 @@ public partial class Culture : IEu5Object<Culture>, IMapInferable
    [ParseAs("character_modifier", itemNodeType: AstNodeType.ContentNode)]
    [Description("Modifiers applied to characters of this culture.")]
    public ObservableRangeCollection<ModValInstance> CharacterModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("goods_demand_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers affecting the demand for goods of this culture.")]
+   public ObservableRangeCollection<GoodsDemand> GoodsDemandModifiers { get; set; } = [];
 
    #endregion
 

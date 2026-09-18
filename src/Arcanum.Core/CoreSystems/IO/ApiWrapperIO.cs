@@ -1,4 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text;
 using Arcanum.API.Core.IO;
 using Arcanum.API.UtilServices;
@@ -15,8 +16,7 @@ public class APIWrapperIO : IFileOperations
    public IService.ServiceState VerifyState() => IService.ServiceState.Ok;
    public string GetArcanumDataPath { get; } = IO.GetArcanumDataPath;
 
-   public string? SelectFolder(string startPath, string defaultFileName = "Select Folder")
-      => IO.SelectFolder(startPath, defaultFileName);
+   public string? SelectFolder(string startPath, string defaultFileName = "Select Folder") => IO.SelectFolder(startPath, defaultFileName);
 
    public string? SelectFile(string startFolder, string filterText) => IO.SelectFile(startFolder, filterText);
 
@@ -36,17 +36,13 @@ public class APIWrapperIO : IFileOperations
 
    public string[]? ReadAllLinesUtf8WithBom(string path) => IO.ReadAllLinesUtf8WithBom(path);
 
-   public bool WriteAllText(string path, string data, Encoding encoding, bool append = false)
-      => IO.WriteAllText(path, data, encoding, append);
+   public bool WriteAllText(string path, string data, Encoding encoding, bool append = false) => IO.WriteAllText(path, data, encoding, append);
 
-   public bool WriteAllTextAnsi(string path, string data, bool append = false)
-      => IO.WriteAllTextAnsi(path, data, append);
+   public bool WriteAllTextAnsi(string path, string data, bool append = false) => IO.WriteAllTextAnsi(path, data, append);
 
-   public bool WriteAllTextUtf8(string path, string data, bool append = false)
-      => IO.WriteAllTextUtf8(path, data, append);
+   public bool WriteAllTextUtf8(string path, string data, bool append = false) => IO.WriteAllTextUtf8(path, data, append);
 
-   public bool WriteAllTextUtf8WithBom(string path, string data, bool append = false)
-      => IO.WriteAllTextUtf8WithBom(path, data, append);
+   public bool WriteAllTextUtf8WithBom(string path, string data, bool append = false) => IO.WriteAllTextUtf8WithBom(path, data, append);
 
    public bool EnsureDirectoryExists(string directoryPath) => IO.EnsureDirectoryExists(directoryPath);
 
@@ -63,17 +59,14 @@ public class APIWrapperIO : IFileOperations
 
    public Task<string[]?> ReadAllLinesAsync(string path,
                                             Encoding encoding,
-                                            CancellationToken cancellationToken = default)
-      => IO.ReadAllLinesAsync(path, encoding, cancellationToken);
+                                            CancellationToken cancellationToken = default) => IO.ReadAllLinesAsync(path, encoding, cancellationToken);
 
-   public Task<string?> ReadAllTextAnsiAsync(string path, CancellationToken cancellationToken = default)
-      => IO.ReadAllTextAnsiAsync(path, cancellationToken);
+   public Task<string?> ReadAllTextAnsiAsync(string path, CancellationToken cancellationToken = default) => IO.ReadAllTextAnsiAsync(path, cancellationToken);
 
    public Task<string[]?> ReadAllLinesAnsiAsync(string path, CancellationToken cancellationToken = default)
       => IO.ReadAllLinesAnsiAsync(path, cancellationToken);
 
-   public Task<string?> ReadAllTextUtf8Async(string path, CancellationToken cancellationToken = default)
-      => IO.ReadAllTextUtf8Async(path, cancellationToken);
+   public Task<string?> ReadAllTextUtf8Async(string path, CancellationToken cancellationToken = default) => IO.ReadAllTextUtf8Async(path, cancellationToken);
 
    public Task<string[]?> ReadAllLinesUtf8Async(string path, CancellationToken cancellationToken = default)
       => IO.ReadAllLinesUtf8Async(path, cancellationToken);
@@ -88,20 +81,17 @@ public class APIWrapperIO : IFileOperations
                                        string data,
                                        Encoding encoding,
                                        bool append = false,
-                                       CancellationToken cancellationToken = default)
-      => IO.WriteAllTextAsync(path, data, encoding, append, cancellationToken);
+                                       CancellationToken cancellationToken = default) => IO.WriteAllTextAsync(path, data, encoding, append, cancellationToken);
 
    public Task<bool> WriteAllTextAnsiAsync(string path,
                                            string data,
                                            bool append = false,
-                                           CancellationToken cancellationToken = default)
-      => IO.WriteAllTextAnsiAsync(path, data, append, cancellationToken);
+                                           CancellationToken cancellationToken = default) => IO.WriteAllTextAnsiAsync(path, data, append, cancellationToken);
 
    public Task<bool> WriteAllTextUtf8Async(string path,
                                            string data,
                                            bool append = false,
-                                           CancellationToken cancellationToken = default)
-      => IO.WriteAllTextUtf8Async(path, data, append, cancellationToken);
+                                           CancellationToken cancellationToken = default) => IO.WriteAllTextUtf8Async(path, data, append, cancellationToken);
 
    public Task<bool> WriteAllTextUtf8WithBomAsync(string path,
                                                   string data,
@@ -112,6 +102,5 @@ public class APIWrapperIO : IFileOperations
    public Task<bool> SaveBitmapAsync(string path,
                                      Bitmap bmp,
                                      ImageFormat format,
-                                     CancellationToken cancellationToken = default)
-      => IO.SaveBitmapAsync(path, bmp, format, cancellationToken);
+                                     CancellationToken cancellationToken = default) => IO.SaveBitmapAsync(path, bmp, format, cancellationToken);
 }

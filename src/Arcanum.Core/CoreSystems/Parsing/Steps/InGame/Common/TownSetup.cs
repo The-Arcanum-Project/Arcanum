@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -11,6 +13,8 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core.Attributes;
 using Building = Arcanum.Core.GameObjects.InGame.Economy.Building;
 using BuildingLevel = Arcanum.Core.GameObjects.InGame.Economy.SubClasses.BuildingLevel;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 
@@ -25,6 +29,12 @@ public partial class TownSetup : IEu5Object<TownSetup>
    [ParseAs("-", isShatteredList: true, iEu5KeyType: typeof(Building), itemNodeType: AstNodeType.ContentNode)]
    [Description("Collection of building levels associated with this TownSetup.")]
    public ObservableRangeCollection<BuildingLevel> BuildingLevels { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("copy_from")]
+   [Description("Reference to another TownSetup object to copy properties from.")]
+   public TownSetup CopyFrom { get; set; } = Empty;
 
    #endregion
 

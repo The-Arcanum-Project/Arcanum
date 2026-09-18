@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.Parsing.Steps.InGame;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Parsing.Steps.InGame;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.SubClasses;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.GFX.Map;
@@ -11,6 +13,8 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Common.UI;
 using LanguageParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LanguageParsing;
 using LocationRankParsing = Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common.LocationRankParsing;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
@@ -96,6 +100,31 @@ public static class DescriptorDefinitions
                                                                      ],
                                                                      false);
 
+   public static readonly FileDescriptor EstateDescriptor = new(["in_game", "common", "estates"],
+                                                                new("estates", "txt", "#"),
+                                                                [new EstateParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
+                                                                false);
+
+   public static readonly FileDescriptor PopTypeDescriptor = new(["in_game", "common", "pop_types"],
+                                                                 new("01_pop_types", "txt", "#"),
+                                                                 ConsequentialLoadingSteps([
+                                                                    new PopTypeDiscoverer([]),
+                                                                    new PopTypesParsing([
+                                                                       ColorParser.LoadingService[0], ModifierDefinitionDescriptor.LoadingService[0],
+                                                                       EstateDescriptor.LoadingService[0],
+                                                                    ]),
+                                                                 ]),
+                                                                 false);
+
+   public static readonly FileDescriptor RawMaterialDescriptor = new(["in_game", "common", "goods"],
+                                                                     new("raw_materials", "txt", "#"),
+                                                                     [
+                                                                        new RawMaterialParsing([
+                                                                           PopTypeDescriptor.LoadingService[1], DefinitionsDescriptor.LoadingService[0],
+                                                                        ]),
+                                                                     ],
+                                                                     false);
+
    public static readonly FileDescriptor GameObjecLocatorsDescriptor = new(["in_game", "gfx", "map", "map_objects"],
                                                                            new("CityLocators", "txt", string.Empty),
                                                                            [new CityGameObjectLocatorParsing([LocationDescriptor.LoadingService[0]])],
@@ -113,22 +142,6 @@ public static class DescriptorDefinitions
                                                                      new("Adjacencies", "csv", string.Empty),
                                                                      [new AdjacencyFileLoading([LocationDescriptor.LoadingService[0]])],
                                                                      false);
-
-   public static readonly FileDescriptor EstateDescriptor = new(["in_game", "common", "estates"],
-                                                                new("estates", "txt", "#"),
-                                                                [new EstateParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
-                                                                false);
-
-   public static readonly FileDescriptor PopTypeDescriptor = new(["in_game", "common", "pop_types"],
-                                                                 new("01_pop_types", "txt", "#"),
-                                                                 ConsequentialLoadingSteps([
-                                                                    new PopTypeDiscoverer([]),
-                                                                    new PopTypesParsing([
-                                                                       ColorParser.LoadingService[0], ModifierDefinitionDescriptor.LoadingService[0],
-                                                                       EstateDescriptor.LoadingService[0],
-                                                                    ]),
-                                                                 ]),
-                                                                 false);
 
    public static readonly FileDescriptor LanguageDescriptor = new(["in_game", "common", "languages"],
                                                                   new("languages", "txt", "#"),
@@ -175,6 +188,7 @@ public static class DescriptorDefinitions
                                                                          new CultureGroupParsing([
                                                                             CultureDiscovery, ModifierDefinitionDescriptor
                                                                               .LoadingService[0],
+                                                                            RawMaterialDescriptor.LoadingService[0], 
                                                                          ]),
                                                                       ],
                                                                       false);
@@ -224,6 +238,12 @@ public static class DescriptorDefinitions
                                                                        [new ReligiousFactionParsing([])],
                                                                        false);
 
+   public static readonly FileDescriptor ReligiousFocusParsing = new(["in_game", "common", "religious_focuses"],
+                                                                     new("religious_focuses", "txt", "#"),
+                                                                     [new ReligiousFocusParsing([])],
+                                                                     false);
+
+
    public static readonly FileDescriptor ReligiousGroupDescriptor = new(["in_game", "common", "religion_groups"],
                                                                         new("religion_groups", "txt", "#"),
                                                                         [
@@ -231,14 +251,22 @@ public static class DescriptorDefinitions
                                                                               ColorParser.LoadingService[0],
                                                                               ModifierDefinitionDescriptor
                                                                                 .LoadingService[0],
+                                                                              RawMaterialDescriptor.LoadingService[0],
                                                                            ]),
                                                                         ],
                                                                         false);
 
-   public static readonly FileDescriptor ReligiousFocusParsing = new(["in_game", "common", "religious_focuses"],
-                                                                     new("religious_focuses", "txt", "#"),
-                                                                     [new ReligiousFocusParsing([])],
-                                                                     false);
+   public static readonly FileDescriptor SocietalValuesDescriptor =
+      new(["in_game", "common", "societal_values"],
+          new("societal_values", "txt", "#"),
+          [new SocientalValuesParsing([])],
+          false);
+
+   public static readonly FileDescriptor StaticModifiersDescriptor =
+      new(["main_menu", "common", "static_modifiers"],
+          new("static_modifiers", "txt", "#"),
+          [new StaticModifierParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
+          false);
 
    public static readonly FileDescriptor ReligionDescriptor = new(["in_game", "common", "religions"],
                                                                   new("religions", "txt", "#"),
@@ -253,23 +281,6 @@ public static class DescriptorDefinitions
                                                                      ]),
                                                                   ],
                                                                   false);
-
-   public static readonly FileDescriptor RawMaterialDescriptor = new(["in_game", "common", "goods"],
-                                                                     new("raw_materials", "txt", "#"),
-                                                                     [new RawMaterialParsing([PopTypeDescriptor.LoadingService[1]])],
-                                                                     false);
-
-   public static readonly FileDescriptor SocietalValuesDescriptor =
-      new(["in_game", "common", "societal_values"],
-          new("societal_values", "txt", "#"),
-          [new SocientalValuesParsing([])],
-          false);
-
-   public static readonly FileDescriptor StaticModifiersDescriptor =
-      new(["main_menu", "common", "static_modifiers"],
-          new("static_modifiers", "txt", "#"),
-          [new StaticModifierParsing([ModifierDefinitionDescriptor.LoadingService[0]])],
-          false);
 
    public static readonly FileDescriptor LocationTemplateDescriptor =
       new(["in_game", "map_data", "location_templates.txt"],
@@ -349,11 +360,15 @@ public static class DescriptorDefinitions
             descriptor.Reset();
       };
 
-      foreach (var t in from descriptor in FileDescriptors
-                        from t in descriptor.LoadingService.SelectMany(fs => fs.ParsedObjects).Distinct()
-                        where !TypeToDescriptor.TryAdd(t, descriptor)
-                        select t)
-         throw new InvalidOperationException($"Type {t.FullName} is already registered to a FileDescriptor.");
+      foreach (var descriptor in FileDescriptors)
+         foreach (var t in descriptor.LoadingService.SelectMany(fs => fs.ParsedObjects).Distinct())
+            if (!TypeToDescriptor.TryAdd(t, descriptor))
+            {
+               ArcLog.Error("DescriptorDefinitions",
+                            $"Type {t.FullName} is already registered to {TypeToDescriptor[t].Name}. Cannot register to {descriptor.Name}.");
+               throw new
+                  InvalidOperationException($"Type {t.FullName} is already registered to {TypeToDescriptor[t].Name}. Cannot register to {descriptor.Name}.");
+            }
    }
 
    public static readonly Dictionary<Type, FileDescriptor> TypeToDescriptor = new();

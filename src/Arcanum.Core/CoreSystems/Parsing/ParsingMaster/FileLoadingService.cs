@@ -1,9 +1,13 @@
-﻿using System.Diagnostics;
+﻿#region
+
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Arcanum.Core.CoreSystems.ErrorSystem.Diagnostics;
 using Arcanum.Core.CoreSystems.Parsing.ParsingMaster.ParsingStep;
 using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.Utils.Sorting;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
 
@@ -38,7 +42,11 @@ public abstract class FileLoadingService : IDependencyNode<string>
    protected TimeSpan Duration => _stopwatch.Elapsed;
 
    public TimeSpan LastTotalLoadingDuration { get; set; } = TimeSpan.Zero;
-   public bool SuccessfullyLoaded { get; set; } = false;
+   public bool SuccessfullyLoaded
+   {
+      get => Volatile.Read(ref field);
+      set => Volatile.Write(ref field, value);
+   }
    public virtual bool HasPriority { get; set; } = false;
    public virtual bool CanBeReloaded => true;
 

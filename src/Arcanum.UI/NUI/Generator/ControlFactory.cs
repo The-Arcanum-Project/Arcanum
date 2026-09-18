@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿#region
+
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Arcanum.Core.CoreSystems.Clipboard;
@@ -6,6 +8,8 @@ using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.NUI.UserControls.BaseControls;
+
+#endregion
 
 namespace Arcanum.UI.NUI.Generator;
 
@@ -45,6 +49,7 @@ public static class ControlFactory
          {
             new() { Width = new(4, GridUnitType.Star) }, new() { Width = new(5, GridUnitType.Star) },
          },
+         Margin = new(2),
       };
 
       return grid;

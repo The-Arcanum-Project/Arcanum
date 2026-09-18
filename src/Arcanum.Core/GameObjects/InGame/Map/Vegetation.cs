@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using System.Diagnostics;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
@@ -15,6 +17,8 @@ using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
 using Nexus.Core.Attributes;
 using ModValInstance = Arcanum.Core.CoreSystems.Jomini.Modifiers.ModValInstance;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Map;
 
@@ -47,6 +51,18 @@ public partial class Vegetation : IEu5Object<Vegetation>, IMapInferable
    [ParseAs("movement_cost")]
    [Description("The movement cost modifier for units moving through this vegetation type.")]
    public float MovementCost { get; set; } = 1f;
+
+   [SaveAs]
+   [DefaultValue(0f)]
+   [ParseAs("colonial_migration_size_modifier")]
+   [Description("The modifier for colonial migration size associated with this vegetation type.")]
+   public float ColonialMigrationSizeModifier { get; set; }
+
+   [SaveAs]
+   [DefaultValue(1.0f)]
+   [ParseAs("proximity")]
+   [Description("The proximity factor for this vegetation type.")]
+   public float Proximity { get; set; } = 1.0f;
 
    [SaveAs]
    [DefaultValue(false)]

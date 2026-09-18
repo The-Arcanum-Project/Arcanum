@@ -225,15 +225,6 @@ public static class LvnHelpers
          return true;
       }
 
-      public bool TryParseCountry(ref ParsingContext pc,
-                                  [MaybeNullWhen(false)] out Country country)
-      {
-         return LUtil.TryGetFromGlobalsAndLog(lvn.Value,
-                                              ref pc,
-                                              Globals.Countries,
-                                              out country);
-      }
-
       public bool TryParseCharacter(ref ParsingContext pc,
                                     [MaybeNullWhen(false)] out Character character)
       {

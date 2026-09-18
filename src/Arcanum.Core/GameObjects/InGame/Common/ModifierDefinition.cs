@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.NodeParser.ToolBox;
@@ -10,6 +12,8 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Nexus.Core;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Common;
 
@@ -76,6 +80,9 @@ public enum ModifierCategory
 
    [EnumAgsData("rebel")]
    Rebel,
+
+   [EnumAgsData("movement")]
+   Movement,
 }
 
 public enum ModifierFormat
@@ -110,6 +117,12 @@ public partial class ModifierDefinition : IEu5Object<ModifierDefinition>
    [ParseAs("color")]
    [Description("The color to display the modifier in.")]
    public IsModifierGood IsGood { get; set; } = IsModifierGood.Good;
+
+   [ParseAs("no_difference_sign")]
+   [Description("Whether this modifier should use the difference sign.")]
+   [SaveAs]
+   [DefaultValue(false)]
+   public bool NoDifferenceSign { get; set; }
 
    [SaveAs]
    [DefaultValue(2)]

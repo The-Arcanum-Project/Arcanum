@@ -1,16 +1,18 @@
-﻿using System.Collections.ObjectModel;
+﻿#region
+
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
-using Arcanum.Core.CoreSystems.Clipboard;
 using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Parsing.ParsingHelpers.ArcColor;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.UI.Components.Charts.DonutChart;
 using Arcanum.UI.Components.Windows.MinorWindows.PopUpEditors;
+using Common.Logger;
 using CommunityToolkit.Mvvm.Input;
 using Culture = Arcanum.Core.GameObjects.InGame.Cultural.Culture;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
@@ -18,11 +20,13 @@ using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 using PopType = Arcanum.Core.GameObjects.InGame.Pops.PopType;
 using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
 
+#endregion
+
 namespace Arcanum.UI.Components.UserControls.ValueAllocators;
 
-public class AllocatorViewModel : ViewModelBase
+public sealed class AllocatorViewModel : ViewModelBase
 {
-   private int _totalLimit;
+   internal int _totalLimit;
    private int _maxTotalLimit;
    private bool? _areAllLocked;
    private bool _suppressCalculation;
@@ -33,7 +37,6 @@ public class AllocatorViewModel : ViewModelBase
    public ICommand UndoCommand { get; }
    public ICommand DeleteCommand { get; }
    public ICommand ApplyChangesCommand { get; }
-   public ICommand PasteFromLocationCommand { get; }
 
    public ObservableCollection<BasicChartItem> ReligionStats { get; } = [];
    public ObservableCollection<BasicChartItem> CultureStats { get; } = [];
@@ -200,6 +203,7 @@ public class AllocatorViewModel : ViewModelBase
          OnPropertyChanged();
       }
    } = string.Empty;
+   
 
    public AllocatorViewModel(Location location)
    {
@@ -211,30 +215,8 @@ public class AllocatorViewModel : ViewModelBase
       UndoCommand = new RelayCommand(Undo);
       DeleteCommand = new RelayCommand<AllocationItem>(Delete);
       ApplyChangesCommand = new RelayCommand(ApplyChanges);
-      PasteFromLocationCommand = new RelayCommand<Location>(PastePopsFromLocation);
    }
 
-   private void PastePopsFromLocation(Location? obj)
-   {
-      if (ArcClipboard.CurrentPayload != null && ArcClipboard.CurrentPayload.Value is Location cl)
-      {
-         if (LoadedLocation == Location.Empty || LoadedLocation == cl)
-            return;
-
-         var diff = 0d;
-         foreach (var pop in cl.Pops)
-         {
-            Nx.AddToCollection(LoadedLocation, Location.Field.Pops, pop);
-            AddItem(pop, balanceToTotal: false);
-            diff += pop.Size;
-         }
-
-         _totalLimit += (int)(diff * 1000);
-
-         RunAutoLogScale();
-         OnPropertyChanged(nameof(TotalLimit));
-      }
-   }
 
    private void InitializeLocationData(Location location)
    {
@@ -245,7 +227,10 @@ public class AllocatorViewModel : ViewModelBase
       MaxTotalLimit = _totalLimit > 0 ? _totalLimit * Config.Settings.SpecializedEditorSettings.PopEditorSettings.TotalPopsFactor : 1000;
 
       foreach (var pop in location.Pops)
+      {
          Items.Add(new(this, pop));
+         ArcLog.WritePure($"Added: {pop.GetHashCode()}");
+      }
 
       UpdateMasterLockState();
       UpdateCalculatedInfo(null, new(nameof(Items)));
@@ -276,7 +261,7 @@ public class AllocatorViewModel : ViewModelBase
       PopTypeStats.Clear();
    }
 
-   private void ApplyChanges()
+   public void ApplyChanges()
    {
       if (LoadedLocation == Location.Empty)
          return;
@@ -423,7 +408,7 @@ public class AllocatorViewModel : ViewModelBase
       }
    }
 
-   private void Undo()
+   public void Undo()
    {
       if (_undoStack.Count == 0)
          return;
@@ -505,7 +490,7 @@ public class AllocatorViewModel : ViewModelBase
       RunAutoLogScale();
    }
 
-   private void RunAutoLogScale()
+   internal void RunAutoLogScale()
    {
       if (!AutoDetectLogScale)
          return;

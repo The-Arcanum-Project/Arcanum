@@ -14,8 +14,6 @@ using Arcanum.Core.CoreSystems.IO;
 using Arcanum.Core.CoreSystems.Map;
 using Arcanum.Core.CoreSystems.Map.MapModes;
 using Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
-using Arcanum.Core.CoreSystems.Parsing.ParsingMaster;
-using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Map;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
@@ -57,6 +55,8 @@ public partial class MapControl
    public static readonly DependencyProperty CurrentPosProperty =
       DependencyProperty.Register(nameof(CurrentPos), typeof(Vector2), typeof(MapControl), new(default(Vector2)));
 
+   private Polygon[] _polygons = [];
+
    public readonly MapInteractionManager MapInteractionManager;
 
    private Vector2? _contextMenuClickLocation;
@@ -67,8 +67,11 @@ public partial class MapControl
 
    private bool _isRenderingLoopActive;
    private int _mapHeight = -1;
-
    private int _mapWidth = -1;
+
+   public int MapHeight => _mapHeight;
+   public int MapWidth => _mapWidth;
+
    private Color4[] _selectionColor = null!;
 
    private float _rot;
@@ -189,6 +192,12 @@ public partial class MapControl
       if (!IsLoaded)
          throw new InvalidOperationException("MapControl must be loaded before calling SetupRendering");
 
+      if (LocationRenderer != null!)
+      {
+         LocationRenderer.Dispose();
+         _d3dHost.Dispose();
+      }
+
       Coords = new(this, imageSize);
 
       var vertices = await Task.Run(() => LocationRenderer.CreateVertices(polygons, imageSize));
@@ -198,7 +207,7 @@ public partial class MapControl
       _selectionColor = (Color4[])CurrentBackgroundColors.Clone();
       _d3dHost = new(LocationRenderer, HwndHostContainer, OnRendererLoaded);
       HwndHostContainer.Child = _d3dHost;
-
+      _polygons = polygons;
       SelectionManager.PropertyChanged += SelectionManager_PropertyChanged;
       SelectionManager.PreviewChanged += RefreshAndRenderSelectionColors;
 
@@ -380,15 +389,13 @@ public partial class MapControl
       var height = _mapHeight;
       var stride = bmpData.Stride;
 
-      var sourcePolygons = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor.LoadingService[0]).Polygons!;
-
       const int sliceHeight = 32;
 
-      var workItems = new List<RenderTask>(sourcePolygons.Length * 2);
+      var workItems = new List<RenderTask>(_polygons.Length * 2);
 
-      for (var i = 0; i < sourcePolygons.Length; i++)
+      for (var i = 0; i < _polygons.Length; i++)
       {
-         var poly = sourcePolygons[i];
+         var poly = _polygons[i];
 
          var complexity = poly.TriangleIndices.Length;
          var polyTop = (int)poly.Bounds.Top;

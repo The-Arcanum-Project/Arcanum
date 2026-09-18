@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿#region
+
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using Arcanum.Core.GlobalStates;
@@ -6,6 +9,8 @@ using Arcanum.Core.Settings.SmallSettingsObjects;
 using Arcanum.UI.Commands.KeyMap;
 using Arcanum.UI.Components.Converters;
 using Common.Logger;
+
+#endregion
 
 namespace Arcanum.UI.Commands;
 
@@ -92,6 +97,20 @@ public static class CommandRegistry
 
       ArcLog.Write("CRS", LogLevel.ERR, "Command with ID {0} not found in registry.", id.Value);
       return null!;
+   }
+
+   public static bool TryGetFromString(string idString, [MaybeNullWhen(false)] out IAppCommand command)
+   {
+      var id = new CommandId(idString);
+      if (Commands.TryGetValue(id, out var cmd))
+      {
+         command = cmd;
+         return true;
+      }
+
+      ArcLog.Write("CRS", LogLevel.ERR, "Command with ID {0} not found in registry.", idString);
+      command = null;
+      return false;
    }
 
    public static void Initialize()

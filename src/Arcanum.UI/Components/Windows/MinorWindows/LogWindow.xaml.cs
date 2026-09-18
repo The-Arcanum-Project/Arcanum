@@ -1,25 +1,49 @@
-﻿using System.Windows.Controls;
+﻿#region
+
+using System.Windows.Documents;
+using System.Windows.Threading;
+using Arcanum.UI.Components.Helpers;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.MinorWindows;
 
 public partial class LogWindow
 {
+   private readonly FlowDocument _document;
+   private readonly DispatcherTimer _renderTimer;
+
+   private const bool AUTO_SCROLL = true;
+
    public LogWindow()
    {
       InitializeComponent();
+
+      _document = new();
+      LogDisplay.Document = _document;
+
+      _renderTimer = new(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
+      _renderTimer.Tick += ProcessLogs;
+      _renderTimer.Start();
    }
 
-   private bool _autoScroll = true;
-
-   private void OnScrollChanged(object sender, ScrollChangedEventArgs e)
+   private void ProcessLogs(object? sender, EventArgs e)
    {
-      if (sender is not ScrollViewer sw)
+      if (DataContext is not LogViewModel vm)
          return;
 
-      if (e.ExtentHeightChange == 0)
-         _autoScroll = Math.Abs(sw.VerticalOffset - sw.ScrollableHeight) < 0.1;
+      var added = false;
+      while (vm.PendingLogs.TryDequeue(out var entry))
+      {
+         var p = new Paragraph(new Run(entry.Message)) { Foreground = entry.Color };
+         _document.Blocks.Add(p);
+         added = true;
+      }
 
-      if (_autoScroll && e.ExtentHeightChange > 0)
-         sw.ScrollToEnd();
+      while (_document.Blocks.Count > 1000)
+         _document.Blocks.Remove(_document.Blocks.FirstBlock);
+
+      if (added && AUTO_SCROLL)
+         LogDisplay.ScrollToEnd();
    }
 }

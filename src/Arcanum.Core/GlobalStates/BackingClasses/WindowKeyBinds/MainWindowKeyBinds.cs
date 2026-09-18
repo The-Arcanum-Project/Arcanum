@@ -1,5 +1,9 @@
-﻿using System.Windows.Input;
+﻿#region
+
+using System.Windows.Input;
 using Arcanum.API.Core.KeyBinds;
+
+#endregion
 
 namespace Arcanum.Core.GlobalStates.BackingClasses.WindowKeyBinds;
 
@@ -72,4 +76,7 @@ public class MainWindowKeyBinds : KeyBindProvider
 
    public KeyGesture FreezeSelection { get; set; } = new(Key.W, ModifierKeys.Control);
    public KeyGesture OpenClipboardHistory { get; set; } = new(Key.V, ModifierKeys.Control | ModifierKeys.Shift);
+
+   // Map Editing
+   public KeyGesture OpenLocationColorPicker { get; set; } = new(Key.L, ModifierKeys.Control | ModifierKeys.Shift);
 }

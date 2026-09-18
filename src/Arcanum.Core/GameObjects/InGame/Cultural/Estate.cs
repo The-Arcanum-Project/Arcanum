@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
@@ -12,6 +14,8 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
 using Arcanum.Core.GameObjects.InGame.Cultural.SubObjects;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Cultural;
 
@@ -145,6 +149,12 @@ public partial class Estate : IEu5Object<Estate>
    [DefaultValue(null)]
    [Description("The modifiers scaled by the current satisfaction of this Estate.")]
    public ObservableRangeCollection<ModValInstance> SatisfactionModifiers { get; set; } = [];
+
+   [SaveAs]
+   [ParseAs("disenfranchise_to")]
+   [DefaultValue(null)]
+   [Description("The estate to which characters of this estate will disenfranchise.")]
+   public Estate DisenfranchiseTo { get; set; } = Empty;
 
    #endregion
 

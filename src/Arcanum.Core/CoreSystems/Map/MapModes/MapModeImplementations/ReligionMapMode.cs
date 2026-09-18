@@ -1,9 +1,13 @@
-﻿using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+﻿#region
+
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Religion = Arcanum.Core.GameObjects.InGame.Religious.Religion;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class ReligionMapMode : LocationBasedMapMode
+public sealed class ReligionMapMode : LocationBasedMapMode
 {
    public override string Name => "Religion";
    public override Type[] DisplayTypes => [typeof(Religion)];

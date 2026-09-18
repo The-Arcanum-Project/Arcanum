@@ -21,7 +21,6 @@ using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Settings.BaseClasses;
 using Arcanum.Core.Settings.SmallSettingsObjects;
-using Arcanum.Core.Utils;
 using Arcanum.Core.Utils.PerformanceCounters;
 using Arcanum.UI.Commands;
 using Arcanum.UI.Components.StyleClasses;
@@ -30,6 +29,7 @@ using Arcanum.UI.Components.Views.MainWindow;
 using Arcanum.UI.Components.Windows.DebugWindows;
 using Arcanum.UI.Components.Windows.MainWindows.MainWindowsHelpers;
 using Arcanum.UI.Components.Windows.MinorWindows;
+using Arcanum.UI.Components.Windows.MinorWindows.LocationColorPicker;
 using Arcanum.UI.Components.Windows.PopUp;
 using Arcanum.UI.HostUIServices.SettingsGUI;
 using Arcanum.UI.NUI.Generator.SpecificGenerators;
@@ -225,20 +225,34 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
       Application.Current.Shutdown();
    }
 
+   public void TryLoadMapData()
+   {
+      // Don't do anything if it's already loaded
+      if (MapModeManager.IsMapReady)
+         return;
+
+      if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
+         throw new ApplicationException("Could not load location map tracing descriptor.");
+
+      lock (mapDataParser)
+         if (mapDataParser.TryGetMapData(out var data))
+         {
+            _ = MainMap.SetupRenderer(data.Polygons, data.MapSize);
+            MapModeManager.IsMapReady = true;
+            mapDataParser.DisposeMapData();
+         }
+         else
+            ArcLog.WriteLine("MAP", LogLevel.INF, "Map data not ready at UI load, will load map once ready.");
+   }
+
    private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
    {
       // Load map if data ready
       if (DescriptorDefinitions.MapTracingDescriptor.LoadingService[0] is not LocationMapTracing mapDataParser)
          throw new ApplicationException("Could not load location map tracing descriptor.");
 
-      lock (mapDataParser)
-         if (mapDataParser.FinishedTesselation)
-         {
-            Debug.Assert(mapDataParser.Polygons != null,
-                         "Map data parser has finished tesselation but polygons are null.");
-            _ = MainMap.SetupRenderer(mapDataParser.Polygons!, mapDataParser.MapSize);
-            MapModeManager.IsMapReady = true;
-         }
+      // If tessellation is faster than loading, we can load the map directly
+      TryLoadMapData();
 
       // Eu5UiGen.GenerateAndSetView(new(Globals.Locations.First().Value, true, UiPresenter));
 
@@ -247,9 +261,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
 
       MapControl.OnMapLoaded += () =>
       {
-         var size = ((LocationMapTracing)DescriptorDefinitions.MapTracingDescriptor
-                                                              .LoadingService[0]).MapSize;
-         Selection.MapManager.InitializeMapData(new(0, 0, size.Item1, size.Item2));
+         Selection.MapManager.InitializeMapData(new(0, 0, MainMap.MapWidth, MainMap.MapHeight));
 
          SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.FrozenSelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
          SettingsEventManager.RegisterSettingsHandler(nameof(MapSettingsObj.SelectionColorOpacity), (_, _) => MainMap.RefreshAndRenderSelectionColors());
@@ -261,8 +273,6 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          var rect = Selection.DragArea;
          RectangleBounds = $"Rect: [X:{rect.X}, Y:{rect.Y}, W:{rect.Width}, H:{rect.Height}]";
       };
-
-      GcWizard.ForceGc();
 
       Selection.LocationHovered += locations =>
       {
@@ -280,8 +290,7 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          }
       };
 
-      lock (mapDataParser)
-         SetUpToolTip(MainMap);
+      SetUpToolTip(MainMap);
 
       SelectionManager.PropertyChanged += SelectionManagerOnPropertyChanged;
 
@@ -772,6 +781,12 @@ public sealed partial class MainWindow : IPerformanceMeasured, INotifyPropertyCh
          return;
 
       SelectionManager.SelectWater = selectWater.IsChecked ?? true;
+   }
+
+   private void OpenLocationColorPickerCommand_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+   {
+      var colorPicker = new LocationColorPicker();
+      colorPicker.ShowDialog();
    }
 
    private void Popup_Opened(object? sender, EventArgs e)

@@ -1,8 +1,12 @@
-﻿using System.Diagnostics;
+﻿#region
+
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using Arcanum.Core.CoreSystems.IO;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.InGame.Pops;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Commands;
@@ -16,6 +20,8 @@ using Arcanum.UI.Saving.Window;
 using Arcanum.UI.Util.WindowManagement;
 using Common.Logger;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+
+#endregion
 
 namespace Arcanum.UI.Components.Windows.DebugWindows.DebugPanel;
 
@@ -283,5 +289,29 @@ public partial class DebugPanelGrid
    private void DocuPageTest_OnClick(object sender, RoutedEventArgs e)
    {
       new DocuPageTest().Show();
+   }
+
+   private void ThrowRandomException_OnClick(object sender, RoutedEventArgs e)
+   {
+      var exceptions = new List<Exception>
+      {
+         new InvalidOperationException("This is an invalid operation."),
+         new ArgumentNullException(nameof(sender), "This argument cannot be null."),
+         new FileNotFoundException("This file was not found."),
+         new FormatException("This is a format error."),
+         new("This is a general exception."),
+      };
+
+      var randomException = exceptions[Random.Shared.Next(exceptions.Count)];
+      throw randomException;
+   }
+
+   private void SetAllPopsToOneSize_OnClick(object sender, RoutedEventArgs e)
+   {
+      foreach (var loc in Globals.Locations.Values)
+      {
+         foreach (var pop in loc.Pops)
+            Nx.Set(pop, PopDefinition.Field.Size, 0.001);
+      }
    }
 }

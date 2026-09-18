@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿#region
+
+using System.ComponentModel;
 using Arcanum.API.UtilServices.Search;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
@@ -9,7 +11,10 @@ using Arcanum.Core.CoreSystems.SavingSystem.Util;
 using Arcanum.Core.CoreSystems.Selection;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.BaseTypes.InjectReplace;
+using Arcanum.Core.GameObjects.InGame.Economy;
 using Nexus.Core.Attributes;
+
+#endregion
 
 namespace Arcanum.Core.GameObjects.InGame.Cultural;
 
@@ -36,6 +41,12 @@ public partial class CultureGroup : IEu5Object<CultureGroup>
    [ParseAs("location_modifier", itemNodeType: AstNodeType.ContentNode)]
    [Description("Modifiers applied to locations of this culture group.")]
    public ObservableRangeCollection<ModValInstance> LocationModifiers { get; set; } = [];
+
+   [SaveAs]
+   [DefaultValue(null)]
+   [ParseAs("goods_demand_modifier", AstNodeType.BlockNode, itemNodeType: AstNodeType.ContentNode)]
+   [Description("Modifiers affecting the demand for goods by clergy of this culture group.")]
+   public ObservableRangeCollection<GoodsDemand> GoodsDemandModifier { get; set; } = [];
 
    #endregion
 

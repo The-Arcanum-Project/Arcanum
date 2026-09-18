@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Drawing;
 using System.Numerics;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 

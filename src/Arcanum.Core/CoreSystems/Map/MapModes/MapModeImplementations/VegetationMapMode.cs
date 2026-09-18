@@ -1,9 +1,13 @@
-﻿using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
+﻿#region
+
+using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using Vegetation = Arcanum.Core.GameObjects.InGame.Map.Vegetation;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class VegetationMapMode : LocationBasedMapMode
+public sealed class VegetationMapMode : LocationBasedMapMode
 {
    public override bool IsLandOnly => false;
    public override string Name => "Vegetation";

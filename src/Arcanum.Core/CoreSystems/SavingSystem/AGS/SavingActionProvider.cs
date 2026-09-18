@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿#region
+
+using System.Diagnostics;
 using Arcanum.Core.AgsRegistry;
 using Arcanum.Core.CoreSystems.Common;
 using Arcanum.Core.CoreSystems.Jomini.Date;
@@ -9,6 +11,7 @@ using Arcanum.Core.CoreSystems.SavingSystem.Serialization.Nodes;
 using Arcanum.Core.GameObjects.BaseTypes;
 using Arcanum.Core.GameObjects.InGame.Court.State;
 using Arcanum.Core.GameObjects.InGame.Cultural.SubObjects;
+using Arcanum.Core.GameObjects.InGame.Economy;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects;
 using Arcanum.Core.GameObjects.InGame.Religious.SubObjects;
 using static Arcanum.Core.CoreSystems.SavingSystem.AGS.SavingUtil;
@@ -24,6 +27,8 @@ using MapMovementAssist = Arcanum.Core.GameObjects.InGame.Map.SubObjects.MapMove
 using Road = Arcanum.Core.GameObjects.InGame.Map.Road;
 using SocientalValueEntry = Arcanum.Core.GameObjects.InGame.Court.State.SubClasses.SocientalValueEntry;
 using SoundToll = Arcanum.Core.GameObjects.InGame.Map.SoundToll;
+
+#endregion
 
 namespace Arcanum.Core.CoreSystems.SavingSystem.AGS;
 
@@ -295,6 +300,38 @@ public static class SavingActionProvider
       sb.Append(FormatValue(SavingValueType.Identifier, ecd, EstateCountDefinition.Field.Estate))
         .AppendSeparator()
         .Append(FormatValue(SavingValueType.Int, ecd, EstateCountDefinition.Field.Count));
+   }
+
+   public static void DemandSaving(IEu5Object target,
+                                   HashSet<PropertySavingMetadata> metadata,
+                                   IndentedStringBuilder sb,
+                                   bool asOneLine,
+                                   bool writeDefaults)
+   {
+      SavingValueType svl;
+      float value;
+      object source;
+
+      if (target is IIEu5ObjectDemand dd)
+      {
+         dd.GetData(out var demand, out value);
+         source = demand;
+         svl = SavingValueType.Identifier;
+      }
+      else if (target is IEnumDemand ed)
+      {
+         ed.GetData(out var demand, out value);
+         source = demand;
+         svl = SavingValueType.Enum;
+      }
+      else
+         throw new InvalidOperationException("SaveDemandData can only be used with DemandData instances.");
+
+      PropertySavingMetadata? md = null;
+
+      sb.Append(FormatValue(svl, source, md))
+        .AppendSeparator()
+        .Append(FormatValue(SavingValueType.Float, value, md));
    }
 
    public static void ModValInstanceSaving(IEu5Object target,

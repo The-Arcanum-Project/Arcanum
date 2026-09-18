@@ -1,13 +1,17 @@
-﻿using System.Buffers;
+﻿#region
+
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Arcanum.Core.Utils.Colors;
 using Location = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.Location;
 using PopDefinition = Arcanum.Core.GameObjects.InGame.Pops.PopDefinition;
 
+#endregion
+
 namespace Arcanum.Core.CoreSystems.Map.MapModes.MapModeImplementations;
 
-public class PopulationMapMode : LocationBasedMapMode
+public sealed class PopulationMapMode : LocationBasedMapMode
 {
    public override string Name => "Population";
    public override string Description => "Displays the population of each location on the map.";

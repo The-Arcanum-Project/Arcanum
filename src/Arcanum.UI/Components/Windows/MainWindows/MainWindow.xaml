@@ -158,6 +158,10 @@
         <CommandBinding Command = "mainWindow:MwCommands.GoToNextINUICommand" Executed = "GoToNextINUICommand_Executed"
                         CanExecute = "CanGoToNextINUICommand_Executed" />
 
+        <!-- Command Bindings for Map Editing -->
+        <CommandBinding Command = "mainWindow:MwCommands.OpenLocationColorPickerCommand"
+                        Executed = "OpenLocationColorPickerCommand_OnExecuted" CanExecute = "CommandCanAlwaysExecute" />
+
     </Window.CommandBindings>
 
     <styleClasses:BaseWindow.HeaderContent>
@@ -324,6 +328,11 @@
                     <Separator />
                     <uc:SearchableMenuItem Header = "Parser Test" Command = "mainWindow:MwCommands.ExecuteLexer" />
                 </uc:SearchableMenuItem>
+
+                <uc:SearchableMenuItem Header = "Map Editing">
+                    <uc:SearchableMenuItem Header = "Location Color Picker"
+                                           Command = "mainWindow:MwCommands.OpenLocationColorPickerCommand" />
+                </uc:SearchableMenuItem>
             </Menu>
 
 
@@ -418,11 +427,10 @@
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column = "0" BorderBrush = "{DynamicResource DefaultBorderColorBrush}" BorderThickness = "1"
-                    CornerRadius = "8" Margin = "0, 0, 2, 0">
-                <ScrollViewer>
-                    <ContentPresenter x:Name = "UiPresenter" />
+                    CornerRadius = "8" Margin = "0, 0, 2, 0" Padding = "0">
+                <ScrollViewer VerticalScrollBarVisibility = "Auto" HorizontalScrollBarVisibility = "Disabled">
+                    <ContentPresenter x:Name = "UiPresenter" Margin = "0" />
                 </ScrollViewer>
-
             </Border>
 
             <GridSplitter Grid.Column = "1" Width = "4" ResizeBehavior = "PreviousAndNext" />

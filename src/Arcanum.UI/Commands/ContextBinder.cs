@@ -1,6 +1,12 @@
-﻿using System.Windows;
+﻿#region
+
+using System.Windows;
 using Arcanum.Core.ApplicationContext;
 using Arcanum.UI.AppFeatures;
+using Arcanum.UI.Documentation.Implementation;
+using Common.Logger;
+
+#endregion
 
 namespace Arcanum.UI.Commands;
 
@@ -55,16 +61,9 @@ public static class ContextBinder
 
       void OnElementOnDataContextChanged(object _, DependencyPropertyChangedEventArgs args)
       {
-         switch (args.NewValue)
-         {
-            case IAppFeature feature:
-               FeatureRegistry.Register(feature);
-               break;
-            case IAppFeatureProvider provider:
-               FeatureRegistry.Register(provider.FeatureMetadata);
-               break;
-         }
-
+         if (args.NewValue is IAppFeatureProvider { Feature: null } provider)
+            ArcLog.Warning("CTB", $"Feature provider {provider.GetType().FullName} returned null feature for id: '{provider.FeatureId}'");
+         
          // If the element is already loaded and visible, update active status immediately
          if (element is { IsLoaded: true, IsVisible: true })
             RegisterContext(args.NewValue);
@@ -88,11 +87,15 @@ public static class ContextBinder
 
       switch (dc)
       {
-         case IAppFeature feature:
+         case FeatureDoc feature:
             FeatureRegistry.AddActiveFeature(feature);
             break;
          case IAppFeatureProvider provider:
-            FeatureRegistry.AddActiveFeature(provider.FeatureMetadata);
+            var f = provider.Feature;
+            if (f != null)
+               FeatureRegistry.AddActiveFeature(f);
+            else
+               ArcLog.Warning("CTB", $"Feature provider {provider.GetType().FullName} returned null feature for id: '{provider.FeatureId}'");
             break;
       }
    }
@@ -112,7 +115,7 @@ public static class ContextBinder
       foreach (var i in interfaces)
          ArcAppContext.RemoveContext(i);
 
-      if (dc is IAppFeature feature)
+      if (dc is FeatureDoc feature)
          FeatureRegistry.RemoveActiveFeature(feature);
    }
 }

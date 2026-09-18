@@ -1,4 +1,6 @@
-﻿using Arcanum.Core.CoreSystems.Jomini.AiTags;
+﻿#region
+
+using Arcanum.Core.CoreSystems.Jomini.AiTags;
 using Arcanum.Core.CoreSystems.Jomini.AudioTags;
 using Arcanum.Core.CoreSystems.Jomini.CurrencyDatas;
 using Arcanum.Core.CoreSystems.Jomini.Date;
@@ -6,6 +8,8 @@ using Arcanum.Core.CoreSystems.Jomini.Effects;
 using Arcanum.Core.CoreSystems.Jomini.Modifiers;
 using Arcanum.Core.CoreSystems.NUI;
 using Arcanum.Core.CoreSystems.Parsing.Steps.InGame.Common;
+using Arcanum.Core.GameObjects.InGame.Cultural;
+using Arcanum.Core.GameObjects.InGame.Economy;
 using Arcanum.Core.GameObjects.InGame.Economy.SubClasses;
 using Arcanum.Core.GameObjects.InGame.gfx.map;
 using Arcanum.Core.GameObjects.InGame.Map.LocationCollections;
@@ -78,6 +82,8 @@ using Trait = Arcanum.Core.GameObjects.InGame.Court.Trait;
 using VariableDataBlock = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDataBlock;
 using VariableDeclaration = Arcanum.Core.GameObjects.InGame.Map.LocationCollections.SubObjects.VariableDeclaration;
 using Vegetation = Arcanum.Core.GameObjects.InGame.Map.Vegetation;
+
+#endregion
 
 namespace Arcanum.Core.Settings;
 
@@ -734,4 +740,50 @@ public class NUISettings
                                                            Enum.GetValues<TownSetup.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<TownSetup.Field>().Cast<Enum>().ToArray(),
                                                            Enum.GetValues<TownSetup.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting GoodsDemandSettings { get; set; } = new(GoodsDemand.Field.UniqueId,
+                                                             Enum.GetValues<GoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                             Enum.GetValues<GoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                             Enum.GetValues<GoodsDemand.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting WinterGoodsDemandSettings { get; set; } = new(WinterGoodsDemand.Field.UniqueId,
+                                                                   Enum.GetValues<WinterGoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                                   Enum.GetValues<WinterGoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                                   Enum.GetValues<WinterGoodsDemand.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting TopographyGoodsDemandSettings { get; set; } = new(TopographyGoodsDemand.Field.UniqueId,
+                                                                       Enum.GetValues<TopographyGoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                                       Enum.GetValues<TopographyGoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                                       Enum.GetValues<TopographyGoodsDemand.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting SubContinentGoodsDemandSettings { get; set; } = new(SubContinentGoodsDemand.Field.UniqueId,
+                                                                         Enum.GetValues<SubContinentGoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                                         Enum.GetValues<SubContinentGoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                                         Enum.GetValues<SubContinentGoodsDemand.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting RegionGoodsDemandSettings { get; set; } = new(RegionGoodsDemand.Field.UniqueId,
+                                                                   Enum.GetValues<RegionGoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                                   Enum.GetValues<RegionGoodsDemand.Field>().Cast<Enum>().ToArray(),
+                                                                   Enum.GetValues<RegionGoodsDemand.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting NamingWeightSettings { get; set; } = new(NamingWeight.Field.UniqueId,
+                                                              Enum.GetValues<NamingWeight.Field>().Cast<Enum>().ToArray(),
+                                                              Enum.GetValues<NamingWeight.Field>().Cast<Enum>().ToArray(),
+                                                              Enum.GetValues<NamingWeight.Field>().Cast<Enum>().ToArray());
+   public NUISetting NameCollectionSettings { get; set; } = new(NameCollection.Field.UniqueId,
+                                                                Enum.GetValues<NameCollection.Field>().Cast<Enum>().ToArray(),
+                                                                Enum.GetValues<NameCollection.Field>().Cast<Enum>().ToArray(),
+                                                                Enum.GetValues<NameCollection.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting ContinenteDemandSettings { get; set; } = new(ContinentDemand.Field.UniqueId,
+                                                                  Enum.GetValues<ContinentDemand.Field>().Cast<Enum>().ToArray(),
+                                                                  Enum.GetValues<ContinentDemand.Field>().Cast<Enum>().ToArray(),
+                                                                  Enum.GetValues<ContinentDemand.Field>().Cast<Enum>().ToArray());
+
+   public NUISetting ClimateDemandSettings { get; set; } = new(ClimateDemand.Field.UniqueId,
+                                                               Enum.GetValues<ClimateDemand.Field>().Cast<Enum>().ToArray(),
+                                                               Enum.GetValues<ClimateDemand.Field>().Cast<Enum>().ToArray(),
+                                                               Enum.GetValues<ClimateDemand.Field>().Cast<Enum>().ToArray());
+   
+   
 }
