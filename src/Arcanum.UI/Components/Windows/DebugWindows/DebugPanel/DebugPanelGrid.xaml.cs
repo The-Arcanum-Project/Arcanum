@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using Arcanum.Core.CoreSystems.IO;
+using Arcanum.Core.CoreSystems.Nexus;
 using Arcanum.Core.CoreSystems.Selection;
+using Arcanum.Core.GameObjects.InGame.Pops;
 using Arcanum.Core.GlobalStates;
 using Arcanum.Core.Utils;
 using Arcanum.UI.Commands;
@@ -302,5 +304,14 @@ public partial class DebugPanelGrid
 
       var randomException = exceptions[Random.Shared.Next(exceptions.Count)];
       throw randomException;
+   }
+
+   private void SetAllPopsToOneSize_OnClick(object sender, RoutedEventArgs e)
+   {
+      foreach (var loc in Globals.Locations.Values)
+      {
+         foreach (var pop in loc.Pops)
+            Nx.Set(pop, PopDefinition.Field.Size, 0.001);
+      }
    }
 }
